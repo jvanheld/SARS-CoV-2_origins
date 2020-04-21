@@ -1,2 +1,13 @@
-# coronavirus_insertions
-Analysis of insertions in the genomes and proteins of coronaviruses
+# Analysis of insertions in genomic and protein sequences of coronaviruses
+
+## Motivation
+
+...
+
+## Collaborators
+
+- ...
+
+## Files
+
+- ...
