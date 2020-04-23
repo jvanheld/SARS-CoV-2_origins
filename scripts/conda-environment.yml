@@ -1,0 +1,14 @@
+## Conda environment for analysis of SARS-CoV-2 sequences
+name: covid-19
+
+channels:
+  - bioconda
+  - conda-forge
+  - r
+
+dependencies:
+  ## sequence alignment
+  - bioconda::muscle
+  - bioconda::blast
+  - bioconda::emboss
+
