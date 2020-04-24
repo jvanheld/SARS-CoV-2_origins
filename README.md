@@ -34,3 +34,13 @@ make -f scripts/makefiles/01_software-environment.mk install_env
 ### Analysis of the spike protein sequences
 
 bla bla bla
+
+The commands are specifie in the make file `make -f scripts/makefiles/03_protein-alignments.mk`. 
+
+The list of targets can be obtained with the following command.
+
+```
+make -f make -f scripts/makefiles/03_protein-alignments.mk
+```
+
+
