@@ -43,4 +43,14 @@ The list of targets can be obtained with the following command.
 make -f scripts/makefiles/03_protein-alignments.mk
 ```
 
+#### Colorizing the inserts on the 3D structural model
+
+bla bla bla
+
+1. Open pymol
+2. Open the script `scripts/pymol/colorize-inserts.pml`
+3. ....
+
+
+
 
