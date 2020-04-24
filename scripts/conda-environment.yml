@@ -11,4 +11,5 @@ dependencies:
   - bioconda::muscle
   - bioconda::blast
   - bioconda::emboss
+  - schrodinger::pymol
 
