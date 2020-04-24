@@ -17,6 +17,10 @@ links:
 	@echo "		https://drive.google.com/drive/folders/1-4n6cLKPISuZw9HM77R6Ma9ktFE1jnwI"
 	@echo " Spike protein analysis on Drive"
 	@echo "		https://drive.google.com/drive/folders/1obOSIGl5r-xTT0J7fGt54V2C5gnkeaXf"
+	@echo "	Github repository"
+	@echo "		https://github.com/jvanheld/coronavirus_insertions"
+	@echo "	Git pages"
+	@echo "		https://jvanheld.github.io/coronavirus_insertions/"
 
 ################################################################
 ## Conda environment
