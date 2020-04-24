@@ -1,38 +1,50 @@
-################################################################
 ## Makefile to run the different scripts for the analysis of
 ## SARS-CoV-2 sequences and their comparison with HIV sequences.
 
+MAKEFILE=scripts/makefiles/02_genome-blast.mk
+MAKE=make -f ${MAKEFILE}
+
 targets:
 	@echo "Targets:"
-	@echo "	align_muscle		align spike protein sequences with muscle"
-	@echo "	align_uniprot_seq	align spike proteins from Uniprot"
+	@echo "	blastdb			format a viral genome for BLAST searches"
+	@echo "	genome_blast		search similarities between two viral genomes"
+	@echo "	cov2_vs_hiv		search HIV genome with SARS-CoV-2 genome"
+	@echo "	hiv_vs_cov2		search SARS-CoV-2 genome with HIV genome"
 
 
 ################################################################
-## Multiple alignment of spike protein sequences
-DATA_DIR=analyses/spike_protein/data_spike-proteins/
-SPIKE_PREFIX=SARS-CoV-2_spike_prot_seq
-SPIKE_SEQ=${DATA_DIR}/${SPIKE_PREFIX}
-MUSCLE_DIR=analyses/spike_protein/muscle_alignments/
-MUSCLE=${MUSCLE_DIR}/${SPIKE_PREFIX}_aligned_muscle
-MUSCLE_FORMAT=msf
-MUSCLE_LOG=${MUSCLE}_${MUSCLE_FORMAT}_log.txt
-MUSCLE_OPT=-quiet
-align_muscle:
-	@echo "Spike proteins: multiple alignemnt with MUSCLE"
-	@echo "	Result directory"
-	@echo "	${MUSCLE_DIR}"
-	@mkdir -p ${MUSCLE_DIR}
-	@make _align_muscle_one_format MUSCLE_FORMAT=msf
-	@make _align_muscle_one_format MUSCLE_FORMAT=html
-	@make _align_muscle_one_format MUSCLE_FORMAT=clw
+## Format a viral genome for blast searches
+GENOME_DIR=data/virus_genomes
+DB_ORG=HIV
+DB_DIR=${GENOME_DIR}/${DB_ORG}/
+DB_SEQ=${DB_DIR}/${DB_ORG}_genome_seq.fasta
+blastdb:
+	@echo "Formating genome	for virus	${DB_ORG}"OB
+	@echo "	DB_ORG		${DB_ORG}"
+	makeblastdb -in ${DB_SEQ}  -dbtype nucl
+	@echo "	DB_DIR		${DB_DIR}"
+	@echo "	DB_SEQ		${DB_SEQ}"
 
-_align_muscle_one_format:
-	muscle -in ${SPIKE_SEQ}.fasta -${MUSCLE_FORMAT} ${MUSCLE_OPT} -log ${MUSCLE_LOG} -out ${MUSCLE}.${MUSCLE_FORMAT}
-	@echo "	${MUSCLE}.${MUSCLE_FORMAT}"
+################################################################
+## Search similarities between two viral genomes
+QUERY_ORG=SARS-CoV-2
+QUERY_DIR=${GENOME_DIR}/${QUERY_ORG}
+QUERY_SEQ=${QUERY_DIR}/${QUERY_ORG}_genome_seq.fasta
+ALIGN_PREFIX=${QUERY_ORG}_vs_${DB_ORG}
+ALIGN_DIR=results/genome_blast/${ALIGN_PREFIX}
+ALIGN=${ALIGN_DIR}/${ALIGN_PREFIX}_alignment.txt
+BLAST_TASK=blastn
+genome_blast:
+	@echo "Searching similarities between genomes"
+	@echo "	QUERY_ORG	${QUERY_ORG}"
+	@echo "	DB_ORG		${DB_ORG}"
+	@echo "	ALIGN_DIR	${ALIGN_DIR}"
+	@mkdir -p ${ALIGN_DIR}
+	blastn -db ${DB_SEQ} -query ${QUERY_SEQ} -task ${BLAST_TASK} -out ${ALIGN}
+	@echo "	ALIGN		${ALIGN}"
 
-align_uniprot_seq:
-	@echo "Aligning spike sequences from Uniprot"
-	@make align_muscle SPIKE_PREFIX=uniprot_SARS_spike_taxid-694009_complete-seq_174_proteins
+cov2_vs_hiv:
+	@${MAKE} DB_ORG=HIV QUERY_ORG=SARS-CoV-2 blastdb genome_blast
 
-
+hiv_vs_cov2:
+	@${MAKE} DB_ORG=SARS-CoV-2 QUERY_ORG=HIV blastdb genome_blast
