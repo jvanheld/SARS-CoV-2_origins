@@ -1,5 +1,5 @@
 #open the model
-cmd.load('/home/erwan/BigBazar/Documents/coronavacances/spike/model3.pdb')
+cmd.load('data/pdb/model3.pdb')
 cmd.color('wheat',selection='all',quiet=1)
 
 # coloration des insertions
