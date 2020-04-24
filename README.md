@@ -6,7 +6,10 @@
 
 ## Collaborators
 
-- ...
+- Etienne Decroly
+- Jacques van Helden
+- Erwan Salles
+- José Halloy
 
 ## Files
 
