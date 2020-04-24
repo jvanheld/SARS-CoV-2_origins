@@ -2,7 +2,7 @@
 ## Makefile to run the different scripts for the analysis of
 ## SARS-CoV-2 sequences and their comparison with HIV sequences.
 
-MAKEFILE=scripts/makefiles/02_protein-alignments.mk
+MAKEFILE=scripts/makefiles/03_protein-alignments.mk
 MAKE=make -f ${MAKEFILE}
 
 targets:
@@ -36,23 +36,23 @@ uniprot_seq:
 	@echo "	${UNIPROT_URL}"
 
 uniprot_coronaviridae:
-	@make -f scripts/makefiles/03_protein-alignments.mk uniprot_seq TAXID=11118 TAXNAME=coronaviridae
+	@${MAKE} uniprot_seq TAXID=11118 TAXNAME=coronaviridae
 
 uniprot_betacoronaviridae:
-	@make -f scripts/makefiles/03_protein-alignments.mk uniprot_seq TAXID=694002 TAXNAME=betacoronavirus
+	@${MAKE} uniprot_seq TAXID=694002 TAXNAME=betacoronavirus
 
 uniprot_sarbecovirus:
-	@make -f scripts/makefiles/03_protein-alignments.mk uniprot_seq TAXID=2509511 TAXNAME=sarbecovirus
+	@${MAKE} uniprot_seq TAXID=2509511 TAXNAME=sarbecovirus
 
 uniprot_sars:
-	@make -f scripts/makefiles/03_protein-alignments.mk uniprot_seq TAXID=694009 TAXNAME=SARS
+	@${MAKE} uniprot_seq TAXID=694009 TAXNAME=SARS
 
 
 ################################################################
 ## Multiple alignment of spike protein sequences
 #DATA_DIR=analyses/spike_protein/data_spike-proteins/
 DATA_DIR=data/spike_proteins
-SPIKE_PREFIX=${TAXNAME}_${TAXID}_prot.fasta
+SPIKE_PREFIX=${TAXNAME}_${TAXID}_spike_prot
 #SPIKE_PREFIX=SARS-CoV-2_spike_prot
 SPIKE_SEQ=${DATA_DIR}/${SPIKE_PREFIX}
 #MUSCLE_DIR=analyses/spike_protein/muscle_alignments/
@@ -67,8 +67,8 @@ align_muscle:
 	@echo "	${MUSCLE_DIR}"
 	@mkdir -p ${MUSCLE_DIR}
 	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=msf
-	@make -f scripts/makefiles/02_protein-alignments.mk  _align_muscle_one_format MUSCLE_FORMAT=html
-	@make -f scripts/makefiles/02_protein-alignments.mk _align_muscle_one_format MUSCLE_FORMAT=clw
+	@${MAKE}  _align_muscle_one_format MUSCLE_FORMAT=html
+	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=clw
 
 _align_muscle_one_format:
 	muscle -in ${SPIKE_SEQ}.fasta -${MUSCLE_FORMAT} ${MUSCLE_OPT} -log ${MUSCLE_LOG} -out ${MUSCLE}.${MUSCLE_FORMAT}
