@@ -14,6 +14,7 @@ targets:
 	@echo "	uniprot_sars			run uniprot_seq with SARS"
 	@echo "	align_muscle			align spike protein sequences with muscle"
 	@echo "	align_uniprot_seq		align spike proteins from Uniprot"
+	@echo "	identify_insertion		locate the insertions in a chosen sequence"
 
 ################################################################
 ## Retrieve sequences from Uniprot
@@ -78,4 +79,18 @@ align_uniprot_seq:
 	@echo "Aligning spike sequences from Uniprot"
 	@make align_muscle SPIKE_PREFIX=uniprot_SARS_spike_taxid-694009_complete-seq_174_proteins
 
+################################################################
+## Identification of insertions
+CLW_FILE=${MUSCLE}.clw
+REFERENCE='sp|P0DTC2|SPIKE_SARS2'
+OUTPUT_DIR=results/spike_protein/insertion_data/
+CSV_NAME=${OUTPUT_DIR}${SPIKE_PREFIX}.csv
 
+
+identify_insertion:
+	@echo "Identification of the insertions in the sequence: "
+	@echo "${REFERENCE}"
+	@echo "	Result directory: "
+	@echo "${OUTPUT_DIR}"
+	@mkdir -p ${OUTPUT_DIR}
+	python scripts/python/detection_insertion.py ${CLW_FILE} ${REFERENCE} ${CSV_NAME}
