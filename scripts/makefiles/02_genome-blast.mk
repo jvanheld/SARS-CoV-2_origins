@@ -9,6 +9,7 @@ MAKE=make -f ${MAKEFILE}
 targets:
 	@echo "Targets:"
 	@echo "	download_betacov_db	download BLAST-formated Betacoronavirus genomes"
+	@echo "	download_virus_db	download BLAST-formated virus reference genomes"
 	@echo "	blastdb			format a viral genome for BLAST searches"
 	@echo "	genome_blast		search similarities between two viral genomes as query"
 	@echo "	cov2_vs_hiv		search HIV genome with SARS-CoV-2 genome as query"
@@ -18,15 +19,29 @@ targets:
 
 ################################################################
 ## Download blast-formatted database of Betacoronavirus genomes from NCBI
-BETACOV_DIR=data/virus_genomes/Betacoronavirus
-BETACOV_DB=${BETACOV_DIR}/Betacoronavirus
-BETACOV_SEQ=${BETACOV_DIR}/Betacoronavirus.fasta
+BETACOV_NAME=Betacoronavirus
+BETACOV_DIR=data/virus_genomes/${BETACOV_NAME}
+BETACOV_DB=${BETACOV_DIR}/${BETACOV_NAME}
+BETACOV_SEQ=${BETACOV_DIR}/${BETACOV_NAME}.fasta
+DOWNLOAD_NAME=Betacoronavirus
+DOWNLOAD_DIR=data/virus_genomes/${DOWNLOAD_NAME}
+DOWNLOAD_DB=${DOWNLOAD_DIR}/${DOWNLOAD_NAME}
+DOWNLOAD_SEQ=${DOWNLOAD_DIR}/${DOWNLOAD_NAME}.fasta
+download_db:
+	@echo "Downloading ${DOWNLOAD_DB} genomes from NCBI"
+	@mkdir -p ${DOWNLOAD_DIR}
+	(cd ${DOWNLOAD_DIR}; update_blastdb.pl --decompress ${DOWNLOAD_NAME}; blastdbcmd -entry all -db ${DOWNLOAD_NAME} -out ${DOWNLOAD_NAME}.fasta)
+	@echo "	DOWNLOAD_DIR	${DOWNLOAD_DIR}"
+	@ls -lt ${DOWNLOAD_DIR}
+
+## Download BLAST database of Betacoronavirus from NCBI
 download_betacov_db:
-	@echo "Downloading Betacoronavirus genomes from NCBI"
-	@mkdir -p ${BETACOV_DIR}
-	(cd ${BETACOV_DIR}; update_blastdb.pl Betacoronavirus; blastdbcmd -entry all -db Betacoronavirus -out Betacoronavirus.fasta)
-	@echo "	BETACOV_DIR	${BETACOV_DIR}"
-	@ls -lt ${BETACOV_DIR}
+	@${MAKE} download_db DOWNLOAD_NAME=Betacoronavirus
+
+## Download BLAST database of reference virus from NCBI
+download_virus_db:
+	@${MAKE} download_db DOWNLOAD_NAME=ref_viruses_rep_genomes
+
 
 ################################################################
 ## Format a viral genome for blast searches

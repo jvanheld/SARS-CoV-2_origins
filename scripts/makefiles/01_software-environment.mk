@@ -39,3 +39,12 @@ start_env:
 	@echo "source ${CONDA_BASE}/etc/profile.d/conda.sh"
 	@echo "conda activate covid-19"
 
+################################################################
+## There is an issue with the conda app on Mac OS X
+## https://github.com/tensorflow/swift/issues/177
+## https://github.com/tensorflow/swift/pull/352
+## To circumvent it, we recommend to install it with homebrew.
+pymol_for_mac:
+	@echo "Installing PuMol on Mac OS X with brew"
+	brew install brewsci/bio/pymol
+	which pymol

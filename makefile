@@ -1,1 +1,1 @@
-scripts/makefiles/01_software-environment.mk
+scripts/makefiles/02_genome-blast.mk
