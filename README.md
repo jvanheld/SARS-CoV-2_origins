@@ -8,7 +8,7 @@
 
 - Etienne Decroly
 - Jacques van Helden
-- Erwan Salles
+- Erwan Sallard
 - José Halloy
 
 ## Files
