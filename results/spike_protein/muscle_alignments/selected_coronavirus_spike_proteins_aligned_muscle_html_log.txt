@@ -1,0 +1,3 @@
+Started Mon Apr 27 01:24:14 2020
+muscle -in data/spike_proteins/selected_coronavirus_spike_proteins.fasta -html -quiet -log results/spike_protein/muscle_alignments//selected_coronavirus_spike_proteins_aligned_muscle_html_log.txt -out results/spike_protein/muscle_alignments//selected_coronavirus_spike_proteins_aligned_muscle.html 
+Finished Mon Apr 27 01:24:15 2020
