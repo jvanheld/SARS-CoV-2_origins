@@ -28,16 +28,27 @@ TAXID=694009
 TAXNAME=SARS
 UNIPROT_FORMAT=tab
 UNIPROT_FIELDS=id,entry%20name,reviewed,length,protein%20names,genes,organism,length,virus%20hosts,sequence
-UNIPROT_QUERY=taxonomy:${TAXID}+AND+name:spike+AND+fragment:no&format=${UNIPROT_FORMAT}&columns=${UNIPROT_FIELDS}
-UNIPROT_URL=https://www.uniprot.org/uniprot/?query=${UNIPROT_QUERY}
+UNIPROT_QUERY_TAB=taxonomy:${TAXID}+AND+name:spike+AND+fragment:no&format=${UNIPROT_FORMAT}&columns=${UNIPROT_FIELDS}
+UNIPROT_QUERY_SEQ=taxonomy:${TAXID}+AND+name:spike+AND+fragment:no&format=fasta
+UNIPROT_URL_TAB=https://www.uniprot.org/uniprot/?query=${UNIPROT_QUERY_TAB}
+UNIPROT_URL_SEQ=https://www.uniprot.org/uniprot/?query=${UNIPROT_QUERY_SEQ}
 SPIKE_SEQ_DIR=data/spike_proteins
+UNIPROT_PREFIX=${SPIKE_SEQ_DIR}/${TAXNAME}_${TAXID}_spike-proteins_uniprot
+UNIPROT_TAB=${UNIPROT_PREFIX}.tsv
+UNIPROT_SEQ=${UNIPROT_PREFIX}.fasta
 uniprot_seq:
 	@echo "Retrieving spike protein sequences from Uniprot"
 	@echo "	TAXNAME	${TAXNAME}"
 	@echo "	TAXID	${TAXID}"
 	@mkdir -p ${SPIKE_SEQ_DIR}
-	@echo "	UNIPROT_URL"
-	@echo "	${UNIPROT_URL}"
+	@echo "	UNIPROT_PREFIX		${UNIPROT_PREFIX}"
+	@echo "	UNIPROT_URL_TAB		${UNIPROT_URL_TAB}"
+	@curl "${UNIPROT_URL_TAB}" > ${UNIPROT_TAB}
+	@echo "	UNIPROT_TAB		${UNIPROT_TAB}"
+	@echo "	UNIPROT_URL_SEQ		${UNIPROT_URL_SEQ}"
+	@curl "${UNIPROT_URL_SEQ}" > ${UNIPROT_SEQ}
+	@echo "	UNIPROT_SEQ		${UNIPROT_SEQ}"
+
 
 uniprot_coronaviridae:
 	@${MAKE} uniprot_seq TAXID=11118 TAXNAME=coronaviridae
@@ -78,7 +89,7 @@ align_muscle:
 	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=clw
 
 _align_muscle_one_format:
-	muscle -in ${SPIKE_SEQ}.fasta -${MUSCLE_FORMAT} ${MUSCLE_OPT} -log ${MUSCLE_LOG} -out ${MUSCLE_PREFIX}.${MUSCLE_FORMAT}
+	time muscle -in ${SPIKE_SEQ}.fasta -${MUSCLE_FORMAT} ${MUSCLE_OPT} -log ${MUSCLE_LOG} -out ${MUSCLE_PREFIX}.${MUSCLE_FORMAT}
 	@echo "	${MUSCLE_PREFIX}.${MUSCLE_FORMAT}"
 
 align_uniprot_seq:
