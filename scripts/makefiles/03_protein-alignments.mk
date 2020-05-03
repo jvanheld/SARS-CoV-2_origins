@@ -19,11 +19,12 @@ targets:
 #	@echo "	nr_sarbecovirus			generate non-redundant sequences from Uniprot for Sarbecovirus"
 	@echo "	nr_betacoronaviridae		generate non-redundant sequences from Uniprot for Betacoronaviridae"
 	@echo "	nr_coronaviridae		generate non-redundant sequences from Uniprot for Coronaviridae"
+	@echo "	nr_selected			generate non-redundant sequences from selected spike proteins"
 	@echo
 	@echo "	align_muscle			align spike protein sequences with muscle"
-#	@echo "	align_uniprot		align spike proteins from Uniprot"
-	@echo "	align_selected		align selection of representative sequences"
-	@echo "	align_genbank		align sequences from Genbank"
+#	@echo "	align_uniprot			align spike proteins from Uniprot"
+	@echo "	align_selected			align selection of representative sequences"
+	@echo "	align_genbank			align sequences from Genbank"
 	@echo "	align_uniprot_sars		align spike sequences from Uniprot for SARS"
 #	@echo "	align_uniprot_sarbecovirus	align spike sequences from Uniprot for Sarbecovirus"
 	@echo "	align_uniprot_betacoronaviridae	align spike sequences from Uniprot for Betacoronaviridae"
@@ -82,7 +83,7 @@ uniprot_seq_coronaviridae:
 
 ################################################################
 ## Generate non-redundant collections of protein sequences
-NR_IDENTITY=0.99
+NR_IDENTITY=1.00
 NR_THREADS=4
 NR_MEM=8000
 NR_SUFFIX=NR_${NR_IDENTITY}
@@ -118,6 +119,9 @@ nr_coronaviridae:
 
 #-c ${NR_IDENTITY} -n ${NR_WSIZE} -M ${NR_MEM} –d 1 -T ${NR_THREADS} \
 
+nr_selected:
+	@${MAKE} nr SPIKE_PREFIX=selected_coronavirus_spike_proteins
+
 ################################################################
 ## Multiple alignment of spike protein sequences
 #DATA_DIR=analyses/spike_protein/data_spike-proteins/
@@ -127,6 +131,7 @@ MUSCLE_IN=${SPIKE_SEQ}
 MUSCLE_DIR=results/spike_protein/muscle_alignments/
 MUSCLE_PREFIX=${MUSCLE_DIR}/${SPIKE_PREFIX}_aligned_muscle
 MUSCLE_FORMAT=msf
+MUSCLE_EXT=${MUSCLE_FORMAT}
 MUSCLE_LOG=${MUSCLE_PREFIX}_${MUSCLE_FORMAT}_log.txt
 MUSCLE_MAXHOURS=1
 MUSCLE_OPT=-quiet -maxhours ${MUSCLE_MAXHOURS}
@@ -139,12 +144,28 @@ align_muscle:
 	@echo "	MUSCLE_LOG		${MUSCLE_LOG}"
 	@mkdir -p ${MUSCLE_DIR}
 #	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=msf
-	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=clw
+	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=clw MUSCLE_EXT=aln
 	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=html
 
 _align_muscle_one_format:
-	time muscle -in ${MUSCLE_IN}.fasta -${MUSCLE_FORMAT} ${MUSCLE_OPT} -log ${MUSCLE_LOG} -out ${MUSCLE_PREFIX}.${MUSCLE_FORMAT}
-	@echo "	${MUSCLE_PREFIX}.${MUSCLE_FORMAT}"
+	time muscle -in ${MUSCLE_IN}.fasta -${MUSCLE_FORMAT} ${MUSCLE_OPT} \
+		-log ${MUSCLE_LOG} \
+		-out ${MUSCLE_PREFIX}.${MUSCLE_EXT}
+	@echo "	${MUSCLE_PREFIX}.${MUSCLE_EXT}"
+
+################################################################
+## Generate a species tree from the aligned genomes
+tree_from_muscle:
+	@echo "Generating tree from aligned spike proteinswith Neighbour-Joining method"
+	time clustalw -tree \
+		-infile=${MUSCLE_PREFIX}.aln -type=dna \
+		-clustering=NJ
+	time clustalw -bootstrap=100 \
+		-infile=${MUSCLE_PREFIX}.aln -type=dna \
+		-clustering=NJ 
+	@echo "	${CLUSTALW_PREFIX}.ph"
+
+
 
 align_uniprot_coronaviridae:
 	@echo "Aligning all Uniprot coronaviridae sequences"
