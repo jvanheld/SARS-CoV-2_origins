@@ -7,9 +7,11 @@ channels:
   - r
 
 dependencies:
-  ## sequence alignment
-  - bioconda::muscle
-  - bioconda::blast
-  - bioconda::emboss
-  - tpeulen::pymol-open-source
-
+  - bioconda::muscle    # iterative multiple sequence alignment
+  - bioconda::clustalw  # progressive multiple sequence alignment
+  - bioconda::blast     # similarity searches bewteen sequences
+  - bioconda::emboss    # classical sequence analysis tools, used here for sequence shuffling
+  - bioconda::cd-hit    # to generate non-redundant protein sequence sets
+  - bioconda::phyml     # maximum likelo-ihood-based phylogenetic inference
+  - bioconda::figtree   # a graphical viewer of phylogenetic trees and as a program for producing publication-ready figures.
+  - tpeulen::pymol-open-source  # structure analysis and visualisation. Note: does not work on Mac OS X
