@@ -8,30 +8,38 @@ MAKE=make -f ${MAKEFILE}
 targets:
 	@echo "Targets:"
 	@echo
+	@echo "	all				run all targets"
+	@echo
 	@echo "	uniprot_seq			automatically retrieve spike protein sequences from Uniprot"
 	@echo "	uniprot_seq_sars		get spike sequences from Uniprot for SARS"
 #	@echo "	uniprot_seq_sarbecovirus	get spike sequences from Uniprot for Sarbecovirus"
 	@echo "	uniprot_seq_betacoronaviridae	get spike sequences from Uniprot for Betacoronaviridae"
 	@echo "	uniprot_seq_coronaviridae	get spike sequences from Uniprot for Coronaviridae"
+	@echo "	uniprot_seq_all			get spike sequences from Uniprot for all the groups defined above"
 	@echo
 	@echo "	nr				generate non-retundant sequences with cd-hit"
+	@echo "	nr_selected			generate non-redundant sequences from selected spike proteins"
 	@echo "	nr_sars				generate non-redundant sequences from Uniprot for SARS"
 #	@echo "	nr_sarbecovirus			generate non-redundant sequences from Uniprot for Sarbecovirus"
 	@echo "	nr_betacoronaviridae		generate non-redundant sequences from Uniprot for Betacoronaviridae"
 	@echo "	nr_coronaviridae		generate non-redundant sequences from Uniprot for Coronaviridae"
-	@echo "	nr_selected			generate non-redundant sequences from selected spike proteins"
+	@echo "	nr_all				generate non-redundant sequences for all the groups avove"
 	@echo
 	@echo "	align_muscle			align spike protein sequences with muscle"
 #	@echo "	align_uniprot			align spike proteins from Uniprot"
 	@echo "	align_selected			align selection of representative sequences"
-	@echo "	align_genbank			align sequences from Genbank"
+#	@echo "	align_genbank			align sequences from Genbank"
 	@echo "	align_uniprot_sars		align spike sequences from Uniprot for SARS"
 #	@echo "	align_uniprot_sarbecovirus	align spike sequences from Uniprot for Sarbecovirus"
 	@echo "	align_uniprot_betacoronaviridae	align spike sequences from Uniprot for Betacoronaviridae"
 	@echo "	align_uniprot_coronaviridae	align spike sequences from Uniprot for Coronaviridae"
+	@echo "	align_muscle_all		align spike sequences from Uniprot for all the groups above"
 	@echo
 	@echo "	identify_insertions		locate the insertions in a chosen sequence"
 
+################################################################
+## Run all targets
+all: uniprot_seq_all nr_all align_muscle_all identify_insertions
 
 ################################################################
 ## Retrieve sequences from Uniprot
@@ -67,7 +75,6 @@ uniprot_seq:
 	@echo "	UNIPROT_SEQ		${UNIPROT_SEQ}"
 	@echo "	UNIPROT_SEQ_NB		${UNIPROT_SEQ_NB}"
 
-
 uniprot_seq_sars:
 	@${MAKE} uniprot_seq TAXID=694009 TAXNAME=SARS
 
@@ -80,6 +87,7 @@ uniprot_seq_betacoronaviridae:
 uniprot_seq_coronaviridae:
 	@${MAKE} uniprot_seq TAXID=11118 TAXNAME=coronaviridae
 
+uniprot_seq_all: uniprot_seq_sars uniprot_seq_betacoronaviridae uniprot_seq_coronaviridae 
 
 ################################################################
 ## Generate non-redundant collections of protein sequences
@@ -105,6 +113,9 @@ nr:
 	@echo "		before filtering	${SEQ_NB}"
 	@echo "		after filtering		${NR_SEQ_NB}"
 
+nr_selected:
+	@${MAKE} nr SPIKE_PREFIX=selected_coronavirus_spike_proteins
+
 nr_sars:
 	@${MAKE} nr TAXID=694009 TAXNAME=SARS
 
@@ -119,8 +130,7 @@ nr_coronaviridae:
 
 #-c ${NR_IDENTITY} -n ${NR_WSIZE} -M ${NR_MEM} –d 1 -T ${NR_THREADS} \
 
-nr_selected:
-	@${MAKE} nr SPIKE_PREFIX=selected_coronavirus_spike_proteins
+nr_all: nr_selected nr_sars nr_betacoronaviridae nr_coronaviridae 
 
 ################################################################
 ## Multiple alignment of spike protein sequences
@@ -167,29 +177,27 @@ tree_from_muscle:
 
 
 
-align_uniprot_coronaviridae:
-	@echo "Aligning all Uniprot coronaviridae sequences"
-	@${MAKE} align_muscle TAXID=11118 TAXNAME=coronaviridae
-
-align_uniprot_betacoronaviridae:
-	@echo "Aligning all Uniprot betacoronaviridae sequences"
-	@${MAKE} align_muscle TAXID=694002 TAXNAME=betacoronavirus
-
-align_uniprot_sars:
-	@echo "Aligning all Uniprot SARS sequences"
-	@${MAKE} align_muscle TAXID=694009 TAXNAME=SARS
-
-# align_uniprot:
-# 	@echo "Aligning spike sequences from Uniprot"
-# 	@${MAKE} align_muscle SPIKE_PREFIX=uniprot_SARS_spike_taxid-694009_complete-seq_174_proteins
-
 align_selected:
-	@echo "Aligning selected sequences"
+	@echo "Aligning selected spike sequences"
 	@${MAKE} align_muscle SPIKE_PREFIX=selected_coronavirus_spike_proteins
 
-align_genbank:
-	@echo "Aligning selected sequences from Genbank"
-	@${MAKE} align_muscle SPIKE_PREFIX=genbank_CoV_spike_sequences
+align_uniprot_sars:
+	@echo "Aligning all Uniprot SARS spike sequences"
+	@${MAKE} align_muscle TAXID=694009 TAXNAME=SARS
+
+align_uniprot_betacoronaviridae:
+	@echo "Aligning all Uniprot Betacoronaviridae spike sequences"
+	@${MAKE} align_muscle TAXID=694002 TAXNAME=betacoronavirus
+
+align_uniprot_coronaviridae:
+	@echo "Aligning all Uniprot Coronaviridae spike sequences"
+	@${MAKE} align_muscle TAXID=11118 TAXNAME=coronaviridae
+
+# align_genbank:
+# 	@echo "Aligning selected sequences from Genbank"
+# 	@${MAKE} align_muscle SPIKE_PREFIX=genbank_CoV_spike_sequences
+
+align_muscle_all: align_selected align_uniprot_sars align_uniprot_betacoronaviridae align_uniprot_coronaviridae 
 
 ################################################################
 ## Identification of insertions
@@ -205,3 +213,4 @@ identify_insertions:
 	@echo "${OUTPUT_DIR}"
 	@mkdir -p ${OUTPUT_DIR}
 	python scripts/python/detection_insertion.py ${CLW_FILE} ${REFERENCE} ${CSV_NAME}
+
