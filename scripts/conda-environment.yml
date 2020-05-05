@@ -15,4 +15,5 @@ dependencies:
   - bioconda::cd-hit    # to generate non-redundant protein sequence sets
   - bioconda::phyml     # maximum likelo-ihood-based phylogenetic inference
   - bioconda::figtree   # a graphical viewer of phylogenetic trees and as a program for producing publication-ready figures.
+  - bioconda::jalview   # a free program for multiple sequence alignment editing, visualisation and analysis
   - tpeulen::pymol-open-source  # structure analysis and visualisation. Note: does not work on Mac OS X
