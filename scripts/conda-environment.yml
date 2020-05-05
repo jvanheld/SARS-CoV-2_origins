@@ -1,3 +1,4 @@
+################################################################
 ## Conda environment for analysis of SARS-CoV-2 sequences
 name: covid-19
 
