@@ -153,12 +153,14 @@ align_muscle:
 	@echo "	MUSCLE_PREFIX		${MUSCLE_PREFIX}"
 	@echo "	MUSCLE_LOG		${MUSCLE_LOG}"
 	@mkdir -p ${MUSCLE_DIR}
-#	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=msf
-	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=clw MUSCLE_EXT=aln
-	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=html
+	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT= MUSCLE_EXT=fa
+	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=-clw MUSCLE_EXT=aln
+	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=-msf
+	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=-html
 
 _align_muscle_one_format:
-	time muscle -in ${MUSCLE_IN}.fasta -${MUSCLE_FORMAT} ${MUSCLE_OPT} \
+	time muscle -in ${MUSCLE_IN}.fasta ${MUSCLE_FORMAT} ${MUSCLE_OPT} \
+		-seqtype protein \
 		-log ${MUSCLE_LOG} \
 		-out ${MUSCLE_PREFIX}.${MUSCLE_EXT}
 	@echo "	${MUSCLE_PREFIX}.${MUSCLE_EXT}"
