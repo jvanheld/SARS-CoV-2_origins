@@ -97,7 +97,7 @@ hiv_vs_betacov:
 ## Align reference genomes
 DATA_DIR=data/spike_proteins
 REF_GENOMES_DIR=data/virus_genomes/
-REF_GENOMES_PREFIX=coronavirus_54_genomes
+REF_GENOMES_PREFIX=coronavirus_selected_genomes
 REF_GENOMES_SEQ=${REF_GENOMES_DIR}/${REF_GENOMES_PREFIX}.fasta
 MUSCLE_DIR=results/ref_genomes/muscle_alignments/
 MUSCLE_PREFIX=${MUSCLE_DIR}/${REF_GENOMES_PREFIX}_aligned_muscle
