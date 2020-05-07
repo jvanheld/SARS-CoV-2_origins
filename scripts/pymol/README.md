@@ -1,7 +1,7 @@
 ## Pymol scripts for the coloration of SARS-CoV-2 spike protein
 
 
-**Author: ** Erwan Sallard
+**Author: ** Erwan Sallard	erwan.sallard@ens.psl.eu
 
 Folder contents
 
