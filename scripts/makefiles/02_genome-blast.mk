@@ -132,6 +132,9 @@ align_ref_genomes_clustalw:
 		-outfile=${CLUSTALW_PREFIX}.aln
 	@echo "	${CLUSTALW_PREFIX}.aln"
 	@${MAKE} genome_tree
+	@echo "Converting alignment to fasta format"
+	seqret -sequence ${CLUSTALW_PREFIX}.aln -outseq ${CLUSTALW_PREFIX}.fasta
+	@echo ${CLUSTALW_PREFIX}.fasta
 
 ################################################################
 ## Generate a species tree from the aligned genomes
