@@ -1,3 +1,5 @@
-Started Mon Apr 27 01:24:15 2020
-muscle -in data/spike_proteins/selected_coronavirus_spike_proteins.fasta -clw -quiet -log results/spike_protein/muscle_alignments//selected_coronavirus_spike_proteins_aligned_muscle_clw_log.txt -out results/spike_protein/muscle_alignments//selected_coronavirus_spike_proteins_aligned_muscle.clw 
-Finished Mon Apr 27 01:24:17 2020
+Started Tue May  5 15:08:06 2020
+muscle -in data/spike_proteins/selected_coronavirus_spike_proteins.fasta -clw -quiet -maxhours 1 -log results/spike_protein/muscle_alignments//selected_coronavirus_spike_proteins_aligned_muscle_clw_log.txt -out results/spike_protein/muscle_alignments//selected_coronavirus_spike_proteins_aligned_muscle.aln 
+
+*** WARNING ***  Assuming Amino (see -seqtype option), invalid letters found: U
+Finished Tue May  5 15:08:11 2020

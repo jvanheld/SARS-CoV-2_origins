@@ -1,3 +1,0 @@
-Started Fri Apr 24 15:32:36 2020
-muscle -in data/spike_proteins/SARS_694009_spike_prot.fasta -msf -quiet -log results/spike_protein/muscle_alignments//SARS_694009_spike_prot_aligned_muscle_msf_log.txt -out results/spike_protein/muscle_alignments//SARS_694009_spike_prot_aligned_muscle.msf 
-Finished Fri Apr 24 15:33:52 2020

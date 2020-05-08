@@ -1,3 +1,0 @@
-Started Mon Apr 27 06:28:22 2020
-muscle -in data/spike_proteins/uniprot_SARS_spike_taxid-694009_complete-seq_174_proteins.fasta -clw -quiet -log results/spike_protein/muscle_alignments//uniprot_SARS_spike_taxid-694009_complete-seq_174_proteins_aligned_muscle_clw_log.txt -out results/spike_protein/muscle_alignments//uniprot_SARS_spike_taxid-694009_complete-seq_174_proteins_aligned_muscle.clw 
-Finished Mon Apr 27 06:28:35 2020
