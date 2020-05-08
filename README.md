@@ -8,7 +8,7 @@
 
 - Etienne Decroly
 - Jacques van Helden
-- Erwan Sallard
+- Erwan Sallard		erwan.sallard@ens.psl.eu
 - José Halloy
 
 ## Files
@@ -55,12 +55,24 @@ Results will be found in the "results/spike_protein" folder (namely the multiple
 
 #### Colorizing the inserts on the 3D structural model
 
-bla bla bla
+The color_insertions.pml program enables to visualize the insertions in SARS-CoV-2 spike on a 3D structural model.
 
-1. Open pymol
-2. Open the script `scripts/pymol/colorize-inserts.pml`
-3. ....
+```
+pymol scripts/pymol/color_insertions.pml
+```
 
+#### Comparing ACE2 proteins
 
+ACE2 is the receptor of SARS-CoV-2. To determine which animals are susceptible to be infected by SARS-CoV-2 or similar viruses, we gathered the ACE2 sequences of numerous animals in the data/ACE2/ACE2.fa file. Our aim is to align them, construct a phylogenetic tree, and to determine the similarity of each protein with the human protein on the residues involved in spike binding.
+
+To build the multiple alignment (in multifasta format) between the ACE2 sequences:
+```
+make -f scripts/makefiles/05_ACE2_analysis.mk align_muscle_fasta
+```
+
+Once this is done, the comparison with the human protein can be performed with:
+```
+make -f scripts/makefiles/05_ACE2_analysis.mk compare_ACE2_with_human
+```
 
 
