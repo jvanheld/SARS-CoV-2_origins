@@ -168,7 +168,7 @@ _align_muscle_one_format:
 ################################################################
 ## Generate a species tree from the aligned genomes
 tree_from_muscle:
-	@echo "Generating tree from aligned spike proteinswith Neighbour-Joining method"
+	@echo "Generating tree from aligned spike proteins with Neighbour-Joining method"
 	time clustalw -tree \
 		-infile=${MUSCLE_PREFIX}.aln -type=dna \
 		-clustering=NJ
@@ -176,8 +176,6 @@ tree_from_muscle:
 		-infile=${MUSCLE_PREFIX}.aln -type=dna \
 		-clustering=NJ 
 	@echo "	${CLUSTALW_PREFIX}.ph"
-
-
 
 align_selected:
 	@echo "Aligning selected spike sequences"
