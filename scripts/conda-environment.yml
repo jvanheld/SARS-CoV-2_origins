@@ -8,6 +8,8 @@ channels:
   - r
 
 dependencies:
+
+  ## Tools
   - bioconda::muscle    # iterative multiple sequence alignment
   - bioconda::clustalw  # progressive multiple sequence alignment
   - bioconda::blast     # similarity searches bewteen sequences
@@ -17,3 +19,14 @@ dependencies:
   - bioconda::figtree   # a graphical viewer of phylogenetic trees and as a program for producing publication-ready figures.
   - bioconda::jalview   # a free program for multiple sequence alignment editing, visualisation and analysis
   - tpeulen::pymol-open-source  # structure analysis and visualisation. Note: does not work on Mac OS X
+
+  ## R dependencies
+  - r-base
+
+  ## R packages
+  - bioconda::bioconductor-biostrings
+              
+  
+  ## Python
+  - python
+  - conda-forge::pandas
