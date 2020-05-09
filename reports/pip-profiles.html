@@ -11,7 +11,7 @@
 
 <meta name="author" content="Jacques van Helden" />
 
-<meta name="date" content="2020-05-08" />
+<meta name="date" content="2020-05-09" />
 
 <title>Analysis of coronavirus sequences</title>
 
@@ -353,7 +353,7 @@ div.tocify {
 <h1 class="title toc-ignore">Analysis of coronavirus sequences</h1>
 <h3 class="subtitle">Normalization and target selection methods</h3>
 <h4 class="author">Jacques van Helden</h4>
-<h4 class="date">2020-05-08</h4>
+<h4 class="date">2020-05-09</h4>
 
 </div>
 
@@ -1441,17 +1441,30 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <a class="sourceLine" id="cb9-13" data-line-number="13"><span class="kw">writeXStringSet</span>(refSpike, </a>
 <a class="sourceLine" id="cb9-14" data-line-number="14">                <span class="dt">filepath =</span> outfiles<span class="op">$</span>Smatches, <span class="dt">format =</span> <span class="st">&quot;fasta&quot;</span>)</a>
 <a class="sourceLine" id="cb9-15" data-line-number="15"></a>
-<a class="sourceLine" id="cb9-16" data-line-number="16"><span class="co"># i &lt;- 1</span></a>
-<a class="sourceLine" id="cb9-17" data-line-number="17"><span class="co"># for (i in 1:length(spikesNto1All$alignments)) {</span></a>
-<a class="sourceLine" id="cb9-18" data-line-number="18"><span class="co">#   subject &lt;- subject(spikesNto1All$alignments[[i]])</span></a>
-<a class="sourceLine" id="cb9-19" data-line-number="19"><span class="co">#   writeXStringSet(subject, </span></a>
-<a class="sourceLine" id="cb9-20" data-line-number="20"><span class="co">#                   filepath = outfiles$Smatches, format = &quot;fasta&quot;, add = TRUE)</span></a>
-<a class="sourceLine" id="cb9-21" data-line-number="21"><span class="co"># </span></a>
-<a class="sourceLine" id="cb9-22" data-line-number="22"><span class="co"># }</span></a>
-<a class="sourceLine" id="cb9-23" data-line-number="23"><span class="co"># # View(spikesNto1All$alignments)</span></a>
-<a class="sourceLine" id="cb9-24" data-line-number="24"><span class="co"># querySeq &lt;- lapply(spikesNto1All[[1]], FUN = subject)</span></a>
-<a class="sourceLine" id="cb9-25" data-line-number="25"><span class="co"># </span></a>
-<a class="sourceLine" id="cb9-26" data-line-number="26"><span class="co"># toString(querySeq)</span></a></code></pre></div>
+<a class="sourceLine" id="cb9-16" data-line-number="16">i &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb9-17" data-line-number="17">nbAlignments &lt;-<span class="st"> </span><span class="kw">length</span>(spikesNto1All<span class="op">$</span>alignments)</a>
+<a class="sourceLine" id="cb9-18" data-line-number="18"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>nbAlignments) {</a>
+<a class="sourceLine" id="cb9-19" data-line-number="19">  genomeName &lt;-<span class="st"> </span><span class="kw">names</span>(genomes[i])</a>
+<a class="sourceLine" id="cb9-20" data-line-number="20">  alignment &lt;-<span class="st"> </span>spikesNto1All<span class="op">$</span>alignments[[i]]</a>
+<a class="sourceLine" id="cb9-21" data-line-number="21">  </a>
+<a class="sourceLine" id="cb9-22" data-line-number="22">  alignmentFile &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;pairwise-alignment_&quot;</span>, </a>
+<a class="sourceLine" id="cb9-23" data-line-number="23">                       <span class="co"># gsub(pattern = &quot;/&quot;, replacement = &quot;-&quot;, x = genomeName), </span></a>
+<a class="sourceLine" id="cb9-24" data-line-number="24">                       <span class="st">&quot;.txt&quot;</span>)</a>
+<a class="sourceLine" id="cb9-25" data-line-number="25">  <span class="kw">writePairwiseAlignments</span>(<span class="dt">x =</span> alignment, <span class="dt">file =</span> <span class="kw">file.path</span>(dir<span class="op">$</span>outseq, alignmentFile))</a>
+<a class="sourceLine" id="cb9-26" data-line-number="26">  </a>
+<a class="sourceLine" id="cb9-27" data-line-number="27">  subject &lt;-<span class="st"> </span><span class="kw">subject</span>(alignment)</a>
+<a class="sourceLine" id="cb9-28" data-line-number="28">  sequence &lt;-<span class="st"> </span><span class="kw">as.character</span>(subject)</a>
+<a class="sourceLine" id="cb9-29" data-line-number="29">  sequenceDesaligned &lt;-<span class="st"> </span><span class="kw">gsub</span>(<span class="dt">pattern =</span> <span class="st">&quot;-&quot;</span>, <span class="dt">replacement =</span> <span class="st">&quot;&quot;</span>, <span class="dt">x =</span> sequence)</a>
+<a class="sourceLine" id="cb9-30" data-line-number="30">  sequenceID &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>, genomeName, <span class="st">&quot;S-gene&quot;</span>, <span class="kw">start</span>(subject), <span class="kw">end</span>(subject))</a>
+<a class="sourceLine" id="cb9-31" data-line-number="31">  seqStringSet &lt;-<span class="st"> </span><span class="kw">DNAStringSet</span>(<span class="dt">x =</span> sequenceDesaligned) <span class="co">#, start = start(subject), end=end(subject))</span></a>
+<a class="sourceLine" id="cb9-32" data-line-number="32">  <span class="kw">names</span>(seqStringSet) &lt;-<span class="st"> </span>sequenceID</a>
+<a class="sourceLine" id="cb9-33" data-line-number="33">  <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Appending sequence &quot;</span>, i, <span class="st">&quot;/&quot;</span>, nbAlignments, <span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>, sequenceID)</a>
+<a class="sourceLine" id="cb9-34" data-line-number="34">  <span class="kw">writeXStringSet</span>(seqStringSet,</a>
+<a class="sourceLine" id="cb9-35" data-line-number="35">                  <span class="dt">filepath =</span> outfiles<span class="op">$</span>Smatches, <span class="dt">format =</span> <span class="st">&quot;fasta&quot;</span>, <span class="dt">append =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb9-36" data-line-number="36"></a>
+<a class="sourceLine" id="cb9-37" data-line-number="37">}</a>
+<a class="sourceLine" id="cb9-38" data-line-number="38"><span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>, outfiles<span class="op">$</span>Smatches)</a>
+<a class="sourceLine" id="cb9-39" data-line-number="39"><span class="co"># </span></a></code></pre></div>
 </div>
 </div>
 
