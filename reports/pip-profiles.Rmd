@@ -310,18 +310,30 @@ outfiles$Smatches <- file.path(dir$outseq, paste0("S-gene_", refGenomeName, "_ma
 writeXStringSet(refSpike, 
                 filepath = outfiles$Smatches, format = "fasta")
 
-# i <- 1
-# for (i in 1:length(spikesNto1All$alignments)) {
-#   subject <- subject(spikesNto1All$alignments[[i]])
-#   writeXStringSet(subject, 
-#                   filepath = outfiles$Smatches, format = "fasta", add = TRUE)
-# 
-# }
-# # View(spikesNto1All$alignments)
-# querySeq <- lapply(spikesNto1All[[1]], FUN = subject)
-# 
-# toString(querySeq)
+i <- 1
+nbAlignments <- length(spikesNto1All$alignments)
+for (i in 1:nbAlignments) {
+  genomeName <- names(genomes[i])
+  alignment <- spikesNto1All$alignments[[i]]
+  
+  alignmentFile <- paste0("pairwise-alignment_", 
+                       # gsub(pattern = "/", replacement = "-", x = genomeName), 
+                       ".txt")
+  writePairwiseAlignments(x = alignment, file = file.path(dir$outseq, alignmentFile))
+  
+  subject <- subject(alignment)
+  sequence <- as.character(subject)
+  sequenceDesaligned <- gsub(pattern = "-", replacement = "", x = sequence)
+  sequenceID <- paste(sep = "_", genomeName, "S-gene", start(subject), end(subject))
+  seqStringSet <- DNAStringSet(x = sequenceDesaligned) #, start = start(subject), end=end(subject))
+  names(seqStringSet) <- sequenceID
+  message("\tAppending sequence ", i, "/", nbAlignments, "\t", sequenceID)
+  writeXStringSet(seqStringSet,
+                  filepath = outfiles$Smatches, format = "fasta", append = TRUE)
 
+}
+message("\t", outfiles$Smatches)
+# 
 ```
 
 
