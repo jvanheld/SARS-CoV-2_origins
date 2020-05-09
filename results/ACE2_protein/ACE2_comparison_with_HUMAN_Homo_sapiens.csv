@@ -1,0 +1,31 @@
+,number of differences with human on the important residues
+number of important residues,8
+ZEBRAFISH_Danio_rerio,5
+ZEBRAFISH2_Danio_rerio,5
+CATFISH_Ictalurus_punctatus,5
+SAUMON_Salmo_salar,7
+COELACANTHE_Latimeria_chalumnae,4
+GOBEMOUCHE_Ficedula_albicollis,6
+PIGEON_Columba_livia,7
+POULE_Gallus_gallus,6
+COCHONDINDE_Cavia_porcellus,3
+BAT_Myotis_lucifugus,6
+BAT_Rhinolophus_sinicus,4
+PIG_Sus_scrofa,4
+BOVIN_Bos_taurus,2
+SHEEP_Ovis_aries,2
+CHEVRE_Capra_hircus,2
+BALEINE_Balaenoptera_acutorostrata,3
+DAUPHINYANGTZE_Lipotes_vexillifer,3
+DAUPHIN_Tursiops_truncatus,4
+PANGOLIN_Manis_javanic,5
+CHIEN_Canis_lupu,4
+CIVETTE_Paguma_larvata,4
+CHAT_Felis_catus,3
+ORANGOUTAN_Pongo_abelii,0
+HUMAN_Homo_sapiens,0
+BONOBO_Pan_paniscus,0
+RABIT_Oryctolagus_cuniculus,4
+HAMSTER_Mesocricetus_auratus,2
+RAT_Rattus_norvegicus,4
+MOUSE_Mus_musculus,4

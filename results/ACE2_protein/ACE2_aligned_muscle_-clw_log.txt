@@ -1,0 +1,5 @@
+Started Fri May  8 14:32:13 2020
+muscle -in data/ACE2/ACE2.fa -clw -quiet -maxhours 1 -seqtype protein -log results/ACE2_protein//ACE2_aligned_muscle_-clw_log.txt -out results/ACE2_protein//ACE2_aligned_muscle.aln 
+
+*** FATAL ERROR ***  Invalid file format, expected '>' to start FASTA label
+Stopped Fri May  8 14:32:13 2020
