@@ -65,12 +65,15 @@ pymol scripts/pymol/color_insertions.pml
 
 ACE2 is the receptor of SARS-CoV-2. To determine which animals are susceptible to be infected by SARS-CoV-2 or similar viruses, we gathered the ACE2 sequences of numerous animals in the data/ACE2/ACE2.fa file. Our aim is to align them, construct a phylogenetic tree, and to determine the similarity of each protein with the human protein on the residues involved in spike binding.
 
-To build the multiple alignment (in multifasta format) between the ACE2 sequences:
+To build the multiple alignment (saved in fasta and phylip format) between the ACE2 sequences:
 ```
-make -f scripts/makefiles/05_ACE2_analysis.mk align_muscle_fasta
+make -f scripts/makefiles/05_ACE2_analysis.mk align_muscle_fasta_phylip
 ```
-
-Once this is done, the comparison with the human protein can be performed with:
+Once this is done, the corresponding tree can be built with:
+```
+make -f scripts/makefiles/05_ACE2_analysis.mk phyml_ACE2
+```
+and the comparison with the human protein can be performed with:
 ```
 make -f scripts/makefiles/05_ACE2_analysis.mk compare_ACE2_with_human
 ```
