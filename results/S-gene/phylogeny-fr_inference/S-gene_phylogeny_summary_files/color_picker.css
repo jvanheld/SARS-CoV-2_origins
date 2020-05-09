@@ -1,0 +1,177 @@
+/**
+ColorPicker CSS
+***************
+Version: 0.10.1
+Date:    21/03/2008
+Authors: Aurelien
+Modified by:
+         Alexis DEREEPER (IGS), alexis.dereeper@igs.cnrs-mrs.fr
+         Valentin GUIGNON (LIRMM), valentin.guignon@lirmm.fr
+
+Source: http://www.asp-php.net/scripts/scripting/jscolorpicker.php
+
+Description:
+CSS used with color selection dialog box.
+
+*/
+
+table.color_table, table.color_table thead, table.color_table tbody, table.color_table tfoot
+{
+  margin: 0px;
+  padding: 0px;
+  border-spacing: 0px;
+}
+
+fieldset.color_fieldset
+{
+  padding: 0px;
+  margin: 0px;
+  color: #000000;
+  border-top-color:#60a0c0;
+  border-left-color:#60a0c0;
+  border-right-color:#60a0c0;
+  border-bottom-color:#60a0c0;
+}
+
+legend.color_legend
+{
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+  font-size: 10pt;
+  color: #000000;
+}
+
+
+a.color, a.color:active, a.color:visited
+{
+  position: relative;
+  display: block;
+  text-decoration: none;
+  width: 10px;
+  height: 10px;
+  line-height: 10px;
+  margin: 0px;
+  padding: 0px;
+  border: 1px inset;
+  border-top-color:#006699;
+  border-left-color:#006699;
+  border-right-color:#00334c;
+  border-bottom-color:#00334c;
+}
+
+a.color:hover
+{
+  border: 1px outset;
+  border-top-color:#00334c;
+  border-left-color:#00334c;
+  border-right-color:#006699;
+  border-bottom-color:#006699;
+  text-decoration: none;
+}
+
+a.none, a.none:active, a.none:visited, a.none:hover
+{
+  position: relative;
+  display: block;
+  text-decoration: none;
+  width: 10px;
+  height: 10px;
+  line-height: 10px;
+  margin: 0px;
+  padding: 0px;
+  cursor: default;
+  border: 1px solid #e0ebf0;
+}
+
+
+.color_button
+{
+  border: 2px solid;
+  border-top-color:#006699;
+  border-left-color:#006699;
+  border-right-color:#00334c;
+  border-bottom-color:#00334c;
+  vertical-align: top;
+}
+
+.color_button_disabled
+{
+  border: 2px solid;
+  border-top-color:#006699;
+  border-left-color:#006699;
+  border-right-color:#00334c;
+  border-bottom-color:#00334c;
+  color: #404040;
+  vertical-align: top;
+}
+
+
+.tblColor
+{
+  display: none;
+}
+
+.tdColor
+{
+  padding: 1px;
+}
+
+.tblContainer
+{
+  background-color: #e0ebf0;
+}
+
+.tblGlobal
+{
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  display: none;
+  background-color: #e0ebf0;
+  border: 2px outset;
+  border-top-color:#00334c;
+  border-left-color:#00334c;
+  border-right-color:#006699;
+  border-bottom-color:#006699;
+}
+
+.tdContainer
+{
+  padding: 5px;
+}
+
+.tdDisplay
+{
+  width: 50%;
+  height: 20px;
+  line-height: 20px;
+  border: 1px solid #00334c;
+}
+
+.tdDisplayTxt
+{
+  width: 50%;
+  height: 24px;
+  line-height: 12px;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+  font-size: 8pt;
+  color: black;
+  text-align: center;
+}
+
+.btnColor
+{
+  width: 100%;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+  font-size: 10pt;
+  padding: 0px;
+  margin: 0px;
+}
+
+.btnPalette
+{
+  width: 100%;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+  font-size: 8pt;
+  padding: 0px;
+  margin: 0px;
+}

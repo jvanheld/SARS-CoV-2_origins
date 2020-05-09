@@ -1,0 +1,377 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0101)http://www.phylogeny.fr/simple_phylogeny.cgi?workflow_id=b3cc67cade1224542aa8523e35e5d7b0&tab_index=1 -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Phylogeny.fr: "One Click" Mode</title>
+<link type="image/x-icon" rel="shortcut icon" href="http://www.phylogeny.fr/images/phylogeny-fr.ico">
+<link type="application/rss+xml" rel="alternate" href="http://www.phylogeny.fr/phylogeny-en.xml">
+<link rel="stylesheet" type="text/css" href="./S-gene_phylogeny_summary_files/default.all.css">
+<link rel="stylesheet" type="text/css" href="./S-gene_phylogeny_summary_files/color_picker.css">
+<link rel="stylesheet" type="text/css" href="./S-gene_phylogeny_summary_files/tooltips.all.css">
+<link rel="stylesheet" type="text/css" href="./S-gene_phylogeny_summary_files/default.print.css" media="print">
+<script type="text/javascript">//<![CDATA[
+var SITE_URL = 'http://www.phylogeny.fr';
+var CGI_PATH = 'http://www.phylogeny.fr';
+var SCRIPTS_PATH = 'http://www.phylogeny.fr/javascript';
+var IMAGES_PATH = 'http://www.phylogeny.fr/images';
+var APPLETS_PATH = 'http://www.phylogeny.fr/applets';
+
+//]]></script><style>@media print {#ghostery-purple-box {display:none !important}}</style>
+<script src="./S-gene_phylogeny_summary_files/config.js" type="text/javascript"></script>
+<script src="./S-gene_phylogeny_summary_files/ajax.js" type="text/javascript"></script>
+<script src="./S-gene_phylogeny_summary_files/functions.js" type="text/javascript"></script>
+<script src="./S-gene_phylogeny_summary_files/forms_style.js" type="text/javascript"></script>
+
+</head>
+<body onload="DoLoad();verifyBlastBanks();">
+
+<!-- #################### BEGIN PAGE #################### -->
+<div id="page">
+<a name="top"></a>
+
+  <!-- #################### BEGIN PAGE HEADER #################### -->
+  <div id="page_header">
+    <a href="http://www.lirmm.fr/mab/" target="_blank">
+      <img src="./S-gene_phylogeny_summary_files/logo_mablirmm.png" alt="Equipe MAB - LIRMM" name="logo_mab" id="logo_mab">
+    </a>
+    <a href="http://www.igs.cnrs-mrs.fr/" target="_blank">
+      <img src="./S-gene_phylogeny_summary_files/logo_igs.png" alt="Information Genomique et Structurale" name="logo_igs" id="logo_igs">
+    </a>
+  </div>
+  <!-- #################### END PAGE HEADER #################### -->
+
+  <!-- #################### BEGIN TOP MENU #################### -->
+  <div id="menu">
+    <a class="menuitem" href="http://www.phylogeny.fr/index.cgi" style="width: 70px;">Home</a>
+    <div class="menuitem" style="width: 121px;"><a href="http://www.phylogeny.fr/phylogeny.cgi" style="display: block; width: 121px; height: 24px; margin-bottom: 1px;">Phylogeny Analysis</a>
+      <a class="subitem" href="http://www.phylogeny.fr/simple_phylogeny.cgi">"One Click"</a>
+      <a class="subitem" href="http://www.phylogeny.fr/advanced.cgi">"Advanced"</a>
+      <a class="subitem" href="http://www.phylogeny.fr/alacarte.cgi">"A la Carte"</a>
+    </div>
+    <a class="menuitem" href="http://www.phylogeny.fr/one_task.cgi?task_type=blast" style="width: 101px;">Blast Explorer</a>
+    <div class="menuitem" style="width: 112px;"><a href="http://www.phylogeny.fr/programs.cgi" style="display: block; width: 112px; height: 24px; margin-bottom: 1px;">Online Programs</a>
+      <span class="subitem">
+        <span class="subheader">Blast</span>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=blast">Blast</a></span><!-- note: do not add an EOL before previous closing span tag to prevent a rendering bug on IE6 -->
+      <span class="subitem">
+        <span class="subheader">Multiple Alignment</span>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=muscle">MUSCLE</a>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=tcoffee">T-Coffee</a>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=clustalw">ClustalW</a>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=probcons">ProbCons</a>
+      </span>
+      <span class="subitem">
+        <span class="subheader">Phylogeny</span>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=phyml">PhyML</a>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=bionj">BioNJ</a>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=tnt">TNT</a>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=mrbayes">MrBayes</a>
+      </span>
+      <span class="subitem">
+        <span class="subheader">Tree Viewers</span>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=treedyn">TreeDyn</a>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=drawgram">Drawgram</a>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=drawtree">Drawtree</a>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=atv">ATV</a>
+      </span>
+      <span class="subitem">
+        <span class="subheader">Utilities</span>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=gblocks">Gblocks</a>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=jalview">Jalview</a>
+        <a href="http://www.phylogeny.fr/one_task.cgi?task_type=readseq">Readseq</a>
+        <a href="http://www.phylogeny.fr/data_converter.cgi">Format converter</a>
+      </span>
+    </div>
+    <a class="menuitem" href="http://www.phylogeny.fr/workspace.cgi" style="width: 105px;">Your Workspace</a>
+    <a class="menuitem" href="http://www.phylogeny.fr/documentation.cgi" style="width: 97px;">Documentation</a>
+    <a class="menuitem" href="http://www.phylogeny.fr/downloads.cgi" style="width: 80px;">Downloads</a>
+    <a class="menuitem" href="http://www.phylogeny.fr/contacts.cgi" style="width: 70px;">Contacts</a>
+  </div>
+  <!-- #################### END TOP MENU #################### -->
+
+  <!-- #################### BEGIN ANNOUNCEMENT #################### -->
+  
+  <!-- #################### END ANNOUNCEMENT #################### -->
+
+  <!-- #################### BEGIN PAGE CONTENT #################### -->
+  <div id="page_content">
+<br>
+  <div class="wf_header">
+    <table style="width: 100%; border-collapse: collapse;">
+      <tbody>
+        <tr>
+          <td class="wf_title">coronavirus S gene</td>
+          <td>
+<div class="miniworkflow">
+
+<!-- BEGIN MINI-WORKFLOW -->
+<div class="miniworkflow">
+  <div title="Alignment" class="wf_stagebox muscle_stage done_stage">
+    <b>Alignment</b><br>
+MUSCLE
+  </div>
+  <div title="arrow to Curation" class="wf_right_arrow"><img src="./S-gene_phylogeny_summary_files/arrow_right_blue.png" alt="-&gt;"></div>
+  <div title="Curation" class="wf_stagebox gblocks_stage done_stage">
+    <b>Curation</b><br>
+Gblocks
+  </div>
+  <div title="arrow to Phylogeny" class="wf_right_arrow"><img src="./S-gene_phylogeny_summary_files/arrow_right_blue.png" alt="-&gt;"></div>
+  <div title="Phylogeny" class="wf_stagebox phyml_stage done_stage">
+    <b>Phylogeny</b><br>
+PhyML
+  </div>
+  <div title="arrow to Tree Rendering" class="wf_right_arrow"><img src="./S-gene_phylogeny_summary_files/arrow_right_blue.png" alt="-&gt;"></div>
+  <div title="Tree Rendering" class="wf_stagebox treedyn_stage done_stage">
+    <b>Tree Rendering</b><br>
+TreeDyn
+  </div>
+</div> <!-- END MINI-WORKFLOW -->
+
+</div>
+          </td>
+          <td class="wf_help"><a href="http://www.phylogeny.fr/documentation.cgi">Help <img src="./S-gene_phylogeny_summary_files/help.png" alt="?"></a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+<!-- #################### BEGIN NAV TABS #################### -->
+<div id="nav_tabs">
+  <ul>
+    <li class="active_tab workflow_tab">1. Overview</li>
+    <li class="dataset_tab"><a href="http://www.phylogeny.fr/simple_phylogeny.cgi?workflow_id=b3cc67cade1224542aa8523e35e5d7b0&amp;tab_index=2">2. Data &amp; Settings</a></li>
+    <li class="muscle_stage"><a href="http://www.phylogeny.fr/simple_phylogeny.cgi?workflow_id=b3cc67cade1224542aa8523e35e5d7b0&amp;tab_index=3">3. Alignment</a></li>
+    <li class="gblocks_stage"><a href="http://www.phylogeny.fr/simple_phylogeny.cgi?workflow_id=b3cc67cade1224542aa8523e35e5d7b0&amp;tab_index=4">4. Curation</a></li>
+    <li class="phyml_stage"><a href="http://www.phylogeny.fr/simple_phylogeny.cgi?workflow_id=b3cc67cade1224542aa8523e35e5d7b0&amp;tab_index=5">5. Phylogeny</a></li>
+    <li class="treedyn_stage"><a href="http://www.phylogeny.fr/simple_phylogeny.cgi?workflow_id=b3cc67cade1224542aa8523e35e5d7b0&amp;tab_index=6">6. Tree Rendering</a></li>
+  </ul>
+</div>
+<br>
+<!-- #################### END NAV TABS #################### -->
+
+<br>
+<input type="button" value="Create a new workflow" onclick="window.location.href = &#39;http://www.phylogeny.fr/simple_phylogeny.cgi&#39;;"><br>
+<br>
+<br>
+<br>
+<div class="wf_info">
+  <span class="wf_info_title">Process Info:</span><br>
+<span class="wf_info_label">Number of taxa:</span> <span>62</span><br>
+<span class="wf_info_label">Average sequences length:</span> <span>3707<br>&nbsp;&nbsp;&nbsp;(between 3305 and 3822)</span><br>
+<span class="wf_info_label">Assumed to be:</span> <span>DNA</span><br>
+  <br>
+  <span class="wf_info_title">Computation:</span><br>
+  <span class="wf_info_label">Alignment:</span> <span>120 seconds</span><br>
+  <span class="wf_info_label">Curation:</span> <span>2 seconds</span><br>
+  <span class="wf_info_label">Phylogeny:</span> <span>131 seconds</span><br>
+  <span class="wf_info_label">Tree Rendering:</span> <span>2 seconds</span><br>
+  <br>
+  <span class="wf_info_label">Overall time:</span> <span>255 seconds</span><br>
+</div>
+<div class="workflow">
+<table class="workflow_table" style="border: 0px; border-collapse: collapse; border-spacing: 0px;">
+  <tbody>
+    <tr>
+      <td>
+        <div title="User Inputs" class="wf_stagebox wf_sub_stage user_stage done_stage">
+        <b>User Inputs</b><br>
+        <a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade122454672579ab50f394f2">Input</a><br>
+        </div>
+      </td>
+      <td><div class="wf_verbose_settings">The analysis was performed on the Phylogeny.fr platform and comprised the following steps.</div></td>
+    </tr>
+    <tr>
+      <td><div title="arrow to Alignment" class="wf_down_arrow"><img src="./S-gene_phylogeny_summary_files/arrow_down_blue.png" alt="&#8595;"></div></td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>
+        <div title="Alignment" class="wf_stagebox muscle_stage done_stage">
+        <b>Alignment</b><br>
+MUSCLE <a href="http://www.drive5.com/muscle/muscle.html" title="MUSCLE documentation"><img src="./S-gene_phylogeny_summary_files/doc.png" alt="doc"></a>
+<br>
+        <!-- All results link: http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade122454c009de340a469317 -->
+        <br>
+        <u>Outputs:</u><br>
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade122454c009de340a469317&amp;results_in_list=1&amp;raw=1&amp;file=alignment.fasta" title="Alignment in FASTA format">FASTA</a>]
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade122454c009de340a469317&amp;results_in_list=2&amp;raw=1&amp;file=alignment.phy" title="Alignment in PHYLIP format">PHYLIP</a>]
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade122454c009de340a469317&amp;results_in_list=3&amp;raw=1&amp;file=alignment.aln" title="Alignment in Clustal format">Clustal</a>]
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade122454c009de340a469317&amp;results_in_list=4&amp;raw=1" title="Colored alignment on an HTML page">HTML</a>]
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade122454c009de340a469317&amp;results_in_list=9&amp;raw=1&amp;file=muscle.log" title="MUSCLE execution logs">Logs</a>]
+<br>
+
+        <br>
+        <u>Settings:</u><br>
+<span class="wf_info_label">Run mode:</span> <span>full processing mode</span><br>
+        </div>
+      </td>
+      <td><div class="wf_verbose_settings">Sequences were aligned with MUSCLE (v3.8.31) configured for highest accuracy (MUSCLE with default settings).<br>
+</div></td>
+    </tr>
+    <tr>
+      <td><div title="arrow to Curation" class="wf_down_arrow"><img src="./S-gene_phylogeny_summary_files/arrow_down_blue.png" alt="&#8595;"></div></td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>
+        <div title="Curation" class="wf_stagebox gblocks_stage done_stage">
+        <b>Curation</b><br>
+Gblocks <a href="http://molevol.cmima.csic.es/castresana/Gblocks/Gblocks_documentation.html" title="Gblocks documentation"><img src="./S-gene_phylogeny_summary_files/doc.png" alt="doc"></a>
+<br>
+        <!-- All results link: http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade1224540042ef8fbe78b353 -->
+        <br>
+        <u>Outputs:</u><br>
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade1224540042ef8fbe78b353&amp;results_in_list=1&amp;raw=1&amp;file=alignment.fasta" title="Cured alignment in FASTA format">FASTA</a>]
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade1224540042ef8fbe78b353&amp;results_in_list=2&amp;raw=1&amp;file=alignment.phy" title="Cured alignment in PHYLIP format">PHYLIP</a>]
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade1224540042ef8fbe78b353&amp;results_in_list=4&amp;raw=1" title="Colored alignment with conserved blocks on an HTML page">HTML</a>]
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade1224540042ef8fbe78b353&amp;results_in_list=9&amp;raw=1&amp;file=gblocks.log" title="Gblocks execution logs">Logs</a>]
+<br>
+
+        <br>
+        <u>Settings:</u><br>
+<span class="wf_info_label">Min. seq. for flank pos.:</span> <span>85%</span><br>
+<span class="wf_info_label">Max. contig. nonconserved pos.:</span> <span>8</span><br>
+<span class="wf_info_label">Min. block length:</span> <span>10</span><br>
+<span class="wf_info_label">Gaps in final blocks:</span> <span>no</span><br>
+        </div>
+      </td>
+      <td><div class="wf_verbose_settings">After alignment, ambiguous regions (i.e. containing gaps and/or poorly aligned) were removed with Gblocks (v0.91b) using the following parameters:<br>
+-minimum length of a block after gap cleaning: 10<br>
+-no gap positions were allowed in the final alignment<br>
+-all segments with contiguous nonconserved positions bigger than 8 were rejected<br>
+-minimum number of sequences for a flank position: 85%<br>
+</div></td>
+    </tr>
+    <tr>
+      <td><div title="arrow to Phylogeny" class="wf_down_arrow"><img src="./S-gene_phylogeny_summary_files/arrow_down_blue.png" alt="&#8595;"></div></td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>
+        <div title="Phylogeny" class="wf_stagebox phyml_stage done_stage">
+        <b>Phylogeny</b><br>
+PhyML <a href="http://www.atgc-montpellier.fr/phyml/usersguide.php?type=command" title="PhyML documentation"><img src="./S-gene_phylogeny_summary_files/doc.png" alt="doc"></a>&nbsp;+ <a href="http://www.atgc-montpellier.fr/phyml/usersguide.php?type=command" title="PhyML aLRT documentation">aLRT</a>
+<br>
+        <!-- All results link: http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade122454b8348ed43e2cf45c -->
+        <br>
+        <u>Outputs:</u><br>
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade122454b8348ed43e2cf45c&amp;results_in_list=5&amp;raw=1&amp;file=phylo_tree.tree" title="Unrooted tree in Newick format">Newick</a>]
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade122454b8348ed43e2cf45c&amp;results_in_list=50&amp;raw=1" title="PhyML execution statistics">Stats</a>]
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade122454b8348ed43e2cf45c&amp;results_in_list=9&amp;raw=1&amp;file=phyml.log" title="PhyML execution logs">Logs</a>]
+<br>
+
+        <br>
+        <u>Settings:</u><br>
+<span class="wf_info_label">Model:</span> <span>HKY85</span><br>
+<span class="wf_info_label">Statistical test:</span> <span>alrt</span>
+<br><span class="wf_info_label">Number of categories:</span> <span>4</span><br>
+<span class="wf_info_label">Gamma:</span> <span>estimated</span><br>
+<span class="wf_info_label">Invariable sites:</span> <span>estimated</span><br>
+<span class="wf_info_label">Remove gaps:</span> <span>enabled</span><br>
+        </div>
+      </td>
+      <td><div class="wf_verbose_settings">The phylogenetic tree was reconstructed using the maximum likelihood method implemented in the PhyML program (v3.1/3.0 aLRT). The HKY85 substitution model was selected assuming an estimated proportion of invariant sites (of 0.000) and 4 gamma-distributed rate categories to account for rate heterogeneity across sites. The gamma shape parameter was estimated directly from the data (gamma=0.437). Reliability for internal branch was assessed using the aLRT test  (SH-Like).</div></td>
+    </tr>
+    <tr>
+      <td><div title="arrow to Tree Rendering" class="wf_down_arrow"><img src="./S-gene_phylogeny_summary_files/arrow_down_blue.png" alt="&#8595;"></div></td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>
+        <div title="Tree Rendering" class="wf_stagebox treedyn_stage done_stage">
+        <b>Tree Rendering</b><br>
+TreeDyn <a href="http://www.treedyn.org/overview.html" title="TreeDyn documentation"><img src="./S-gene_phylogeny_summary_files/doc.png" alt="doc"></a>
+<br>
+        <!-- All results link: http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade1224541e22494bb0902afa -->
+        <br>
+        <u>Outputs:</u><br>
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade1224541e22494bb0902afa&amp;results_in_list=5&amp;raw=1&amp;file=rooted_tree.tree" title="Rooted tree in Newick format">Newick</a>]
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade1224541e22494bb0902afa&amp;results_in_list=50&amp;raw=1&amp;file=phylo_tree.png" title="Tree image (bitmap in Protable Network Graphics format)">PNG</a>]
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade1224541e22494bb0902afa&amp;results_in_list=6&amp;raw=1&amp;file=phylo_tree.ps" title="Tree image in PostScript format">PS</a>]
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade1224541e22494bb0902afa&amp;results_in_list=7&amp;raw=1&amp;file=phylo_tree.pdf" title="Tree image in Portable Document Format">PDF</a>]
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade1224541e22494bb0902afa&amp;results_in_list=52&amp;raw=1&amp;file=phylo_tree.svg" title="Tree image in Scalable Vector Graphics format">SVG</a>]
+[<a href="http://www.phylogeny.fr/get_result.cgi?task_id=b3cc67cade1224541e22494bb0902afa&amp;results_in_list=51&amp;raw=1&amp;file=phylo_tree.tgf" title="Tree in TreeDyn Graphic File format">TGF</a>]
+<br>
+
+        <br>
+        <u>Settings:</u><br>
+<span class="wf_info_label">Conformation:</span> <span>rectangular</span><br>
+<span class="wf_info_label">Legend:</span> <span>displayed</span><br>
+<span class="wf_info_label">Branch annotation:</span> <span>bootstrap</span><br>
+<span class="wf_info_label">Font:</span> <span>Times 8 normal </span><br>
+        </div>
+      </td>
+      <td><div class="wf_verbose_settings">Graphical representation and edition of the phylogenetic tree were performed with TreeDyn (v198.3).<br>
+</div></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<br>
+<div class="references">Please cite:<br>
+  <ol>
+    <li>
+      Dereeper A., Audic S., Claverie J.M., Blanc G. <i>BLAST-EXPLORER helps you building datasets for phylogenetic analysis.</i> BMC Evol Biol. 2010 Jan 12;10:8. (<a href="http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&amp;db=PubMed&amp;list_uids=20067610" target="_blank">PubMed</a>)
+    </li>
+    <li>
+      Dereeper A.*, Guignon V.*, Blanc G., Audic S., Buffet S., Chevenet F., Dufayard J.F., Guindon S., Lefort V., Lescot M., Claverie J.M., Gascuel O. <i>Phylogeny.fr: robust phylogenetic analysis for the non-specialist.</i> Nucleic Acids Res. 2008 Jul 1;36(Web Server issue):W465-9. Epub 2008 Apr 19.  (<a href="http://www.ncbi.nlm.nih.gov/pubmed/18424797?ordinalpos=1&amp;itool=EntrezSystem2.PEntrez.Pubmed.Pubmed_ResultsPanel.Pubmed_RVDocSum" target="_blank">PubMed</a>) <span class="small" style="font-weight: normal;">*: joint first authors</span>
+    </li>
+    <li>
+      Edgar RC. <i>MUSCLE: multiple sequence alignment with high accuracy and high throughput.</i> Nucleic Acids Res. 2004, Mar 19;32(5):1792-7. (<a href="http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&amp;db=PubMed&amp;list_uids=15034147" target="_blank">PubMed</a>)
+    </li>
+    <li>
+      Castresana J. <i>Selection of conserved blocks from multiple alignments for their use in phylogenetic analysis.</i> Mol Biol Evol. 2000, Apr;17(4):540-52. (<a href="http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&amp;db=PubMed&amp;list_uids=10742046" target="_blank">PubMed</a>)
+    </li>
+    <li>
+      Guindon S., Gascuel O. <i>A simple, fast, and accurate algorithm to estimate large phylogenies by maximum likelihood.</i> Syst Biol. 2003, Oct;52(5):696-704. (<a href="http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&amp;db=PubMed&amp;list_uids=14530136" target="_blank">PubMed</a>)
+    </li>
+    <li>
+      Anisimova M., Gascuel O. <i>Approximate likelihood ratio test for branchs: A fast, accurate and powerful alternative.</i> Syst Biol. 2006, Aug;55(4):539-52. (<a href="http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&amp;db=PubMed&amp;list_uids=16785212" target="_blank">PubMed</a>)
+    </li>
+    <li>
+      Chevenet F., Brun C., Banuls AL., Jacq B., Chisten R. <i>TreeDyn: towards dynamic graphics and annotations for analyses of trees.</i> BMC Bioinformatics. 2006, Oct 10;7:439. (<a href="http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&amp;db=PubMed&amp;list_uids=17032440" target="_blank">PubMed</a>)
+    </li>
+  </ol>
+</div>
+<br>
+  </div>
+  <!-- #################### END PAGE CONTENT #################### -->
+
+  <!-- #################### BEGIN PAGE FOOTER #################### -->
+  <div id="page_footer">
+    <table style="width: 100%; border-collapse: collapse;">
+      <tbody>
+        <tr>
+          <td class="subfooter" style="width: 30%; text-align: left; vertical-align: top;">
+            <a href="http://www.genopole.univ-mrs.fr/" target="_blank"><img src="./S-gene_phylogeny_summary_files/logo_marseille-nice.png" alt="Genopole Marseille-Nice" name="logo_marseillenice" id="logo_marseillenice"></a>
+          </td>
+          <td class="subfooter" style="width: 25%; text-align: left; vertical-align: top;">
+            <a href="http://www.cnrs.fr/" target="_blank"><img src="./S-gene_phylogeny_summary_files/logo_cnrs.png" alt="CNRS" name="logo_cnrs" id="logo_cnrs"><span class="subfooter">Centre<br>National<br>de la<br>Recherche<br>Scientifique</span></a>
+          </td>
+          <td class="subfooter" style="width: 25%; text-align: center; vertical-align: middle;">
+            <div style="text-align: center;"><a href="http://www.ibisa.net/presentation.php" target="_blank"><img src="./S-gene_phylogeny_summary_files/logo_rng.png" alt="Reseau National des Genopoles" name="logo_rng" id="logo_rng"><br><span class="subfooter">Réseau National des Génopoles ® 2003</span></a></div>
+          </td>
+          <td class="subfooter" style="width: 20%; text-align: right; vertical-align: top;">
+            <a href="http://www.genopole-montpellier-lr.org/genopoles/" target="_blank"><img src="./S-gene_phylogeny_summary_files/logo_montpellier-lr.png" alt="Genopole Montpellier-Languedoc-Roussillon" name="logo_montpellierlr" id="logo_montpellierlr"></a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <!-- #################### END PAGE FOOTER #################### -->
+</div>
+<!-- #################### END PAGE #################### -->
+
+<a id="w3c" href="http://validator.w3.org/check?uri=referer">
+  <img src="./S-gene_phylogeny_summary_files/valid-xhtml10-blue.png" alt="Valid XHTML 1.0 Transitional" height="31" width="88">
+</a>
+
+<!-- 
+Thanks to Mr Khan Janny for his help on fixing a security breach !
+https://www.openbugbounty.org/researchers/KhanJanny/
+-->
+
+
+
+
+
+</body></html>

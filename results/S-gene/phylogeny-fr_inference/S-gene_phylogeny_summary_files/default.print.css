@@ -1,0 +1,1060 @@
+/**
+Phylogeny.fr CSS - Printers version
+****************
+Version: 0.10.1
+Date:    18/01/2008
+Authors:
+         Alexis DEREEPER (IGS), alexis.dereeper@igs.cnrs-mrs.fr
+         Valentin GUIGNON (LIRMM), valentin.guignon@lirmm.fr
+
+Description:
+Main CSS for phylogeny.fr websites for printer devices (print media type).
+
+*/
+
+body
+{
+  margin: 0px 0px 0px 0px;
+  padding: 4px 8px 8px 8px;
+  color: #000000;
+  background-image: url("http://www.phylogeny.fr/images/pattern.gif");
+  text-align: left;
+  text-indent: 0px;
+  font-family: "Times New Roman", Times, FreeSerif, serif;
+  font-size: 14px;
+}
+
+h1
+{
+  margin-bottom: 4px;
+  color: #005580;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+  font-size: 20px;
+}
+
+h2
+{
+  margin-bottom: 4px;
+  color: #004466;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+  font-size: 18px;
+}
+
+h3
+{
+  margin-bottom: 4px;
+  color: #00334c;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+  font-size: 16px;
+}
+
+h4
+{
+  margin-bottom: 4px;
+  color: #002233;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+  font-size: 14px;
+}
+
+p
+{
+  margin: 4px 4px 4px 0px;
+  padding: 0px 4px 4px 4px;
+  color: #000000;
+  text-align: justify;
+  text-indent: 16px;
+  font-family: "Times New Roman", Times, FreeSerif, serif;
+  font-size: 14px;
+}
+
+hr
+{
+  background-color: #808080;
+  color: #808080;
+  height: 3px;
+  border: 0px;
+  text-indent: 0px;
+}
+
+a:link
+{
+  color: #006699;
+  text-decoration: none;
+}
+
+a:visited
+{
+  color: #003366;
+  text-decoration: none;
+}
+
+a:link:hover, a:visited:hover
+{
+  color: #c00000;
+  text-decoration: underline;
+}
+
+a:link:active, a:visited:active
+{
+  color: #bb8000;
+  text-decoration: underline;
+}
+
+a img
+{
+  border: 0px;
+  text-decoration: none;
+}
+
+li, ul, ol
+{
+  margin-top: 0px;
+  margin-bottom: 0px;
+  text-indent: 0px;
+}
+
+dl
+{ 
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+dt
+{
+  margin-top: 8px;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+  font-weight: bold;
+}
+
+dd ul, dd ol, dd li
+{ 
+  padding-left: 0px;
+}
+
+th, .block_header
+{
+  margin-bottom: 12px;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+  font-weight: bold;
+}
+
+caption
+{ 
+  font-style: italic;
+}
+
+iframe
+{
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  width: 100%;
+  border-width: 1px;
+  border-style: solid;
+  border-top-color:#006699;
+  border-left-color:#006699;
+  border-right-color:#00334c;
+  border-bottom-color:#00334c;
+}
+
+textarea
+{
+  padding: 2px 2px 2px 2px;
+  border: 2px inset;
+  border-top-color:#006699;
+  border-left-color:#006699;
+  border-right-color:#00334c;
+  border-bottom-color:#00334c;
+  overflow: auto;
+}
+
+select
+{
+  border-top-color:#006699;
+  border-left-color:#006699;
+  border-right-color:#00334c;
+  border-bottom-color:#00334c;
+  background-color: #ffffff;
+  color: #000000;
+  font-family: "Times New Roman", Times, FreeSerif, serif;
+  font-weight: bold;
+}
+
+input[type="text"], input[type="password"], input[type="file"]
+{
+  padding: 2px 2px 1px 2px;
+  border-top-color:#006699;
+  border-left-color:#006699;
+  border-right-color:#00334c;
+  border-bottom-color:#00334c;
+  background-color: #ffffff;
+  color: #000000;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+}
+
+input[disabled], select[disabled], textarea[disabled]
+{
+  color: #404040;
+  background-color: #c0c0c0;
+}
+
+textarea:focus, select:focus, input:focus[type="text"], input:focus[type="password"], input:focus[type="file"]
+{
+  border-top-color:#32cd32;
+  border-left-color:#32cd32;
+  border-right-color:#008000;
+  border-bottom-color:#008000;
+  /*outline: #808080 dotted 1px;*/
+}
+
+input[type="button"], input[type="submit"], input[type="reset"]
+{
+  padding: 2px 2px 1px 2px;
+  border-top-color:#006699;
+  border-left-color:#006699;
+  border-right-color:#00334c;
+  border-bottom-color:#00334c;
+  background-color: #e0ebf0;
+  color: #000000;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+  font-weight: bold;
+}
+
+input:hover[type="button"], input:hover[type="submit"], input:hover[type="reset"]
+{
+}
+
+input:active[type="button"], input:active[type="submit"], input:active[type="reset"]
+{
+  padding: 2px 2px 1px 2px;
+  border-top-color:#006699;
+  border-left-color:#006699;
+  border-right-color:#00334c;
+  border-bottom-color:#00334c;
+  background-color: #aae0ff;
+  color: #008000;
+}
+
+code, .code
+{
+  font-size: 12px;
+  font-family: "DejaVu Sans Mono", "Courrier New", Courrier, monospace;
+}
+
+code.bordered
+{
+  padding: 8px;
+}
+
+img[src="http://www.phylogeny.fr/images/bullet_blue.png"]
+{
+  vertical-align: middle;
+  padding-right: 4px;
+}
+
+img[src="http://www.phylogeny.fr/images/help.png"]
+{
+  vertical-align: middle;
+}
+
+img[src="http://www.phylogeny.fr/images/doc.png"]
+{
+  vertical-align: middle;
+  padding-left: 1px;
+}
+
+img[src="http://www.phylogeny.fr/images/download.png"]
+{
+  vertical-align: middle;
+}
+
+img[src="http://www.phylogeny.fr/images/mail.png"]
+{
+  vertical-align: middle;
+}
+
+img[src="http://www.phylogeny.fr/images/at_blue.png"]
+{
+  vertical-align: middle;
+}
+
+.radio
+{
+  line-height: 24px;
+  background-repeat: no-repeat;
+  background-position: 5px 3px;
+}
+
+.radio:hover
+{
+  background-color: #e0ebf0;
+}
+
+
+.radio a, .radio a:link, .radio a:visited, .radio a:hover, .radio a:active
+{
+  color: #000000;
+  text-decoration: none;
+}
+
+.radio_active
+{
+  background-image: url("http://www.phylogeny.fr/images/radio_active.png");
+}
+
+.radio_active_checked
+{
+  background-image: url("http://www.phylogeny.fr/images/radio_active_checked.png");
+}
+
+.radio_unchecked
+{
+  background-image: url("http://www.phylogeny.fr/images/radio.png");
+}
+
+.radio_checked
+{
+  background-image: url("http://www.phylogeny.fr/images/radio_checked.png");
+}
+
+.radio_disabled
+{
+  background-image: url("http://www.phylogeny.fr/images/radio_disabled.png");
+  color: #808080;
+}
+
+.radio_disabled_checked
+{
+  background-image: url("http://www.phylogeny.fr/images/radio_disabled_checked.png");
+  color: #808080;
+}
+
+.radio_disabled a, .radio_disabled a:link, .radio_disabled a:visited, .radio_disabled a:hover, .radio_disabled a:active,
+.radio_disabled_checked a, .radio_disabled_checked a:link, .radio_disabled_checked a:visited, .radio_disabled_checked a:hover, .radio_disabled_checked a:active
+{
+  color: #808080;
+  text-decoration: none;
+}
+
+.checkbox
+{
+  line-height: 24px;
+  background-repeat: no-repeat;
+  background-position: 4px 4px;
+}
+
+.checkbox:hover
+{
+  background-color: #e0ebf0;
+}
+
+.checkbox a, .checkbox a:link, .checkbox a:visited, .checkbox a:hover, .checkbox a:active
+{
+  color: #000000;
+  text-decoration: none;
+}
+
+.checkbox_active
+{
+  background-image: url("http://www.phylogeny.fr/images/checkbox_active.png");
+}
+
+.checkbox_active_checked
+{
+  background-image: url("http://www.phylogeny.fr/images/checkbox_active_checked.png");
+}
+
+.checkbox_unchecked
+{
+  background-image: url("http://www.phylogeny.fr/images/checkbox.png");
+}
+
+.checkbox_checked
+{
+  background-image: url("http://www.phylogeny.fr/images/checkbox_checked.png");
+}
+
+.checkbox_disabled
+{
+  background-image: url("http://www.phylogeny.fr/images/checkbox_disabled.png");
+  color: #808080;
+}
+
+.checkbox_disabled_checked
+{
+  background-image: url("http://www.phylogeny.fr/images/checkbox_disabled_checked.png");
+  color: #808080;
+}
+
+.checkbox_disabled a, .checkbox_disabled a:link, .checkbox_disabled a:visited, .checkbox_disabled a:hover, .checkbox_disabled a:active,
+.checkbox_disabled_checked a, .checkbox_disabled_checked a:link, .checkbox_disabled_checked a:visited, .checkbox_disabled_checked a:hover, .checkbox_disabled_checked a:active
+{
+  color: #808080;
+  text-decoration: none;
+}
+
+.bordered
+{
+  display: block;
+  border-width: 1px;
+  border-style: solid;
+  border-top-color:#006699;
+  border-left-color:#006699;
+  border-right-color:#00334c;
+  border-bottom-color:#00334c;
+}
+
+.hidden
+{
+  display: none;
+}
+
+.not_printed
+{
+  display: none;
+}
+
+.enabled
+{
+  color: #000000;
+}
+
+.disabled
+{
+  color: #808080;
+}
+
+.error
+{
+  padding: 2px 4px 4px 4px;
+  color: #c00000;
+  background-color: #ffdddd;
+  line-height: 22px;
+  font-size: 14px;
+  font-family: "DejaVu Sans Mono", "Courrier New", Courrier, monospace;
+}
+
+.warning
+{
+  padding: 2px 4px 4px 4px;
+  color: #e04500;
+  background-color: #ffe0b0;
+  line-height: 22px;
+  font-size: 14px;
+  font-family: "DejaVu Sans Mono", "Courrier New", Courrier, monospace;
+}
+
+.notice
+{
+  padding: 2px 4px 4px 4px;
+  color: #008000;
+  background-color: #ddffdd;
+  line-height: 22px;
+  font-size: 14px;
+  font-family: "DejaVu Sans Mono", "Courrier New", Courrier, monospace;
+}
+
+.info
+{
+  color: #006699;
+}
+
+.example
+{
+  font-size: 10px;
+}
+
+.small
+{
+  font-size: 11px;
+}
+
+h2.small
+{
+  color: #00334c;
+  margin-top: 0px;
+  font-size: 16px;
+
+}
+
+.reduced
+{
+  padding-left: 14px;
+  background-image: url("http://www.phylogeny.fr/images/reduced_blue.png");
+  background-repeat: no-repeat;
+  background-position: 0px 3px;
+  color: #006699;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.expanded
+{
+  padding-left: 14px;
+  background-image: url("http://www.phylogeny.fr/images/expanded_blue.png");
+  background-repeat: no-repeat;
+  background-position: 0px 3px;
+  color: #006699;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.reduced .reduced_desc
+{
+  display: inline;
+}
+
+.expanded .reduced_desc
+{
+  display: none;
+}
+
+.reduced .expanded_desc
+{
+  display: none;
+}
+
+.expanded .expanded_desc
+{
+  display: inline;
+}
+
+.indent
+{
+  margin-left: 16px;
+}
+
+.bullet_p
+{
+  padding-left: 24px;
+  background-image: url("http://www.phylogeny.fr/images/bullet_blue.png");
+  background-repeat: no-repeat;
+  background-position: 0px 0px;
+  text-indent: 0px;
+}
+
+hr.separator
+{
+  height: 1px;
+  margin: 0px 16px 0px 16px;
+  background-color: transparent;
+  border-top: 1px dashed #808080;
+  text-indent: 0px;
+}
+
+
+.caption
+{
+  margin: 8px 4px 16px 0px;
+  color: #404040;
+  text-indent: 0px;
+  font-size: 12px;
+  font-family: "Times New Roman", Times, FreeSerif, serif;
+  font-style: italic;
+}
+
+.caption .index
+{
+  font-weight: bold;
+  font-style: normal;
+}
+
+.references
+{
+  margin: 40px 0px 0px 0px;
+  padding: 0px 4px 4px 4px;
+  background-color: #f0f0f0;
+}
+
+.references ol
+{
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 24px;
+  color: #202020;
+  text-align: left;
+  text-indent: 0px;
+  font-size: 11px;
+  font-family: "Times New Roman", Times, FreeSerif, serif;
+  list-style-type: decimal;
+}
+
+.references li
+{
+  margin: 0px 0px 4px 0px;
+  padding: 0px 0px 0px 0px;
+}
+
+.js_action
+{
+  color: #008000;
+}
+
+.with_tooltip
+{
+  color: #bb8000;
+}
+
+.with_tooltip .tooltip
+{
+  display: none;
+}
+
+.footer
+{
+  margin: 32px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  font-size: 10px;
+  font-family: "Times New Roman", Times, FreeSerif, serif;
+  text-decoration: none;
+}
+
+.subfooter, .subfooter a:visited, .subfooter a:hover
+{
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  color: #60a0c0;
+  font-size: 10px;
+  font-family: "Times New Roman", Times, FreeSerif, serif;
+  text-decoration: none;
+}
+
+
+table.results
+{
+  border-collapse: collapse;
+  border-color: #000000;
+  border-spacing: 0px 0px;
+  border: 0px;
+  caption-side: bottom;
+  background-color: #ffffff;
+}
+
+table.results thead th
+{
+  margin: 4px 4px 4px 4px;
+  padding: 4px 4px 4px 4px;
+  color: #000000;
+  border-top: 1px solid #000000;
+  border-bottom: 1px solid #000000;
+  border-left: 0px;
+  border-right: 0px;
+  text-align: center;
+  text-indent: 0px;
+  text-decoration: none;
+  font-size: 12px;
+  font-family: "Times New Roman", Times, FreeSerif, serif;
+  font-weight: bold;
+}
+
+table.results tfoot tr
+{
+  height: 4px;
+}
+
+table.results tfoot th
+{
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  color: #ffffff;
+  border-top: 1px solid #ffffff; /* Safari fix */
+  border-bottom: 1px solid #000000;
+  border-left: 0px;
+  border-right: 0px;
+  text-align: center;
+  text-indent: 0px;
+  text-decoration: none;
+  font-size: 1px;
+}
+
+table.results tbody tr:hover
+{
+  background-color: #f0f0f0;
+}
+
+table.results td
+{
+  border: 0px;
+  text-align: center;
+  text-indent: 0px;
+  text-decoration: none;
+  font-size: 12px;
+  font-family: "Times New Roman", Times, FreeSerif, serif;
+}
+
+
+table.config
+{
+  border-collapse: collapse;
+  border-color: #000000;
+  border-spacing: 0px 0px;
+  border: 0px;
+  caption-side: bottom;
+  background-color: #ffffff;
+}
+
+table.config *
+{
+  font-size: 11px !important;
+}
+
+table.config th
+{
+  border-bottom: 1px dashed #808080;
+}
+
+table.config th, table.config td
+{
+  padding: 8px 4px 0px 4px;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+}
+
+table.config tbody tr:hover
+{
+  background-color: #f0f0f0;
+}
+
+
+.wf_info
+{
+  display: block;
+  float: left;
+  clear: left;
+  width: 256px;
+  text-align: left;
+  text-indent: 0px;
+  text-decoration: none;
+  font-size: 12px;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+}
+
+.wf_info_title, .wf_info .wf_info_title
+{
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.wf_info_title, .wf_info .wf_info_title
+{
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.wf_info_label, .wf_info .wf_info_label
+{
+  font-style: italic;
+}
+
+.workflow
+{
+  position: relative;
+  left: -15%;
+  margin-left: 50%;
+  text-align: center;
+}
+
+.wf_stagebox
+{
+  padding: 4px 4px 4px 4px;
+  width: 256px;
+  border: 1px solid #000000;
+  color: #000000;
+  background-color: #e0e0e0;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+  font-size: 14px;
+  text-align: center;
+}
+
+.wf_stagebox .with_tooltip
+{
+  color: #202020;
+}
+
+.wf_down_arrow
+{
+  width: 256px;
+  padding: 4px 4px 4px 4px;
+  text-align: center;
+}
+
+.wf_sub_stage
+{
+  background-color: #f0f0f0;
+  color: #404040;
+  font-size: 13px;
+}
+
+.wf_header
+{
+  display: block;
+  margin-bottom: 16px;
+}
+
+.wf_title
+{
+  padding: 0px 4px 0px 4px;
+  width: 160px;
+  border-right: 1px solid #000000;
+  color: #005580;
+  text-align: center;
+  vertical-align: middle;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;;
+  font-size: 18px;
+}
+
+.wf_help
+{
+  width: 48px;
+  border-left: 1px solid #000000;
+  text-align: center;
+  vertical-align: middle;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;;
+  font-size: 12px;
+}
+
+.waiting_stage
+{
+  border: 1px solid #808080 !important;
+}
+
+.waiting_stage, .waiting_stage *.with_tooltip
+{
+  color: #808080 !important;
+  background-color: #f0f0f0 !important;
+}
+
+.active_stage
+{
+  border: 3px solid #006699 !important;
+}
+
+.done_stage
+{
+}
+
+.stop_stage
+{
+  border-width: 1px !important;
+  border-style: double !important;
+}
+
+.error_stage
+{
+  border: 2px solid #c00000 !important;
+}
+
+.warning_stage
+{
+  border: 1px solid #e04500 !important;
+}
+
+.miniworkflow
+{
+  padding-left: 8px;
+  height: 48px;
+}
+
+.miniworkflow > *
+{
+  float: left;
+  margin-bottom: 8px;
+}
+
+.miniworkflow .wf_stagebox
+{
+  float: left;
+  margin-bottom: 8px;
+  height: 32px;
+  width: 96px;
+  padding: 4px 4px 4px 4px;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+  font-size: 11px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.miniworkflow .wf_right_arrow
+{
+  float: left;
+  margin-bottom: 8px;
+  position: relative;
+  padding: 4px 2px 4px 2px;
+  top: 12px;
+}
+
+
+#nav_links
+{
+  clear: left;
+  margin: 0px 0px 8px 0px;
+  padding: 2px 0px 2px 0px;
+  border-top: 1px dotted #404040;
+  border-bottom: 1px dotted #404040;
+  color: #000000;
+  text-align: left;
+  text-indent: 0px;
+  font-family: Arial, Verdana, Helvetica, FreeSans, sans-serif;
+  font-size: 10px;
+}
+
+#nav_links a
+{
+  color: #00334c;
+}
+
+#nav_links a:hover
+{
+  color: #c00000;
+  text-decoration: none;
+}
+
+#nav_tabs
+{
+  border-bottom: 1px solid #404040;
+  margin: 0px;
+  padding-bottom: 19px;
+  padding-left: 8px;
+}
+
+#nav_tabs a:hover
+{
+  text-decoration: none !important;
+}
+
+#nav_tabs ul, #nav_tabs li
+{
+  display: inline;
+  list-style-type: none;
+  margin: 0px;
+  padding: 0px;
+  white-space: nowrap;
+}
+
+	
+#nav_tabs li
+{
+  background: #e0ebf0;
+  border: 1px solid #808080;
+  border-bottom: 0px;
+  color: #000000;
+  float: left;
+  font-size: 11px;
+  font-family: Helvetica, FreeSans, sans-serif;
+  font-weight: normal;
+  line-height: 14px;
+  margin-left: 3px;
+  margin-right: 3px;
+  padding: 2px 10px 2px 10px;
+  text-decoration: none;
+}
+
+#nav_tabs li.active_tab
+{
+  border-left: 1px solid #404040;
+  border-top: 1px solid #404040;
+  border-right: 1px solid #404040;
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #ffffff;
+}
+
+#nav_tabs li.disabled_tab
+{
+  background-color: #d0d0d0 !important;
+  color: #808080 !important;
+}
+
+.settings_subtab
+{
+  padding-right: 4px;
+}
+
+.results_subtab
+{
+  padding-left: 4px;
+  border-left: 1px solid #808080;
+}
+
+#page
+{
+  display: block;
+  position: relative;
+  margin: 10px auto 10px auto;
+  padding: 0px 0px 0px 0px;
+  width: 800px;
+  border: 1px solid #000000;
+  background-color: #ffffff;
+  text-align: left;
+}
+
+#page_header
+{
+  display: block;
+  position: relative;
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  width: 100%;
+  height: 128px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #000000;
+  text-align: left;
+}
+
+#logo_mab
+{
+  float: left;
+}
+
+#logo_igs
+{
+  float: right;
+}
+
+#page_content
+{
+  padding: 8px 8px 8px 16px;
+}
+
+
+#page_footer
+{
+  display: block;
+  position: relative;
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  width: 100%;
+  border-top: 1px solid #000000;
+  background-color: #ffffff;
+  text-align: left;
+}
+
+#logo_marseillenice
+{
+}
+
+#logo_cnrs
+{
+  float: left;
+}
+
+#logo_rng
+{
+}
+
+#logo_montpellierlr
+{
+}
+
+
+#menu
+{
+  display: none;
+  clear: right;
+}
+
+.doc_image
+{ 
+  display: none;
+}
+
+#w3c
+{
+  display: none;
+}

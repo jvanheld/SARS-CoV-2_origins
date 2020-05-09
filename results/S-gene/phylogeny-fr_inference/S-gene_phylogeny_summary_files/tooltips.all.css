@@ -1,0 +1,58 @@
+/**
+Phylogeny.fr CSS - Tooltips
+****************
+Version: 0.10.1
+Date:    18/06/2008
+Authors:
+         Alexis DEREEPER (IGS), alexis.dereeper@igs.cnrs-mrs.fr
+         Valentin GUIGNON (LIRMM), valentin.guignon@lirmm.fr
+
+Description:
+Used to enable tooltips.
+
+*/
+
+.with_tooltip
+{
+  color: #bb8000;
+  cursor: help;
+}
+
+.with_tooltip:link, .with_tooltip:visited
+{
+  visibility: visible;
+}
+
+.with_tooltip:hover
+{
+  color: #c00000;
+  cursor: help;
+}
+
+.with_tooltip .tooltip
+{
+  display: none;
+}
+
+.with_tooltip:link .tooltip, .with_tooltip:visited .tooltip
+{
+  visibility: visible;
+}
+
+.with_tooltip:hover .tooltip, .with_tooltip:active .tooltip, .with_tooltip:focus .tooltip, .tooltip_visible
+{
+  display: inline;
+  position: absolute;
+  z-index: 10000;
+  width: 256px;
+  margin: 16px 0px 0px -16px;
+  padding: 4px 4px 4px 4px;
+  background-color: #fffff0;
+  color: #000000;
+  border: 1px solid #000000;
+  text-align: left;
+  text-decoration: none;
+  line-height: normal;
+  font-size: 12px;
+  font-family: "Times New Roman", Times, FreeSerif, serif;
+}
