@@ -24,38 +24,56 @@ targets:
 	@echo "	run_phyml			generate species tree from aligned genomes with PhyML"
 	@echo "	all_genomes			Phylogeny inference for all genomes from Genbank"
 	@echo "	selected_genomes		Phylogeny inference for selected genomes from Genbank"
+	@echo "	merge_gisaid			merge genome sequences from Genbank and GISAID"
 	@echo "	selected-gisaid_genomes		Phylogeny inference for selected genomes from Genbank + GISAID"
 
 ################################################################
 ## List parameters
+GENOME_DIR=data/virus_genomes
+GENOME_PREFIX=coronavirus_selected_genomes
+GENOME_SEQ=${GENOME_DIR}/${GENOME_PREFIX}.fasta
+GISAID_DIR=${GENOME_DIR}/GISAID_genomes
+GENOME_TASKS=align_genomes_clustalw gblocks_clean run_phyml
 list_param:
-	@echo "Parameters for inter-genome similarity searches with blastn"
+	@echo
+	@echo "Generic parameters"
+	@echo "	GENOME_DIR		${GENOME_DIR}"
+	@echo "	GENOME_PREFIX		${GENOME_PREFIX}"
+	@echo "	GENOME_SEQ		${GENOME_SEQ}"
+	@echo "	GISAID_DIR		${GISAID_DIR}"
+	@echo "	GENOME_TASKS		${GENOME_TASKS}"
+	@echo
+	@echo "Similarity searches with blastn"
 	@echo "	DB_TAXON_NAME		${DB_TAXON_NAME}"
 	@echo "	DB_TAXON_DIR		${DB_TAXON_DIR}"
 	@echo "	DB_TAXON_DB		${DB_TAXON_DB}"
 	@echo "	DB_TAXON_SEQ		${DB_TAXON_SEQ}"
 	@echo
-	@echo "Parameters for multiple alignments of full genomes"
-	@echo "	GENOME_DIR		${GENOME_DIR}"
-	@echo "	GENOME_PREFIX		${GENOME_PREFIX}"
-	@echo "	GENOME_SEQ		${GENOME_SEQ}"
+	@echo "Multiple alignments"
 	@echo "	MUSCLE_DIR		${MUSCLE_DIR}"
 	@echo "	MUSCLE_PREFIX		${MUSCLE_PREFIX}"
+	@echo
 	@echo "	CLUSTALW_DIR		${CLUSTALW_DIR}"
 	@echo "	CLUSTALW_PREFIX		${CLUSTALW_PREFIX}"
+	@echo
 	@echo "	MALIGN_SOFT		${MALIGN_SOFT}"
 	@echo "	MALIGN_DIR		${MALIGN_DIR}"
 	@echo "	MALIGN_PEFIX		${MALIGN_PREFIX}"
+	@echo
+	@echo "PhyML parameters"
+	@echo "	PHYML_THEADS		${PHYML_THREADS}"
+	@echo "	PHYML_OPT		${PHYML_OPT}"
+	@echo
 
 
 ################################################################
 ## Download blast-formatted database of Betacoronavirus genomes from NCBI
 DB_TAXON_NAME=Betacoronavirus
-DB_TAXON_DIR=data/virus_genomes/${DB_TAXON_NAME}
+DB_TAXON_DIR=${GENOME_DIR€/${DB_TAXON_NAME}
 DB_TAXON_DB=${DB_TAXON_DIR}/${DB_TAXON_NAME}
 DB_TAXON_SEQ=${DB_TAXON_DIR}/${DB_TAXON_NAME}.fasta
 DOWNLOAD_NAME=Betacoronavirus
-DOWNLOAD_DIR=data/virus_genomes/${DOWNLOAD_NAME}
+DOWNLOAD_DIR=${GENOME_DIR€/${DOWNLOAD_NAME}
 DOWNLOAD_DB=${DOWNLOAD_DIR}/${DOWNLOAD_NAME}
 DOWNLOAD_SEQ=${DOWNLOAD_DIR}/${DOWNLOAD_NAME}.fasta
 download_db:
@@ -76,7 +94,6 @@ download_virus_db:
 
 ################################################################
 ## Format a viral genome for blast searches
-GENOME_DIR=data/virus_genomes
 DB_ORG=SARS-CoV-2
 DB_DIR=${GENOME_DIR}/${DB_ORG}/
 DB_SEQ=${DB_DIR}/${DB_ORG}_genome_seq.fasta
@@ -119,11 +136,6 @@ betacov_vs_hiv:
 hiv_vs_betacov:
 	@${MAKE} DB_ORG=Betacoronavirus DB_SEQ=${DB_TAXON_DB} QUERY_ORG=HIV genome_blast OUTFMT=6 BLAST_EXT=.tsv
 
-################################################################
-## Multiple alignments and phylogeny inference between ful genomes
-GENOME_DIR=data/virus_genomes/
-GENOME_PREFIX=coronavirus_selected_genomes
-GENOME_SEQ=${GENOME_DIR}/${GENOME_PREFIX}.fasta
 
 
 ################################################################
@@ -204,22 +216,25 @@ nj_tree:
 		-clustering=NJ 
 	@echo "	${MALIGN_PREFIX}.ph"
 
-################################################################
-## Convert sequences from clustalw format (aln extension) to phylip
-## format (phy extension).
-aln2phy:
-	@echo "Converting sequence from aln to phy"
-	seqret -auto -stdout \
-		-sequence ${MALIGN_PREFIX}.aln \
-		-snucleotide1 \
-		-sformat1 clustal \
-		-osformat2 phylip \
-		>  ${MALIGN_PREFIX}.phy
-	@echo "	${MALIGN_PREFIX}.phy"
+# ################################################################
+# ## Convert sequences from clustalw format (aln extension) to phylip
+# ## format (phy extension).
+# aln2phy:
+# 	@echo "Converting sequence from aln to phy"
+# 	seqret -auto -stdout \
+# 		-sequence ${MALIGN_PREFIX}.aln \
+# 		-snucleotide1 \
+# 		-sformat1 clustal \
+# 		-osformat2 phylip \
+# 		>  ${MALIGN_PREFIX}.phy
+# 	@echo "	${MALIGN_PREFIX}.phy"
 
 ################################################################
 ## Infer a phylogenetic tree of coronaviruses from their aligned
 ## genomes, using maximum-likelihood approach (phyml tool).
+PHYML_THREADS=4
+PHYML_BOOTSTRAP=10
+PHYML_OPT=--datatype nt --bootstrap ${PHYML_BOOTSTRAP} --model HKY85
 run_phyml:
 	@echo "Shortening sequence names"
 	@perl -pe 's|^>(.{12}).*|>$$1|' ${GBLOCKS_PREFIX} > ${GBLOCKS_PREFIX}_shortnames
@@ -235,38 +250,40 @@ run_phyml:
 	@echo "	${MALIGN_PREFIX}_gblocks.phy"
 	@echo
 	@echo "Inferring phylogeny with phyml"
-	phyml --input ${MALIGN_PREFIX}_gblocks.phy --datatype nt  --bootstrap 100 --model HKY85
-
-back:
-	seqret -auto -stdout \
-		-sequence ${MALIGN_PREFIX}_gblocks.phy \
-		-sformat1 phylip \
-		-snucleotide1 \
-		-osformat2 fasta \
-		>  ${MALIGN_PREFIX}_gblocks.fasta
-	@echo "	${MALIGN_PREFIX}_gblocks.phy"
-
+	time mpirun -n ${PHYML_THREADS} phyml-mpi --input ${MALIGN_PREFIX}_gblocks.phy ${PHYML_OPT}
 
 ################################################################
 ## Phylogey inference for all the genomes downloaded from Genbank.
 all_genomes:
-	@${MAKE} align_genomes_clustal \
-		GENOME_DIR=data/virus_genomes/ \
+	@${MAKE} ${GENOME_TASKS} \
+		GENOME_DIR=${GENOME_DIR}/ \
 		GENOME_PREFIX=coronavirus_all_genomes \
 
 ################################################################
 ## Phylogeny inference for selected genomes from Genbank
 selected_genomes:
-	@${MAKE} align_genomes_clustalw\
-		GENOME_DIR=data/virus_genomes/ \
+	@${MAKE} ${GENOME_TASKS}\
+		GENOME_DIR=${GENOME_DIR}/ \
 		GENOME_PREFIX=coronavirus_selected_genomes
 
 ################################################################
 ## Phylogeny inference for selected genomes from Genbank + a few
 ## genomes imported from GISAID (login required to download them,
 ## cannot be redistributed in the github).
+merge_gisaid:
+	@echo
+	@echo "Merging Genbank and GISAID genomes"
+	@cat ${GENOME_DIR}/coronavirus_selected_genomes.fasta \
+		${GISAID_DIR}/coronavirus-genomes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
+		> ${GISAID_DIR}/coronavirus_selected-plus-GISAID_genomes.fasta
+	@echo "	${GISAID_DIR}/coronavirus_selected-plus-GISAID_genomes.fasta"
+	@cat ${GENOME_DIR}/coronavirus_all_genomes.fasta \
+		${GISAID_DIR}/coronavirus-genomes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
+		> ${GISAID_DIR}/coronavirus_all-plus-GISAID_genomes.fasta
+	@echo "	${GISAID_DIR}/coronavirus_all-plus-GISAID_genomes.fasta"
+
 selected-gisaid_genomes:
-	@${MAKE} align_genomes_clustalw \
-		GENOME_DIR=data/virus_genomes/sequences_from_GISAID/ \
+	@${MAKE} ${GENOME_TASKS} \
+		GENOME_DIR=${GISAID_DIR}/ \
 		GENOME_PREFIX=coronavirus_selected-plus-GISAID_genomes
 
