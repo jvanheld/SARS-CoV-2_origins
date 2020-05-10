@@ -1,0 +1,141 @@
+#NEXUS
+begin taxa;
+	dimensions ntax=39;
+	taxlabels
+	Bat-R_SRBD[&!color=#999999]
+	Bat_BM48-31[&!color=#999999]
+	Bat_BtKY72[&!color=#999999]
+	'Bat_Cp/Yunnan2011'[&!color=#999999]
+	Bat_HKU3-12[&!color=#999999]
+	Bat_HKU3-8[&!color=#999999]
+	Bat_JL2012[&!color=#999999]
+	Bat_LYRa11[&!color=#999999]
+	Bat_RaTG13[&!color=#000000]
+	'Bat_Rl-BetaCoV/SC2018'[&!color=#999999]
+	'Bat_Rp/Shaanxi2011'[&!color=#999999]
+	'Bat_Rp3/2004'[&!color=#999999]
+	'Bat_Rs-BetaCoV/GX2013'[&!color=#999999]
+	'Bat_Rs-BetaCoV/YN2013'[&!color=#999999]
+	'Bat_Rs-BetaCoV/YN2018B'[&!color=#999999]
+	'Bat_Rs-BetaCoV/YN2018C'[&!color=#999999]
+	'Bat_Rs_672/2006'[&!color=#999999]
+	'Bat_SARS-CoV-Rm1/2004'[&!color=#999999]
+	Bat_SL-CoVZC45[&!color=#000000]
+	Bat_SL-CoVZXC21[&!color=#000000]
+	Bat_SZ3[&!color=#999999]
+	Bat_YNLF_31C[&!color=#999999]
+	Bat_Yu-RmYN02_2019[&!color=#000000]
+	Cam_MERS[&!color=#cc6600]
+	'Civet_SARS-CoV_007/2004'[&!color=#3333ff]
+	Hum_229E[&!color=#ff0000]
+	Hum_NL63[&!color=#ff0000]
+	Hum_OC43[&!color=#ff0000]
+	Hum_SARS-CoV-2_Whu1[&!color=#ff0000]
+	Hum_SARS-CoV_Frankfurt_1[&!color=#ff0000]
+	Hum_TGEV[&!color=#ff0000]
+	'Hum_h-MERS_KOR/CNUH_SNU/172_06'[&!color=#ff0000]
+	Pig_PRCV[&!color=#ff00ff]
+	Pig_SADS[&!color=#ff00ff]
+	'Png_GX-P1E_2017/2020'[&!color=#006600]
+	'Png_GX-P2V_2018/2020'[&!color=#006600]
+	Png_Gu-P2S_2019[&!color=#006600]
+	Png_Gu1_2019[&!color=#006600]
+	Png_MP789[&!color=#006600]
+;
+end;
+
+begin trees;
+	tree tree_1 = [&R] ((((((((((Cam_MERS[&!color=#cc6600,!rotate=true]:0.00131,'Hum_h-MERS_KOR/CNUH_SNU/172_06'[&!color=#cc6600,!rotate=true]:0.00167)[&!color=#cc6600,!hilight={2,0.07228999999999997,#ffffcc},!rotate=true]:0.24573,((((Hum_NL63[&!color=#ff0000,!rotate=true]:0.16283,Hum_229E[&!color=#ff0000,!rotate=true]:0.1721)[&!color=#ff0000,!rotate=true]:0.01873,Pig_SADS[&!color=#ff00ff,!rotate=true]:0.19031)[&!color=#ff0000,!rotate=true]:0.02515,(Hum_TGEV[&!color=#ff0000,!rotate=true]:0.02167,Pig_PRCV[&!color=#ff00ff,!rotate=true]:0.01785)[&!color=#ff0000,!rotate=true]:0.19637)[&!color=#ff0000,!rotate=true]:0.07649,Hum_OC43[&!color=#ff0000,!rotate=true]:0.26549)[&!color=#ff0000,!rotate=true]:0.02516)[&!color=#999999,!rotate=false]:0.1195,(Bat_BtKY72[&!color=#999999,!rotate=true]:0.09913,Bat_BM48-31[&!color=#999999,!rotate=true]:0.09233)[&!color=#999999,!rotate=true]:0.01518)[&!color=#999999,!rotate=true]:0.0121,((Bat_SL-CoVZC45[&!color=#000000,!rotate=true]:0.01255,Bat_SL-CoVZXC21[&!color=#000000,!rotate=true]:0.01274)[&!color=#000000,!rotate=true]:0.05173,((((Bat_RaTG13[&!color=#006600,!rotate=true]:0.01979,Hum_SARS-CoV-2_Whu1[&!color=#ff0000,!rotate=true]:0.01842)[&!color=#006600,!rotate=true]:0.01097,Bat_Yu-RmYN02_2019[&!color=#006600,!rotate=true]:0.03332)[&!color=#006600,!rotate=true,!hilight={3,0.19450999999999993,#ccccff}]:0.02138,((Png_Gu1_2019[&!color=#006600,!rotate=true]:0.004,Png_MP789[&!color=#006600,!rotate=true]:4.7E-4)[&!color=#006600,!rotate=true]:0.00865,Png_Gu-P2S_2019[&!color=#006600,!rotate=true]:-0.00768)[&!color=#006600,!rotate=true]:0.04255)[&!color=#006600,!rotate=true]:0.02042,('Png_GX-P1E_2017/2020'[&!color=#006600,!rotate=true]:6.5E-4,'Png_GX-P2V_2018/2020'[&!color=#006600,!rotate=true]:6.2E-4)[&!color=#006600,!rotate=true]:0.07839)[&!color=#006600,!hilight={8,0.19058999999999995,#ccccff},!rotate=true]:0.00851)[&!color=#000000,!rotate=true,!hilight={10,0.19058999999999995,#ccccff}]:0.02945)[&!color=#999999,!rotate=true]:0.03997,((((Bat_HKU3-12[&!color=#999999,!rotate=true]:0.0056,Bat-R_SRBD[&!color=#999999,!rotate=true]:0.00551)[&!color=#999999,!rotate=true]:0.00673,Bat_HKU3-8[&!color=#999999,!rotate=true]:0.01285)[&!color=#999999,!rotate=true]:0.03757,'Bat_SARS-CoV-Rm1/2004'[&!color=#999999,!rotate=true]:0.04663)[&!color=#999999,!rotate=true]:0.00304,('Bat_Rp/Shaanxi2011'[&!color=#999999,!rotate=true]:0.04273,Bat_JL2012[&!color=#999999,!rotate=true]:0.05505)[&!color=#999999,!rotate=true]:0.00621)[&!color=#999999,!rotate=true]:0.00261)[&!color=#999999,!rotate=true]:0.00991,(Bat_LYRa11[&!color=#999999,!rotate=true]:0.0423,'Bat_Cp/Yunnan2011'[&!color=#999999,!rotate=true]:0.03188)[&!color=#999999,!rotate=true]:0.01182)[&!color=#999999,!rotate=true]:0.00416,'Bat_Rl-BetaCoV/SC2018'[&!color=#999999,!rotate=true]:0.0473)[&!color=#999999,!rotate=true]:0.00703,('Bat_Rs-BetaCoV/GX2013'[&!color=#999999,!rotate=true]:0.03223,'Bat_Rp3/2004'[&!color=#999999,!rotate=true]:0.02527)[&!color=#999999,!rotate=true]:0.00571)[&!color=#999999,!rotate=true]:0.0022,Bat_YNLF_31C[&!color=#999999,!rotate=true]:0.03743)[&!color=#999999,!rotate=true]:0.00186,('Bat_Rs-BetaCoV/YN2013'[&!color=#999999,!rotate=true]:0.02329,('Bat_Rs-BetaCoV/YN2018C'[&!color=#999999,!rotate=true]:0.013,'Bat_Rs_672/2006'[&!color=#999999,!rotate=true]:0.01801)[&!color=#999999,!rotate=true]:0.00415)[&!color=#999999,!rotate=true]:0.0032,(('Bat_Rs-BetaCoV/YN2018B'[&!color=#999999,!rotate=true]:0.0132,Bat_SZ3[&!color=#999999,!rotate=true]:0.01433)[&!color=#999999,!rotate=true]:0.00381,('Civet_SARS-CoV_007/2004'[&!color=#3333ff,!rotate=true]:0.00214,Hum_SARS-CoV_Frankfurt_1[&!color=#ff0000,!rotate=true]:8.4E-4)[&!color=#3333ff,!hilight={2,0.2058099999999999,#ccffcc},!rotate=true]:0.02321)[&!color=#999999,!rotate=true]:0.0113);
+end;
+
+begin figtree;
+	set appearance.backgroundColorAttribute="Default";
+	set appearance.backgroundColour=#ffffff;
+	set appearance.branchColorAttribute="User selection";
+	set appearance.branchColorGradient=false;
+	set appearance.branchLineWidth=3.0;
+	set appearance.branchMinLineWidth=0.0;
+	set appearance.branchWidthAttribute="Fixed";
+	set appearance.foregroundColour=#000000;
+	set appearance.hilightingGradient=false;
+	set appearance.selectionColour=#2d3680;
+	set branchLabels.colorAttribute="User selection";
+	set branchLabels.displayAttribute="Branch times";
+	set branchLabels.fontName=".SF NS Text";
+	set branchLabels.fontSize=11;
+	set branchLabels.fontStyle=0;
+	set branchLabels.isShown=false;
+	set branchLabels.significantDigits=2;
+	set layout.expansion=0;
+	set layout.layoutType="RECTILINEAR";
+	set layout.zoom=0;
+	set legend.attribute=null;
+	set legend.fontSize=10.0;
+	set legend.isShown=false;
+	set legend.significantDigits=4;
+	set nodeBars.barWidth=4.0;
+	set nodeBars.displayAttribute=null;
+	set nodeBars.isShown=false;
+	set nodeLabels.colorAttribute="User selection";
+	set nodeLabels.displayAttribute="Node ages";
+	set nodeLabels.fontName="Arial";
+	set nodeLabels.fontSize=14;
+	set nodeLabels.fontStyle=0;
+	set nodeLabels.isShown=false;
+	set nodeLabels.significantDigits=4;
+	set nodeShapeExternal.colourAttribute="User selection";
+	set nodeShapeExternal.isShown=false;
+	set nodeShapeExternal.minSize=10.0;
+	set nodeShapeExternal.scaleType=Width;
+	set nodeShapeExternal.shapeType=Circle;
+	set nodeShapeExternal.size=4.0;
+	set nodeShapeExternal.sizeAttribute="Fixed";
+	set nodeShapeInternal.colourAttribute="User selection";
+	set nodeShapeInternal.isShown=false;
+	set nodeShapeInternal.minSize=10.0;
+	set nodeShapeInternal.scaleType=Width;
+	set nodeShapeInternal.shapeType=Circle;
+	set nodeShapeInternal.size=4.0;
+	set nodeShapeInternal.sizeAttribute="Fixed";
+	set polarLayout.alignTipLabels=false;
+	set polarLayout.angularRange=0;
+	set polarLayout.rootAngle=0;
+	set polarLayout.rootLength=100;
+	set polarLayout.showRoot=true;
+	set radialLayout.spread=0.0;
+	set rectilinearLayout.alignTipLabels=false;
+	set rectilinearLayout.curvature=0;
+	set rectilinearLayout.rootLength=1220;
+	set scale.offsetAge=0.0;
+	set scale.rootAge=1.0;
+	set scale.scaleFactor=1.0;
+	set scale.scaleRoot=false;
+	set scaleAxis.automaticScale=true;
+	set scaleAxis.fontSize=8.0;
+	set scaleAxis.isShown=false;
+	set scaleAxis.lineWidth=1.0;
+	set scaleAxis.majorTicks=1.0;
+	set scaleAxis.minorTicks=0.5;
+	set scaleAxis.origin=0.0;
+	set scaleAxis.reverseAxis=false;
+	set scaleAxis.showGrid=true;
+	set scaleBar.automaticScale=true;
+	set scaleBar.fontSize=11.0;
+	set scaleBar.isShown=true;
+	set scaleBar.lineWidth=1.0;
+	set scaleBar.scaleRange=0.0;
+	set tipLabels.colorAttribute="User selection";
+	set tipLabels.displayAttribute="Names";
+	set tipLabels.fontName="Arial";
+	set tipLabels.fontSize=14;
+	set tipLabels.fontStyle=0;
+	set tipLabels.isShown=true;
+	set tipLabels.significantDigits=2;
+	set trees.order=false;
+	set trees.orderType="increasing";
+	set trees.rooting=true;
+	set trees.rootingType="User Selection";
+	set trees.transform=false;
+	set trees.transformType="cladogram";
+end;
+
