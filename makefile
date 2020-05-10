@@ -1,1 +1,1 @@
-scripts/makefiles/03_protein-alignments.mk
+scripts/makefiles/02_genome-blast.mk
