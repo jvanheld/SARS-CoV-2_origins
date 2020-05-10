@@ -12,6 +12,7 @@ dependencies:
   ## Tools
   - bioconda::muscle    # iterative multiple sequence alignment
   - bioconda::clustalw  # progressive multiple sequence alignment
+  - bioconda::gblocks   # to clean multiple alignments - suppress gap positions - before phylogeny inference
   - bioconda::blast     # similarity searches bewteen sequences
   - bioconda::emboss    # classical sequence analysis tools, used here for sequence shuffling
   - bioconda::cd-hit    # to generate non-redundant protein sequence sets
