@@ -112,8 +112,21 @@ par.ori <- par(no.readonly = TRUE)
 
 #### Define directories and files ####
 dir <- list(main = '..')
-dir$genomes <- file.path(dir$main, "data/virus_genomes/")
 dir$R <- file.path(dir$main, "scripts/R")
+
+## Input files
+infiles <- list()
+
+## Genome dir and files
+dir$genomes <- file.path(dir$main, "data/virus_genomes/")
+# infiles$genomes <- file.path(dir$genomes, "coronavirus_selected_genomes.fasta")
+
+## Genome sequences
+infiles$genomes <- file.path(dir$genomes, "GISAID_genomes", "coronavirus_selected-plus-GISAID_genomes.fasta")
+if (!file.exists(infiles$genomes)) {
+  stop("Genome sequence file is missing", "\n", infiles$genomes)
+}
+
 
 ## Output tables
 # di$output <- file.path(dir.main, "")
@@ -124,22 +137,27 @@ source(file.path(dir$R, "align_n_to_one.R"))
 source(file.path(dir$R, "plot_pip_profiles.R"))
 
 ## Reference genome
-refPattern <- "Human_SARS-CoV-2_Whu1"
+refPattern <- "Hum_SARS-CoV-2_Whu1"
 # refPattern <- "SARS-CoV-2_BetaCoV/Wuhan/IPBCAMS-WH-01/2019"
 refSpikeLimits <- c(21563, 25384) ## Coordinates of the S gene in the reference genome (coding for the spike protein)
 
 ## Query genomes
-queryPatterns <- c("SARS-CoV-2_WIV04",
-                   "Guangdong/P1L",
-                   # "SARS-CoV-2_BetaCoV/Wuhan/IPBCAMS-WH-01/2019",
-                   #                   "SARS-CoV-2_Whu1",
-                   "Pangolin_PCoV_GX-P5L", 
-                   "Bat_RaTG13", 
-                   "Bat_bat-SL-CoVZC45",
-                   "Bat_bat-SL-CoVZXC21",
-                   "Human_SARS-CoV_Frankfurt_1",
-                   "Civet_SARS-CoV_007/2004",
-                   "Camel_MERS")
+queryPatterns <- c(
+  "GX-P1E_2017/2020", 
+  "Bat_RaTG13", 
+  "Bat_SL-CoVZC45",
+  "Bat_SL-CoVZXC21",
+  "Hum_SARS-CoV_Frankfurt_1"
+)
+
+#### Add GISAID IDs to the query pattern ####
+## Note that GISAI genomes are be submitted to the github repo because they cannot be redistributed
+queryPatterns <- append(queryPatterns, 
+                        c("Bat_Yu-RmYN02_2019",
+                          "Png_Gu1_2019"
+                          ))
+
+message("Number of query genomes: ", length(queryPatterns))
 
 ```
 
@@ -148,9 +166,10 @@ queryPatterns <- c("SARS-CoV-2_WIV04",
 ```{r load_sequences}
 
 #### Load genome sequences ####
-infiles <- list()
-infiles$genomes <- file.path(dir$genomes, "coronavirus_selected_genomes.fasta")
 genomes <- readDNAStringSet(filepath = infiles$genome, format = "fasta")
+genomeNames <- names(genomes)
+nbGenomes <- length(genomeNames)
+message("Loaded ", nbGenomes, " genomes from file ", infiles$genomes)
 
 ## Shorten sequence names by suppressing the fasta comment (after the space)
 names(genomes) <- sub(pattern = " .*", replacement = "", x = names(genomes), perl = TRUE)
@@ -174,6 +193,13 @@ nbQueryGenomes <- length(queryGenomeNames)
 
 if (nbQueryGenomes == 0) {
   stop("Could not identify any query genome with query pattern\n", queryRegExp)
+}
+
+if (length(queryPatterns) != length(queryGenomeNames)) {
+  foundPatterns <- grep(pattern = queryRegExp, x = queryGenomeNames, value = TRUE)
+  missingPatterns <- setdiff(queryPatterns, queryGenomeNames)
+  message("\t", length(missingGenomes), " Missing : ", paste(sep = ", ", missingPatterns))
+  stop("Missing genomes")
 }
 
 
@@ -218,10 +244,11 @@ kable(genomesNto1$stats[order(genomesNto1$stats$score, decreasing = TRUE), ],
 
 ## PIP profile of full genome N-to-1 alignments
 plotPIPprofiles(alignments = genomesNto1$alignments, 
-                windowSize = 500, 
+                windowSize = 800, 
                 legend = paste0(names(genomesNto1$alignments), " (", round(digits = 2, genomesNto1$stats$pid), "%)"),
-                main = paste0("Percent Identical Positions - Full genome", "\nRef: ", refGenomeName),
+                main = paste0("Full genome PIP profile", "\nRef: ", refGenomeName),
                 legendMargin = 0, legendCorner = "bottom", legendCex = 0.7, ylim = c(40,100))
+
 
 ```
 
@@ -258,7 +285,7 @@ refSpike <- subseq(genomes[refGenomeName], start = refSpikeLimits[1], end = refS
 
 spikesNto1 <- alignNtoOne(refSequence = refSpike, querySequences = queryGenomes, type = "global-local")
 
-kable(spikesNto1$stats[order(spikesNto1$stat$score, decreasing = TRUE),], 
+  kable(spikesNto1$stats[order(spikesNto1$stat$score, decreasing = TRUE),], 
       caption = "N-to-one alignment of S genes")
 
 ```
@@ -271,7 +298,7 @@ kable(spikesNto1$stats[order(spikesNto1$stat$score, decreasing = TRUE),],
 plotPIPprofiles(alignments = spikesNto1$alignments, 
                 windowSize = 200, 
                 legend = paste0(names(spikesNto1$alignments), " (", round(digits = 2, spikesNto1$stats$pid), "%)"),
-                main = paste0("Percent Identical Positions - S gene", "\nRef: ", refGenomeName),
+                main = paste0("S gene - PIP profile", "\nRef: ", refGenomeName),
                 legendMargin = 0, legendCorner = "bottomright", legendCex = 0.8, ylim = c(30, 100))
 
 ```
