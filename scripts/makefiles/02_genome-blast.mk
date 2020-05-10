@@ -8,6 +8,7 @@ MAKE=make -f ${MAKEFILE}
 ## List targets
 targets:
 	@echo "Targets:"
+	@echo "	list_param			list parameters"
 	@echo "	download_betacov_db		download BLAST-formated Betacoronavirus genomes"
 	@echo "	download_virus_db		download BLAST-formated virus reference genomes"
 	@echo "	blastdb				format a viral genome for BLAST searches"
@@ -16,17 +17,43 @@ targets:
 	@echo "	hiv_vs_cov2			search SARS-CoV-2 genome with HIV genome as query"
 	@echo "	betacov_vs_hiv			search HIV virus for matches against all Betacoronavirus genomes"
 	@echo "	hiv_vs_betacov			search Betacoronavirus genomes with HIV genome as query"
-	@echo "	align_ref_genomes_muscle	multiple alignment between reference genomes with muscle"
-	@echo "	align_ref_genomes_clustalw	multiple alignment between reference genomes with clustalw"
-	@echo "	genome_tree			generate a species tree from the aligned genomes with clustalw NJ"
+	@echo "	align_genomes_muscle		multiple alignment between reference genomes with muscle"
+	@echo "	align_genomes_clustalw		multiple alignment between reference genomes with clustalw"
+	@echo "	gblocks_clean			clearn the multiple alignments with gblocks"
+	@echo "	nj_tree				generate a species tree from the aligned genomes with clustalw NJ"
+	@echo "	run_phyml			generate species tree from aligned genomes with PhyML"
+	@echo "	all_genomes			Phylogeny inference for all genomes from Genbank"
+	@echo "	selected_genomes		Phylogeny inference for selected genomes from Genbank"
+	@echo "	selected-gisaid_genomes		Phylogeny inference for selected genomes from Genbank + GISAID"
+
+################################################################
+## List parameters
+list_param:
+	@echo "Parameters for inter-genome similarity searches with blastn"
+	@echo "	DB_TAXON_NAME		${DB_TAXON_NAME}"
+	@echo "	DB_TAXON_DIR		${DB_TAXON_DIR}"
+	@echo "	DB_TAXON_DB		${DB_TAXON_DB}"
+	@echo "	DB_TAXON_SEQ		${DB_TAXON_SEQ}"
+	@echo
+	@echo "Parameters for multiple alignments of full genomes"
+	@echo "	GENOME_DIR		${GENOME_DIR}"
+	@echo "	GENOME_PREFIX		${GENOME_PREFIX}"
+	@echo "	GENOME_SEQ		${GENOME_SEQ}"
+	@echo "	MUSCLE_DIR		${MUSCLE_DIR}"
+	@echo "	MUSCLE_PREFIX		${MUSCLE_PREFIX}"
+	@echo "	CLUSTALW_DIR		${CLUSTALW_DIR}"
+	@echo "	CLUSTALW_PREFIX		${CLUSTALW_PREFIX}"
+	@echo "	MALIGN_SOFT		${MALIGN_SOFT}"
+	@echo "	MALIGN_DIR		${MALIGN_DIR}"
+	@echo "	MALIGN_PEFIX		${MALIGN_PREFIX}"
 
 
 ################################################################
 ## Download blast-formatted database of Betacoronavirus genomes from NCBI
-BETACOV_NAME=Betacoronavirus
-BETACOV_DIR=data/virus_genomes/${BETACOV_NAME}
-BETACOV_DB=${BETACOV_DIR}/${BETACOV_NAME}
-BETACOV_SEQ=${BETACOV_DIR}/${BETACOV_NAME}.fasta
+DB_TAXON_NAME=Betacoronavirus
+DB_TAXON_DIR=data/virus_genomes/${DB_TAXON_NAME}
+DB_TAXON_DB=${DB_TAXON_DIR}/${DB_TAXON_NAME}
+DB_TAXON_SEQ=${DB_TAXON_DIR}/${DB_TAXON_NAME}.fasta
 DOWNLOAD_NAME=Betacoronavirus
 DOWNLOAD_DIR=data/virus_genomes/${DOWNLOAD_NAME}
 DOWNLOAD_DB=${DOWNLOAD_DIR}/${DOWNLOAD_NAME}
@@ -87,32 +114,34 @@ hiv_vs_cov2:
 	@${MAKE} DB_ORG=SARS-CoV-2 QUERY_ORG=HIV blastdb genome_blast
 
 betacov_vs_hiv:
-	@${MAKE} QUERY_ORG=Betacoronavirus QUERY_SEQ=${BETACOV_SEQ} DB_ORG=HIV genome_blast OUTFMT=6 BLAST_EXT=.tsv
+	@${MAKE} QUERY_ORG=Betacoronavirus QUERY_SEQ=${DB_TAXON_SEQ} DB_ORG=HIV genome_blast OUTFMT=6 BLAST_EXT=.tsv
 
 hiv_vs_betacov:
-	@${MAKE} DB_ORG=Betacoronavirus DB_SEQ=${BETACOV_DB} QUERY_ORG=HIV genome_blast OUTFMT=6 BLAST_EXT=.tsv
+	@${MAKE} DB_ORG=Betacoronavirus DB_SEQ=${DB_TAXON_DB} QUERY_ORG=HIV genome_blast OUTFMT=6 BLAST_EXT=.tsv
+
+################################################################
+## Multiple alignments and phylogeny inference between ful genomes
+GENOME_DIR=data/virus_genomes/
+GENOME_PREFIX=coronavirus_selected_genomes
+GENOME_SEQ=${GENOME_DIR}/${GENOME_PREFIX}.fasta
 
 
 ################################################################
-## Align reference genomes
-DATA_DIR=data/spike_proteins
-REF_GENOMES_DIR=data/virus_genomes/
-REF_GENOMES_PREFIX=coronavirus_selected_genomes
-REF_GENOMES_SEQ=${REF_GENOMES_DIR}/${REF_GENOMES_PREFIX}.fasta
-MUSCLE_DIR=results/ref_genomes/muscle_alignments/
-MUSCLE_PREFIX=${MUSCLE_DIR}/${REF_GENOMES_PREFIX}_aligned_muscle
+## Align reference genomes with MUSCLE
+MUSCLE_DIR=results/genome_phylogeny/muscle_alignments/
+MUSCLE_PREFIX=${MUSCLE_DIR}/${GENOME_PREFIX}_aligned_muscle
 MUSCLE_FORMAT=clw
 MUSCLE_EXT=aln
 MUSCLE_LOG=${MUSCLE_PREFIX}_${MUSCLE_FORMAT}_log.txt
-MUSCLE_MAXHOURS=1
+MUSCLE_MAXHOURS=3
 MUSCLE_OPT=-maxhours ${MUSCLE_MAXHOURS}
 MUSCLE_LOG=${MUSCLE_PREFIX}_${MUSCLE_FORMAT}_log.txt
-align_ref_genomes_muscle:
+align_genomes_muscle: list_param
 	@echo "Aligning reference genomes wih muscle"
-	@echo "	REF_GENOMES_SEQ	${REF_GENOMES_SEQ}"
+	@echo "	GENOME_SEQ	${GENOME_SEQ}"
 	@echo "	MUSCLE_DIR	${MUSCLE_DIR}"
 	@mkdir -p ${MUSCLE_DIR}
-	time muscle -in ${REF_GENOMES_SEQ} -${MUSCLE_FORMAT} ${MUSCLE_OPT} \
+	time muscle -in ${GENOME_SEQ} -${MUSCLE_FORMAT} ${MUSCLE_OPT} \
 		-log ${MUSCLE_LOG} \
 		-out ${MUSCLE_PREFIX}.${MUSCLE_EXT}
 	@echo "	${MUSCLE_PREFIX}.${MUSCLE_EXT}"
@@ -120,34 +149,60 @@ align_ref_genomes_muscle:
 
 ################################################################
 ## Align reference genomes with clustalw
-CLUSTALW_DIR=results/ref_genomes/clustalw_alignments/
-CLUSTALW_PREFIX=${CLUSTALW_DIR}/${REF_GENOMES_PREFIX}_clustalw
-align_ref_genomes_clustalw:
+CLUSTALW_DIR=results/genome_phylogeny/clustalw_alignments/
+CLUSTALW_PREFIX=${CLUSTALW_DIR}/${GENOME_PREFIX}_clustalw
+align_genomes_clustalw: list_param
 	@echo "Aligning reference genomes wih clustalw"
-	@echo "	REF_GENOMES_SEQ	${REF_GENOMES_SEQ}"
+	@echo "	GENOME_SEQ	${GENOME_SEQ}"
 	@echo "	CLUSTALW_DIR	${CLUSTALW_DIR}"
 	@mkdir -p ${CLUSTALW_DIR}
-	time clustalw -infile=${REF_GENOMES_SEQ} \
+	time clustalw -infile=${GENOME_SEQ} \
 		-align -type=dna -quicktree \
 		-outfile=${CLUSTALW_PREFIX}.aln
 	@echo "	${CLUSTALW_PREFIX}.aln"
-	@${MAKE} genome_tree
+	@echo
 	@echo "Converting alignment to fasta format"
-	seqret -sequence ${CLUSTALW_PREFIX}.aln -outseq ${CLUSTALW_PREFIX}.fasta
-	@echo ${CLUSTALW_PREFIX}.fasta
+	seqret -sequence ${CLUSTALW_PREFIX}.aln -sformat aln -osformat fasta -outseq ${CLUSTALW_PREFIX}.fasta
+	@echo "	${CLUSTALW_PREFIX}.fasta"
+	@echo "Converting alignment to NBRF/PIR format"
+	seqret -sequence ${CLUSTALW_PREFIX}.aln -sformat aln -osformat pir -outseq ${CLUSTALW_PREFIX}.pir
+	@echo "	${CLUSTALW_PREFIX}.pir"
+	@echo
+	@${MAKE} nj_tree
+
+################################################################
+## Clean the multiple alignments with gblocks
+MALIGN_SOFT=clustalw
+MALIGN_DIR=${CLUSTALW_DIR}
+MALIGN_PREFIX=${CLUSTALW_PREFIX}
+GBLOCKS_OPT=-t=d -b3=8 -b4=10 -g -q -boum
+GBLOCKS_PREFIX=${MALIGN_PREFIX}.nbrf-gb
+GBLOCKS_LOG=${GBLOCKS_PREFIX}_logs.txt
+gblocks_clean: list_param
+	@echo
+	@echo "Cleaning ${MALIGN_SOFT} alignments with gblocks"
+	@echo ""
+	${MAKE} -i _gblocks_clean 2> /dev/null
+	@echo "	GBLOCKS_PREFIX	${GBLOCKS_PREFIX}"
+	@echo "	GBLOCKS_LOG	${GBLOCKS_LOG}"
+	@echo
+it:
+_gblocks_clean:
+	gblocks ${MALIGN_PREFIX}.nbrf ${GBLOCKS_OPT} >& ${GBLOCKS_LOG}
+
 
 ################################################################
 ## Generate a species tree from the aligned genomes
-genome_tree:
-	@echo "Generating species tree frm aligned genomes with Neighbour-Joining method"
+nj_tree:
+	@echo
+	@echo "Generating species tree from aligned genomes with Neighbour-Joining method"
 	time clustalw -tree \
-		-infile=${CLUSTALW_PREFIX}.aln -type=dna \
+		-infile=${MALIGN_PREFIX}.aln -type=dna \
 		-clustering=NJ
 	time clustalw -bootstrap=100 \
-		-infile=${CLUSTALW_PREFIX}.aln -type=dna \
+		-infile=${MALIGN_PREFIX}.aln -type=dna \
 		-clustering=NJ 
-	@echo "	${CLUSTALW_PREFIX}.ph"
-
+	@echo "	${MALIGN_PREFIX}.ph"
 
 ################################################################
 ## Convert sequences from clustalw format (aln extension) to phylip
@@ -155,17 +210,63 @@ genome_tree:
 aln2phy:
 	@echo "Converting sequence from aln to phy"
 	seqret -auto -stdout \
-		-sequence ${CLUSTALW_PREFIX}.aln \
-		-sprotein1 \
+		-sequence ${MALIGN_PREFIX}.aln \
+		-snucleotide1 \
 		-sformat1 clustal \
 		-osformat2 phylip \
-		>  ${CLUSTALW_PREFIX}.phy
-	@echo "	${CLUSTALW_PREFIX}.phy"
+		>  ${MALIGN_PREFIX}.phy
+	@echo "	${MALIGN_PREFIX}.phy"
 
 ################################################################
 ## Infer a phylogenetic tree of coronaviruses from their aligned
 ## genomes, using maximum-likelihood approach (phyml tool).
 run_phyml:
+	@echo "Shortening sequence names"
+	@perl -pe 's|^>(.{12}).*|>$$1|' ${GBLOCKS_PREFIX} > ${GBLOCKS_PREFIX}_shortnames
+	@echo "	${GBLOCKS_PREFIX}_shortnames"
+	@echo
+	@echo "Converting gblocks result to phylip format"
+	seqret -auto -stdout \
+		-sequence ${GBLOCKS_PREFIX}_shortnames \
+		-sformat1 pir \
+		-snucleotide1 \
+		-osformat2 phylip \
+		>  ${MALIGN_PREFIX}_gblocks.phy
+	@echo "	${MALIGN_PREFIX}_gblocks.phy"
+	@echo
 	@echo "Inferring phylogeny with phyml"
-	phyml -i ${CLUSTALW_PREFIX}.phy  -d aa 
+	phyml --input ${MALIGN_PREFIX}_gblocks.phy --datatype nt  --bootstrap 100 --model HKY85
+
+back:
+	seqret -auto -stdout \
+		-sequence ${MALIGN_PREFIX}_gblocks.phy \
+		-sformat1 phylip \
+		-snucleotide1 \
+		-osformat2 fasta \
+		>  ${MALIGN_PREFIX}_gblocks.fasta
+	@echo "	${MALIGN_PREFIX}_gblocks.phy"
+
+
+################################################################
+## Phylogey inference for all the genomes downloaded from Genbank.
+all_genomes:
+	@${MAKE} align_genomes_clustal \
+		GENOME_DIR=data/virus_genomes/ \
+		GENOME_PREFIX=coronavirus_all_genomes \
+
+################################################################
+## Phylogeny inference for selected genomes from Genbank
+selected_genomes:
+	@${MAKE} align_genomes_clustalw\
+		GENOME_DIR=data/virus_genomes/ \
+		GENOME_PREFIX=coronavirus_selected_genomes
+
+################################################################
+## Phylogeny inference for selected genomes from Genbank + a few
+## genomes imported from GISAID (login required to download them,
+## cannot be redistributed in the github).
+selected-gisaid_genomes:
+	@${MAKE} align_genomes_clustalw \
+		GENOME_DIR=data/virus_genomes/sequences_from_GISAID/ \
+		GENOME_PREFIX=coronavirus_selected-plus-GISAID_genomes
 
