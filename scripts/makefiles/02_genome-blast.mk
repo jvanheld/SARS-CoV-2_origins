@@ -176,10 +176,6 @@ align_genomes_clustalw: list_param
 	@echo "Converting alignment to fasta format"
 	seqret -sequence ${CLUSTALW_PREFIX}.aln -sformat aln -osformat fasta -outseq ${CLUSTALW_PREFIX}.fasta
 	@echo "	${CLUSTALW_PREFIX}.fasta"
-	@echo "Converting alignment to NBRF/PIR format"
-	seqret -sequence ${CLUSTALW_PREFIX}.aln -sformat aln -osformat pir -outseq ${CLUSTALW_PREFIX}.pir
-	@echo "	${CLUSTALW_PREFIX}.pir"
-	@echo
 	@${MAKE} nj_tree
 
 ################################################################
@@ -188,9 +184,16 @@ MALIGN_SOFT=clustalw
 MALIGN_DIR=${CLUSTALW_DIR}
 MALIGN_PREFIX=${CLUSTALW_PREFIX}
 GBLOCKS_OPT=-t=d -b3=8 -b4=10 -g -q -boum
-GBLOCKS_PREFIX=${MALIGN_PREFIX}.nbrf-gb
+GBLOCKS_PREFIX=${MALIGN_PREFIX}.pir-gb
 GBLOCKS_LOG=${GBLOCKS_PREFIX}_logs.txt
+_gblocks_clean:
+	gblocks ${MALIGN_PREFIX}.pir ${GBLOCKS_OPT} >& ${GBLOCKS_LOG}
+
 gblocks_clean: list_param
+	@echo
+	@echo "Converting alignment to PIR/PIR format"
+	seqret -sequence ${CLUSTALW_PREFIX}.aln -sformat aln -osformat pir -outseq ${CLUSTALW_PREFIX}.pir
+	@echo "	${CLUSTALW_PREFIX}.pir"
 	@echo
 	@echo "Cleaning ${MALIGN_SOFT} alignments with gblocks"
 	@echo ""
@@ -198,10 +201,6 @@ gblocks_clean: list_param
 	@echo "	GBLOCKS_PREFIX	${GBLOCKS_PREFIX}"
 	@echo "	GBLOCKS_LOG	${GBLOCKS_LOG}"
 	@echo
-it:
-_gblocks_clean:
-	gblocks ${MALIGN_PREFIX}.nbrf ${GBLOCKS_OPT} >& ${GBLOCKS_LOG}
-
 
 ################################################################
 ## Generate a species tree from the aligned genomes
