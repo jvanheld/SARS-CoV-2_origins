@@ -9,23 +9,39 @@ MAKE=make -f ${MAKEFILE}
 targets:
 	@echo "Targets:"
 	@echo "	list_param			list parameters"
+	@echo
+	@echo "Download genomes from Genbank"
 	@echo "	download_betacov_db		download BLAST-formated Betacoronavirus genomes"
 	@echo "	download_virus_db		download BLAST-formated virus reference genomes"
+	@echo
+	@echo "Blast searches"
 	@echo "	blastdb				format a viral genome for BLAST searches"
 	@echo "	genome_blast			search similarities between two viral genomes as query"
 	@echo "	cov2_vs_hiv			search HIV genome with SARS-CoV-2 genome as query"
 	@echo "	hiv_vs_cov2			search SARS-CoV-2 genome with HIV genome as query"
 	@echo "	betacov_vs_hiv			search HIV virus for matches against all Betacoronavirus genomes"
 	@echo "	hiv_vs_betacov			search Betacoronavirus genomes with HIV genome as query"
+	@echo
+	@echo "Multipe alignment"
 	@echo "	align_genomes_muscle		multiple alignment between reference genomes with muscle"
 	@echo "	align_genomes_clustalw		multiple alignment between reference genomes with clustalw"
+	@echo
+	@echo "Phylogeny inference methods"
 	@echo "	gblocks_clean			clearn the multiple alignments with gblocks"
 	@echo "	nj_tree				generate a species tree from the aligned genomes with clustalw NJ"
 	@echo "	run_phyml			generate species tree from aligned genomes with PhyML"
+	@echo
+	@echo "Genome phylogeny"
 	@echo "	all_genomes			Phylogeny inference for all genomes from Genbank"
 	@echo "	selected_genomes		Phylogeny inference for selected genomes from Genbank"
 	@echo "	merge_gisaid			merge genome sequences from Genbank and GISAID"
 	@echo "	selected-gisaid_genomes		Phylogeny inference for selected genomes from Genbank + GISAID"
+	@echo "	around-cov2-gisaid_genomes	Close selection around CoV-2 from Genbank + GISAID"
+	@echo
+	@echo "S-gene phylogeny"
+	@echo "	selected_Sgenes			S-gene phylogeny inference for selected strains from Genbank"
+	@echo "	selected_gisaid_Sgenes		S-gene phylogeny inference for selected strains from Genbank + ODGISID"
+
 
 ################################################################
 ## List parameters
@@ -33,7 +49,12 @@ GENOME_DIR=data/virus_genomes
 GENOME_PREFIX=coronavirus_selected_genomes
 GENOME_SEQ=${GENOME_DIR}/${GENOME_PREFIX}.fasta
 GISAID_DIR=${GENOME_DIR}/GISAID_genomes
-GENOME_TASKS=align_genomes_clustalw gblocks_clean run_phyml
+PHYLO_TASKS=align_genomes_clustalw gblocks_clean run_phyml
+SGENE_DIR=data/S-gene
+SGENE_PREFIX=coronavirus_selected_S-genes
+INSEQ_DIR=${GENOME_DIR}
+INSEQ_PREFIX=${GENOME_PREFIX}
+INSEQ_FILE=${INSEQ_DIR}/${INSEQ_PREFIX}.fasta
 list_param:
 	@echo
 	@echo "Generic parameters"
@@ -41,7 +62,11 @@ list_param:
 	@echo "	GENOME_PREFIX		${GENOME_PREFIX}"
 	@echo "	GENOME_SEQ		${GENOME_SEQ}"
 	@echo "	GISAID_DIR		${GISAID_DIR}"
-	@echo "	GENOME_TASKS		${GENOME_TASKS}"
+	@echo "	PHYLO_TASKS		${PHYLO_TASKS}"
+	@echo "	SGENE_DIR		${SGENE_DIR}"
+	@echo "	SGENE_PREFIX		${SGENE_PREFIX}"
+	@echo "	INSEQ_DIR		${INSEQ_DIR}"
+	@echo "	INSEQ_PREFIX		${INSEQ_PREFIX}"
 	@echo
 	@echo "Similarity searches with blastn"
 	@echo "	DB_TAXON_NAME		${DB_TAXON_NAME}"
@@ -59,6 +84,9 @@ list_param:
 	@echo "	MALIGN_SOFT		${MALIGN_SOFT}"
 	@echo "	MALIGN_DIR		${MALIGN_DIR}"
 	@echo "	MALIGN_PEFIX		${MALIGN_PREFIX}"
+	@echo
+	@echo "Alignemtn cleaning with gblocks"
+	@echo "	GBLOCKS_PREFIX		${GBLOCKS_PREFIX}"
 	@echo
 	@echo "PhyML parameters"
 	@echo "	PHYML_THEADS		${PHYML_THREADS}"
@@ -162,13 +190,16 @@ align_genomes_muscle: list_param
 ################################################################
 ## Align reference genomes with clustalw
 CLUSTALW_DIR=results/genome_phylogeny/clustalw_alignments/
-CLUSTALW_PREFIX=${CLUSTALW_DIR}/${GENOME_PREFIX}_clustalw
-align_genomes_clustalw: list_param
+CLUSTALW_PREFIX=${CLUSTALW_DIR}/${INSEQ_PREFIX}_clustalw
+align_genomes_clustalw: 
 	@echo "Aligning reference genomes wih clustalw"
-	@echo "	GENOME_SEQ	${GENOME_SEQ}"
+	@echo "	INSEQ_DIR	${INSEQ_DIR}"
+	@echo "	INSEQ_PREFIX	${INSEQ_PREFIX}"
+	@echo "	INSEQ_FILE	${INSEQ_FILE}"
 	@echo "	CLUSTALW_DIR	${CLUSTALW_DIR}"
+	@echo "	CLUSTALW_PREFIX	${CLUSTALW_PREFIX}"
 	@mkdir -p ${CLUSTALW_DIR}
-	time clustalw -infile=${GENOME_SEQ} \
+	time clustalw -infile=${INSEQ_FILE} \
 		-align -type=dna -quicktree \
 		-outfile=${CLUSTALW_PREFIX}.aln
 	@echo "	${CLUSTALW_PREFIX}.aln"
@@ -189,9 +220,10 @@ GBLOCKS_LOG=${GBLOCKS_PREFIX}_logs.txt
 _gblocks_clean:
 	gblocks ${MALIGN_PREFIX}.pir ${GBLOCKS_OPT} >& ${GBLOCKS_LOG}
 
-gblocks_clean: list_param
+gblocks_clean:
 	@echo
 	@echo "Converting alignment to PIR/PIR format"
+	@echo "	CLUSTALW_PREFIX	${CLUSTALW_PREFIX}"
 	seqret -sequence ${CLUSTALW_PREFIX}.aln -sformat aln -osformat pir -outseq ${CLUSTALW_PREFIX}.pir
 	@echo "	${CLUSTALW_PREFIX}.pir"
 	@echo
@@ -201,6 +233,7 @@ gblocks_clean: list_param
 	@echo "	GBLOCKS_PREFIX	${GBLOCKS_PREFIX}"
 	@echo "	GBLOCKS_LOG	${GBLOCKS_LOG}"
 	@echo
+
 
 ################################################################
 ## Generate a species tree from the aligned genomes
@@ -231,7 +264,7 @@ nj_tree:
 ################################################################
 ## Infer a phylogenetic tree of coronaviruses from their aligned
 ## genomes, using maximum-likelihood approach (phyml tool).
-PHYML_THREADS=4
+PHYML_THREADS=5
 PHYML_BOOTSTRAP=10
 PHYML_OPT=--datatype nt --bootstrap ${PHYML_BOOTSTRAP} --model HKY85
 run_phyml:
@@ -254,16 +287,17 @@ run_phyml:
 ################################################################
 ## Phylogey inference for all the genomes downloaded from Genbank.
 all_genomes:
-	@${MAKE} ${GENOME_TASKS} \
-		GENOME_DIR=${GENOME_DIR}/ \
-		GENOME_PREFIX=coronavirus_all_genomes \
+	@${MAKE} ${PHYLO_TASKS} \
+		INSEQ_DIR=${GENOME_DIR}/ \
+		INSEQ_PREFIX=coronavirus_all_genomes \
 
 ################################################################
 ## Phylogeny inference for selected genomes from Genbank
 selected_genomes:
-	@${MAKE} ${GENOME_TASKS}\
-		GENOME_DIR=${GENOME_DIR}/ \
-		GENOME_PREFIX=coronavirus_selected_genomes
+	@${MAKE} ${PHYLO_TASKS}\
+		INSEQ_DIR=${GENOME_DIR} \
+		INSEQ_PREFIX=coronavirus_selected_genomes
+
 
 ################################################################
 ## Phylogeny inference for selected genomes from Genbank + a few
@@ -280,9 +314,53 @@ merge_gisaid:
 		${GISAID_DIR}/coronavirus-genomes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
 		> ${GISAID_DIR}/coronavirus_all-plus-GISAID_genomes.fasta
 	@echo "	${GISAID_DIR}/coronavirus_all-plus-GISAID_genomes.fasta"
+	@cat ${GENOME_DIR}/coronavirus_around-CoV-2_genomes.fasta \
+		${GISAID_DIR}/coronavirus-genomes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
+		> ${GISAID_DIR}/coronavirus_around-CoV-2-plus-GISAID_genomes.fasta
+	@echo "	${GISAID_DIR}/coronavirus_around-CoV-2-plus-GISAID_genomes.fasta"
+	@echo
+	@echo "Merging Genbank and GISAID S-genes"
+	@cat ${SGENE_DIR}/S-gene_selected.fasta \
+		${GISAID_DIR}/coronavirus-S-genes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
+		> ${GISAID_DIR}/S-gene_selected-plus-GISAID.fasta
+	@echo "	${GISAID_DIR}/S-gene_selected-plus-GISAID_genomes.fasta"
+#	@cat ${SGENE_DIR}/S-gene_all.fasta \
+#		${GISAID_DIR}/coronavirus-S-genes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
+#		> ${GISAID_DIR}/S-gene_all-plus-GISAID.fasta
+#	@echo "	${GISAID_DIR}/S-gene_all-plus-GISAID_genomes.fasta"
+	@cat ${SGENE_DIR}/S-gene_around-CoV-2.fasta \
+		${GISAID_DIR}/coronavirus-S-genes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
+		> ${GISAID_DIR}/S-gene_around-CoV-2-plus-GISAID.fasta
+	@echo "	${GISAID_DIR}/S-gene_around-CoV-2-plus-GISAID.fasta"
 
+################################################################
+## Selected from Genbank + GISAID
 selected-gisaid_genomes:
-	@${MAKE} ${GENOME_TASKS} \
-		GENOME_DIR=${GISAID_DIR}/ \
-		GENOME_PREFIX=coronavirus_selected-plus-GISAID_genomes
+	@${MAKE} ${PHYLO_TASKS} \
+		INSEQ_DIR=${GISAID_DIR}/ \
+		INSEQ_PREFIX=coronavirus_selected-plus-GISAID_genomes
 
+################################################################
+## Close selection around CoV-2 from Genbank + GISAID
+around-cov2-gisaid_genomes:
+	@${MAKE} ${PHYLO_TASKS} \
+		INSEQ_DIR=${GISAID_DIR}/ \
+		INSEQ_PREFIX=coronavirus_around-CoV-2-plus-GISAID_genomes
+
+################################################################
+## S-gene phylogeny for selected genomes from Genbank
+selected_Sgenes:
+	@${MAKE} ${PHYLO_TASKS}\
+		INSEQ_DIR=${SGENE_DIR} \
+		INSEQ_PREFIX=S-gene_selected \
+		CLUSTALW_DIR=results/S-gene/clustalw_alignments \
+		CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_selected
+
+################################################################
+## S-gene phylogeny for selected genomes from Genbank + GISAID
+selected_gisaid_Sgenes:
+	@${MAKE} ${PHYLO_TASKS}\
+		INSEQ_DIR=${GISAID_DIR} \
+		INSEQ_PREFIX=S-gene_selected-plus-GISAID \
+		CLUSTALW_DIR=results/S-gene/clustalw_alignments \
+		CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_selected-plus-GISAID
