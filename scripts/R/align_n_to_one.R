@@ -3,11 +3,13 @@
 #' @param refSequence reference sequence. Must be an object of class Biostrings::DNAStringSet
 #' @param querySequences query sequences. Must be an object of class Biostrings::DNAStringSet
 #' @param type="global-local" alignment type, passed to Biostrings::pairwiseAlignment()
+#' @param outfile=NULL if specified, the alignments are savec in the speficied file
 #' @param ... other arguments are passed to  Biostrings::pairwiseAlignment()
 #' @export
 alignNtoOne <- function(refSequence, 
                         querySequences, 
                         type = "global-local",
+                        outfile = NULL, 
                         ...) {
   ## Prepare a table for the matching statistics
   stats <-  c("pid", "nchar", "insertNb", "insertLen", "delNb", "delLen",  "score")
@@ -39,6 +41,12 @@ alignNtoOne <- function(refSequence,
   }
   result <- list(alignments = alignments,
                  stats = alignmentStats)
+  
+  if (!is.null(outfile)) {
+    message("\talignNtoOne()",
+            "\tExporting multiple alignments to file\n\t\t", outfile)
+  }
+  
   return(result)
 }
 # View(alignmentStats)
