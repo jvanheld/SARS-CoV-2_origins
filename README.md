@@ -7,13 +7,32 @@
 ## Collaborators
 
 - Etienne Decroly
-- Jacques van Helden
-- Erwan Sallard		erwan.sallard@ens.psl.eu
+- Jacques van Helden (<https://orcid.org/0000-0002-8799-8584>)
+- Erwan Sallard	(<erwan.sallard@ens.psl.eu>)
 - José Halloy
+- Didier Casane
 
 ## Files
 
+| Doc | URL |
+|------------|---------------------------------|
+|  | |
+
 ## Usage
+
+### Getting a clone of the github repository
+
+````{bash}
+git clone https://github.com/jvanheld/coronavirus_insertions.git
+```
+
+The code can then be updated as follows
+
+```{bash}
+cd coronavirus_insertions
+git pull
+```
+
 
 ### Installing the software environment
 
