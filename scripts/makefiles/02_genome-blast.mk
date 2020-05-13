@@ -40,7 +40,8 @@ targets:
 	@echo
 	@echo "S-gene phylogeny"
 	@echo "	selected_Sgenes			S-gene phylogeny inference for selected strains from Genbank"
-	@echo "	selected_gisaid_Sgenes		S-gene phylogeny inference for selected strains from Genbank + ODGISID"
+	@echo "	selected_gisaid_Sgenes		S-gene phylogeny inference for selected strains from Genbank + GISAID"
+	@echo "	around-cov-2_gisaid_Sgenes	S-gene phylogeny inference for strains from Genbank + GISAID around SARS-CoV-2"
 
 
 ################################################################
@@ -48,7 +49,7 @@ targets:
 GENOME_DIR=data/virus_genomes
 GENOME_PREFIX=coronavirus_selected_genomes
 GENOME_SEQ=${GENOME_DIR}/${GENOME_PREFIX}.fasta
-GISAID_DIR=${GENOME_DIR}/GISAID_genomes
+GISAID_DIR=data/GISAID_genomes
 PHYLO_TASKS=align_genomes_clustalw gblocks_clean run_phyml
 SGENE_DIR=data/S-gene
 SGENE_PREFIX=coronavirus_selected_S-genes
@@ -265,7 +266,7 @@ nj_tree:
 ## Infer a phylogenetic tree of coronaviruses from their aligned
 ## genomes, using maximum-likelihood approach (phyml tool).
 PHYML_THREADS=5
-PHYML_BOOTSTRAP=10
+PHYML_BOOTSTRAP=100
 PHYML_OPT=--datatype nt --bootstrap ${PHYML_BOOTSTRAP} --model HKY85
 run_phyml:
 	@echo "Shortening sequence names"
@@ -364,3 +365,12 @@ selected_gisaid_Sgenes:
 		INSEQ_PREFIX=S-gene_selected-plus-GISAID \
 		CLUSTALW_DIR=results/S-gene/clustalw_alignments \
 		CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_selected-plus-GISAID
+
+################################################################
+## S-gene phylogeny for genomes from Genbank + GISAID around-cov-2
+around-cov-2_gisaid_Sgenes:
+	@${MAKE} ${PHYLO_TASKS}\
+		INSEQ_DIR=${GISAID_DIR} \
+		INSEQ_PREFIX=S-gene_around-cov-2-plus-GISAID \
+		CLUSTALW_DIR=results/S-gene/clustalw_alignments \
+		CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_around-cov-2-plus-GISAID
