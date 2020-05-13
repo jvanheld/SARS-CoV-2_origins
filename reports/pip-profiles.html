@@ -11,7 +11,7 @@
 
 <meta name="author" content="Jacques van Helden" />
 
-<meta name="date" content="2020-05-09" />
+<meta name="date" content="2020-05-12" />
 
 <title>Analysis of coronavirus sequences</title>
 
@@ -353,98 +353,117 @@ div.tocify {
 <h1 class="title toc-ignore">Analysis of coronavirus sequences</h1>
 <h3 class="subtitle">Normalization and target selection methods</h3>
 <h4 class="author">Jacques van Helden</h4>
-<h4 class="date">2020-05-09</h4>
+<h4 class="date">2020-05-12</h4>
 
 </div>
 
 
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co">#### Define directories and files ####</span></a>
 <a class="sourceLine" id="cb1-2" data-line-number="2">dir &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">main =</span> <span class="st">&#39;..&#39;</span>)</a>
-<a class="sourceLine" id="cb1-3" data-line-number="3">dir<span class="op">$</span>genomes &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>main, <span class="st">&quot;data/virus_genomes/&quot;</span>)</a>
-<a class="sourceLine" id="cb1-4" data-line-number="4">dir<span class="op">$</span>R &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>main, <span class="st">&quot;scripts/R&quot;</span>)</a>
-<a class="sourceLine" id="cb1-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="co">## Output tables</span></a>
-<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="co"># di$output &lt;- file.path(dir.main, &quot;&quot;)</span></a>
-<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="co"># dir$tables &lt;- </span></a>
+<a class="sourceLine" id="cb1-3" data-line-number="3">dir<span class="op">$</span>R &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>main, <span class="st">&quot;scripts/R&quot;</span>)</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co">#### Create output directory for sequences ####</span></a>
+<a class="sourceLine" id="cb1-6" data-line-number="6">dir<span class="op">$</span>outseq &lt;-<span class="st"> </span><span class="kw">file.path</span>(</a>
+<a class="sourceLine" id="cb1-7" data-line-number="7">  dir<span class="op">$</span>main, <span class="st">&quot;results&quot;</span>, <span class="st">&quot;S-gene&quot;</span>, <span class="st">&quot;Nto1_alignments&quot;</span>)</a>
+<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="kw">dir.create</span>(dir<span class="op">$</span>outseq, <span class="dt">showWarnings =</span> <span class="ot">FALSE</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a>
 <a class="sourceLine" id="cb1-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb1-10" data-line-number="10"><span class="co">## Load custom functions</span></a>
-<a class="sourceLine" id="cb1-11" data-line-number="11"><span class="kw">source</span>(<span class="kw">file.path</span>(dir<span class="op">$</span>R, <span class="st">&quot;align_n_to_one.R&quot;</span>))</a>
-<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="kw">source</span>(<span class="kw">file.path</span>(dir<span class="op">$</span>R, <span class="st">&quot;plot_pip_profiles.R&quot;</span>))</a>
-<a class="sourceLine" id="cb1-13" data-line-number="13"></a>
-<a class="sourceLine" id="cb1-14" data-line-number="14"><span class="co">## Reference genome</span></a>
-<a class="sourceLine" id="cb1-15" data-line-number="15">refPattern &lt;-<span class="st"> &quot;Human_SARS-CoV-2_Whu1&quot;</span></a>
-<a class="sourceLine" id="cb1-16" data-line-number="16"><span class="co"># refPattern &lt;- &quot;SARS-CoV-2_BetaCoV/Wuhan/IPBCAMS-WH-01/2019&quot;</span></a>
-<a class="sourceLine" id="cb1-17" data-line-number="17">refSpikeLimits &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">21563</span>, <span class="dv">25384</span>) <span class="co">## Coordinates of the S gene in the reference genome (coding for the spike protein)</span></a>
-<a class="sourceLine" id="cb1-18" data-line-number="18"></a>
-<a class="sourceLine" id="cb1-19" data-line-number="19"><span class="co">## Query genomes</span></a>
-<a class="sourceLine" id="cb1-20" data-line-number="20">queryPatterns &lt;-<span class="st"> </span><span class="kw">c</span>(</a>
-<a class="sourceLine" id="cb1-21" data-line-number="21"><span class="co">#  &quot;SARS-CoV-2_WIV04&quot;,</span></a>
-<a class="sourceLine" id="cb1-22" data-line-number="22"><span class="co">#  &quot;Pangolin_MP789&quot;,</span></a>
-<a class="sourceLine" id="cb1-23" data-line-number="23">  <span class="st">&quot;Pangolin_PCoV_GX-P1E_2017/2020&quot;</span>, </a>
-<a class="sourceLine" id="cb1-24" data-line-number="24">  <span class="st">&quot;Bat_RaTG13&quot;</span>, </a>
-<a class="sourceLine" id="cb1-25" data-line-number="25">  <span class="st">&quot;Bat_bat-SL-CoVZC45&quot;</span>,</a>
-<a class="sourceLine" id="cb1-26" data-line-number="26">  <span class="st">&quot;Bat_bat-SL-CoVZXC21&quot;</span>,</a>
-<a class="sourceLine" id="cb1-27" data-line-number="27">  <span class="st">&quot;Human_SARS-CoV_Frankfurt_1&quot;</span></a>
-<a class="sourceLine" id="cb1-28" data-line-number="28">)</a>
-<a class="sourceLine" id="cb1-29" data-line-number="29"></a>
-<a class="sourceLine" id="cb1-30" data-line-number="30"><span class="co">#### Add GISAID IDs to the query pattern ####</span></a>
-<a class="sourceLine" id="cb1-31" data-line-number="31"><span class="co">## Note that GISAI genomes are be submitted to the github repo because they cannot be redistributed</span></a>
-<a class="sourceLine" id="cb1-32" data-line-number="32">queryPatterns &lt;-<span class="st"> </span><span class="kw">append</span>(queryPatterns, </a>
-<a class="sourceLine" id="cb1-33" data-line-number="33">                        <span class="kw">c</span>(<span class="st">&quot;Bat_Yu-RmYN02_2019&quot;</span>,</a>
-<a class="sourceLine" id="cb1-34" data-line-number="34"><span class="co">#                          &quot;Pangolin_Gu-P2S_2019&quot;,</span></a>
-<a class="sourceLine" id="cb1-35" data-line-number="35">                          <span class="st">&quot;Pangolin_Gu1_2019&quot;</span></a>
-<a class="sourceLine" id="cb1-36" data-line-number="36">                          ))</a>
-<a class="sourceLine" id="cb1-37" data-line-number="37"></a>
-<a class="sourceLine" id="cb1-38" data-line-number="38"><span class="co">#                   &quot;Civet_SARS-CoV_007/2004&quot;,</span></a>
-<a class="sourceLine" id="cb1-39" data-line-number="39"><span class="co"># &quot;SARS-CoV-2_BetaCoV/Wuhan/IPBCAMS-WH-01/2019&quot;,</span></a>
-<a class="sourceLine" id="cb1-40" data-line-number="40"><span class="co">#                   &quot;SARS-CoV-2_Whu1&quot;,</span></a>
-<a class="sourceLine" id="cb1-41" data-line-number="41"><span class="co">#                   &quot;Camel_MERS&quot;,</span></a></code></pre></div>
+<a class="sourceLine" id="cb1-10" data-line-number="10"><span class="co">## Input files</span></a>
+<a class="sourceLine" id="cb1-11" data-line-number="11">infiles &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
+<a class="sourceLine" id="cb1-12" data-line-number="12"></a>
+<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="co">## Instantiate a list for output files</span></a>
+<a class="sourceLine" id="cb1-14" data-line-number="14">outfiles &lt;-<span class="st"> </span><span class="kw">vector</span>()</a>
+<a class="sourceLine" id="cb1-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb1-16" data-line-number="16"><span class="co">## Genome dir and files</span></a>
+<a class="sourceLine" id="cb1-17" data-line-number="17">dir<span class="op">$</span>genomes &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>main, <span class="st">&quot;data/virus_genomes/&quot;</span>)</a>
+<a class="sourceLine" id="cb1-18" data-line-number="18"><span class="co"># infiles$genomes &lt;- file.path(dir$genomes, &quot;coronavirus_selected_genomes.fasta&quot;)</span></a>
+<a class="sourceLine" id="cb1-19" data-line-number="19"></a>
+<a class="sourceLine" id="cb1-20" data-line-number="20"><span class="co">## Genome sequences</span></a>
+<a class="sourceLine" id="cb1-21" data-line-number="21">infiles<span class="op">$</span>genomes &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>genomes, <span class="st">&quot;GISAID_genomes&quot;</span>, <span class="st">&quot;coronavirus_selected-plus-GISAID_genomes.fasta&quot;</span>)</a>
+<a class="sourceLine" id="cb1-22" data-line-number="22"><span class="cf">if</span> (<span class="op">!</span><span class="kw">file.exists</span>(infiles<span class="op">$</span>genomes)) {</a>
+<a class="sourceLine" id="cb1-23" data-line-number="23">  <span class="kw">stop</span>(<span class="st">&quot;Genome sequence file is missing&quot;</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>, infiles<span class="op">$</span>genomes)</a>
+<a class="sourceLine" id="cb1-24" data-line-number="24">}</a>
+<a class="sourceLine" id="cb1-25" data-line-number="25"></a>
+<a class="sourceLine" id="cb1-26" data-line-number="26"></a>
+<a class="sourceLine" id="cb1-27" data-line-number="27"><span class="co">## Output tables</span></a>
+<a class="sourceLine" id="cb1-28" data-line-number="28"><span class="co"># di$output &lt;- file.path(dir.main, &quot;&quot;)</span></a>
+<a class="sourceLine" id="cb1-29" data-line-number="29"><span class="co"># dir$tables &lt;- </span></a>
+<a class="sourceLine" id="cb1-30" data-line-number="30"></a>
+<a class="sourceLine" id="cb1-31" data-line-number="31"><span class="co">## Load custom functions</span></a>
+<a class="sourceLine" id="cb1-32" data-line-number="32"><span class="kw">source</span>(<span class="kw">file.path</span>(dir<span class="op">$</span>R, <span class="st">&quot;align_n_to_one.R&quot;</span>))</a>
+<a class="sourceLine" id="cb1-33" data-line-number="33"><span class="kw">source</span>(<span class="kw">file.path</span>(dir<span class="op">$</span>R, <span class="st">&quot;plot_pip_profiles.R&quot;</span>))</a>
+<a class="sourceLine" id="cb1-34" data-line-number="34"></a>
+<a class="sourceLine" id="cb1-35" data-line-number="35"><span class="co">## Reference genome</span></a>
+<a class="sourceLine" id="cb1-36" data-line-number="36">refPattern &lt;-<span class="st"> &quot;HuCoV2_WH01_2019&quot;</span></a>
+<a class="sourceLine" id="cb1-37" data-line-number="37"><span class="co"># refPattern &lt;- &quot;SARS-CoV-2_BetaCoV/Wuhan/IPBCAMS-WH-01/2019&quot;</span></a>
+<a class="sourceLine" id="cb1-38" data-line-number="38">refSpikeLimits &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">21563</span>, <span class="dv">25384</span>) <span class="co">## Coordinates of the S gene in the reference genome (coding for the spike protein)</span></a>
+<a class="sourceLine" id="cb1-39" data-line-number="39"></a>
+<a class="sourceLine" id="cb1-40" data-line-number="40"></a>
+<a class="sourceLine" id="cb1-41" data-line-number="41"><span class="co">## Query genomes</span></a>
+<a class="sourceLine" id="cb1-42" data-line-number="42">queryPatterns &lt;-<span class="st"> </span><span class="kw">c</span>(</a>
+<a class="sourceLine" id="cb1-43" data-line-number="43">  <span class="st">&quot;PnGX-P1E_2017&quot;</span>, </a>
+<a class="sourceLine" id="cb1-44" data-line-number="44">  <span class="st">&quot;BtRaTG13_2013_Yunnan&quot;</span>, </a>
+<a class="sourceLine" id="cb1-45" data-line-number="45">  <span class="st">&quot;BtZC45&quot;</span>,</a>
+<a class="sourceLine" id="cb1-46" data-line-number="46">  <span class="st">&quot;BtZXC21&quot;</span>,</a>
+<a class="sourceLine" id="cb1-47" data-line-number="47">  <span class="st">&quot;HuSARS-Frankfurt-1_2003&quot;</span></a>
+<a class="sourceLine" id="cb1-48" data-line-number="48">)</a>
+<a class="sourceLine" id="cb1-49" data-line-number="49"></a>
+<a class="sourceLine" id="cb1-50" data-line-number="50"><span class="co">#### Add GISAID IDs to the query pattern ####</span></a>
+<a class="sourceLine" id="cb1-51" data-line-number="51"><span class="co">## Note that GISAI genomes are be submitted to the github repo because they cannot be redistributed</span></a>
+<a class="sourceLine" id="cb1-52" data-line-number="52">queryPatterns &lt;-<span class="st"> </span><span class="kw">append</span>(queryPatterns, </a>
+<a class="sourceLine" id="cb1-53" data-line-number="53">                        <span class="kw">c</span>(<span class="st">&quot;BtYu-RmYN02_2019&quot;</span>,</a>
+<a class="sourceLine" id="cb1-54" data-line-number="54">                          <span class="st">&quot;PnGu1_2019&quot;</span></a>
+<a class="sourceLine" id="cb1-55" data-line-number="55">                        ))</a>
+<a class="sourceLine" id="cb1-56" data-line-number="56"></a>
+<a class="sourceLine" id="cb1-57" data-line-number="57"><span class="kw">message</span>(<span class="st">&quot;Number of query genomes: &quot;</span>, <span class="kw">length</span>(queryPatterns))</a></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co">#### Load genome sequences ####</span></a>
-<a class="sourceLine" id="cb2-2" data-line-number="2">infiles &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="co"># infiles$genomes &lt;- file.path(dir$genomes, &quot;coronavirus_selected_genomes.fasta&quot;)</span></a>
-<a class="sourceLine" id="cb2-4" data-line-number="4">infiles<span class="op">$</span>genomes &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>genomes, <span class="st">&quot;sequences_from_GISAID&quot;</span>, <span class="st">&quot;coronavirus_selected-plus-GISAID_genomes.fasta&quot;</span>)</a>
-<a class="sourceLine" id="cb2-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb2-6" data-line-number="6">genomes &lt;-<span class="st"> </span><span class="kw">readDNAStringSet</span>(<span class="dt">filepath =</span> infiles<span class="op">$</span>genome, <span class="dt">format =</span> <span class="st">&quot;fasta&quot;</span>)</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">genomes &lt;-<span class="st"> </span><span class="kw">readDNAStringSet</span>(<span class="dt">filepath =</span> infiles<span class="op">$</span>genome, <span class="dt">format =</span> <span class="st">&quot;fasta&quot;</span>)</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="co">## Shorten sequence names by suppressing the fasta comment (after the space)</span></a>
+<a class="sourceLine" id="cb2-5" data-line-number="5"><span class="kw">names</span>(genomes) &lt;-<span class="st"> </span><span class="kw">sub</span>(<span class="dt">pattern =</span> <span class="st">&quot; .*&quot;</span>, <span class="dt">replacement =</span> <span class="st">&quot;&quot;</span>, <span class="dt">x =</span> <span class="kw">names</span>(genomes), <span class="dt">perl =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6"></a>
 <a class="sourceLine" id="cb2-7" data-line-number="7">genomeNames &lt;-<span class="st"> </span><span class="kw">names</span>(genomes)</a>
 <a class="sourceLine" id="cb2-8" data-line-number="8">nbGenomes &lt;-<span class="st"> </span><span class="kw">length</span>(genomeNames)</a>
 <a class="sourceLine" id="cb2-9" data-line-number="9"><span class="kw">message</span>(<span class="st">&quot;Loaded &quot;</span>, nbGenomes, <span class="st">&quot; genomes from file &quot;</span>, infiles<span class="op">$</span>genomes)</a>
-<a class="sourceLine" id="cb2-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb2-11" data-line-number="11"><span class="co">## Shorten sequence names by suppressing the fasta comment (after the space)</span></a>
-<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="kw">names</span>(genomes) &lt;-<span class="st"> </span><span class="kw">sub</span>(<span class="dt">pattern =</span> <span class="st">&quot; .*&quot;</span>, <span class="dt">replacement =</span> <span class="st">&quot;&quot;</span>, <span class="dt">x =</span> <span class="kw">names</span>(genomes), <span class="dt">perl =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb2-13" data-line-number="13"></a>
-<a class="sourceLine" id="cb2-14" data-line-number="14"><span class="co"># View(genomes)</span></a>
-<a class="sourceLine" id="cb2-15" data-line-number="15"></a>
-<a class="sourceLine" id="cb2-16" data-line-number="16"><span class="co">#### Define reference and query genomes ####</span></a>
-<a class="sourceLine" id="cb2-17" data-line-number="17">refGenomeName &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="dt">pattern =</span> refPattern, <span class="dt">x =</span> <span class="kw">names</span>(genomes), </a>
-<a class="sourceLine" id="cb2-18" data-line-number="18">                  <span class="dt">ignore.case =</span> <span class="ot">TRUE</span>, <span class="dt">value =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb2-19" data-line-number="19"><span class="cf">if</span> (<span class="kw">is.null</span>(refGenomeName)) {</a>
-<a class="sourceLine" id="cb2-20" data-line-number="20">  <span class="kw">stop</span>(<span class="st">&quot;Could not identify reference genome with pattern &quot;</span>, refPattern)</a>
-<a class="sourceLine" id="cb2-21" data-line-number="21">}</a>
-<a class="sourceLine" id="cb2-22" data-line-number="22"><span class="kw">message</span>(<span class="st">&quot;Reference genome name: &quot;</span>, refGenomeName)</a>
-<a class="sourceLine" id="cb2-23" data-line-number="23"></a>
-<a class="sourceLine" id="cb2-24" data-line-number="24"><span class="co">## Query genomes</span></a>
-<a class="sourceLine" id="cb2-25" data-line-number="25">queryRegExp &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;(&quot;</span>, <span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;)|(&quot;</span>, queryPatterns), <span class="st">&quot;)&quot;</span>)</a>
-<a class="sourceLine" id="cb2-26" data-line-number="26">queryGenomeNames &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="dt">pattern =</span> queryRegExp, </a>
-<a class="sourceLine" id="cb2-27" data-line-number="27">                    <span class="dt">x =</span> <span class="kw">names</span>(genomes), </a>
-<a class="sourceLine" id="cb2-28" data-line-number="28">                    <span class="dt">ignore.case =</span> <span class="ot">TRUE</span>, <span class="dt">value =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb2-29" data-line-number="29">nbQueryGenomes &lt;-<span class="st"> </span><span class="kw">length</span>(queryGenomeNames)</a>
+<a class="sourceLine" id="cb2-10" data-line-number="10"><span class="co"># View(genomes)</span></a>
+<a class="sourceLine" id="cb2-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="co">#### Define reference and query genomes ####</span></a>
+<a class="sourceLine" id="cb2-13" data-line-number="13">refGenomeName &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="dt">pattern =</span> refPattern, <span class="dt">x =</span> <span class="kw">names</span>(genomes), </a>
+<a class="sourceLine" id="cb2-14" data-line-number="14">                      <span class="dt">ignore.case =</span> <span class="ot">TRUE</span>, <span class="dt">value =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb2-15" data-line-number="15"><span class="cf">if</span> (<span class="kw">is.null</span>(refGenomeName)) {</a>
+<a class="sourceLine" id="cb2-16" data-line-number="16">  <span class="kw">stop</span>(<span class="st">&quot;Could not identify reference genome with pattern &quot;</span>, refPattern)</a>
+<a class="sourceLine" id="cb2-17" data-line-number="17">}</a>
+<a class="sourceLine" id="cb2-18" data-line-number="18"><span class="kw">message</span>(<span class="st">&quot;Reference genome name: &quot;</span>, refGenomeName)</a>
+<a class="sourceLine" id="cb2-19" data-line-number="19"></a>
+<a class="sourceLine" id="cb2-20" data-line-number="20"><span class="co">## Query genomes</span></a>
+<a class="sourceLine" id="cb2-21" data-line-number="21">queryRegExp &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;(&quot;</span>, <span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;)|(&quot;</span>, queryPatterns), <span class="st">&quot;)&quot;</span>)</a>
+<a class="sourceLine" id="cb2-22" data-line-number="22">queryGenomeNames &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="dt">pattern =</span> queryRegExp, </a>
+<a class="sourceLine" id="cb2-23" data-line-number="23">                         <span class="dt">x =</span> genomeNames, </a>
+<a class="sourceLine" id="cb2-24" data-line-number="24">                         <span class="dt">ignore.case =</span> <span class="ot">TRUE</span>, <span class="dt">value =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb2-25" data-line-number="25">nbQueryGenomes &lt;-<span class="st"> </span><span class="kw">length</span>(queryGenomeNames)</a>
+<a class="sourceLine" id="cb2-26" data-line-number="26"></a>
+<a class="sourceLine" id="cb2-27" data-line-number="27"><span class="cf">if</span> (nbQueryGenomes <span class="op">==</span><span class="st"> </span><span class="dv">0</span>) {</a>
+<a class="sourceLine" id="cb2-28" data-line-number="28">  <span class="kw">stop</span>(<span class="st">&quot;Could not identify any query genome with query pattern</span><span class="ch">\n</span><span class="st">&quot;</span>, queryRegExp)</a>
+<a class="sourceLine" id="cb2-29" data-line-number="29">}</a>
 <a class="sourceLine" id="cb2-30" data-line-number="30"></a>
-<a class="sourceLine" id="cb2-31" data-line-number="31"><span class="cf">if</span> (nbQueryGenomes <span class="op">==</span><span class="st"> </span><span class="dv">0</span>) {</a>
-<a class="sourceLine" id="cb2-32" data-line-number="32">  <span class="kw">stop</span>(<span class="st">&quot;Could not identify any query genome with query pattern</span><span class="ch">\n</span><span class="st">&quot;</span>, queryRegExp)</a>
-<a class="sourceLine" id="cb2-33" data-line-number="33">}</a>
-<a class="sourceLine" id="cb2-34" data-line-number="34"></a>
-<a class="sourceLine" id="cb2-35" data-line-number="35"></a>
-<a class="sourceLine" id="cb2-36" data-line-number="36"><span class="co">## Compute some statistics about genome sizes</span></a>
-<a class="sourceLine" id="cb2-37" data-line-number="37">genomeStat &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
-<a class="sourceLine" id="cb2-38" data-line-number="38">  <span class="dt">row.names =</span> <span class="kw">c</span>(refGenomeName, queryGenomeNames),</a>
-<a class="sourceLine" id="cb2-39" data-line-number="39">  <span class="dt">status =</span> <span class="kw">c</span>(<span class="st">&quot;Reference&quot;</span>, <span class="kw">rep</span>(<span class="st">&quot;Query&quot;</span>, <span class="dt">length.out =</span> <span class="kw">length</span>(queryGenomeNames)))</a>
-<a class="sourceLine" id="cb2-40" data-line-number="40">)</a>
-<a class="sourceLine" id="cb2-41" data-line-number="41"></a>
-<a class="sourceLine" id="cb2-42" data-line-number="42"><span class="cf">for</span> (g <span class="cf">in</span> <span class="kw">c</span>(refGenomeName, queryGenomeNames)) {</a>
-<a class="sourceLine" id="cb2-43" data-line-number="43">  genomeStat[g, <span class="st">&quot;length&quot;</span>] &lt;-<span class="st"> </span><span class="kw">length</span>(genomes[[g]])</a>
-<a class="sourceLine" id="cb2-44" data-line-number="44">}</a>
-<a class="sourceLine" id="cb2-45" data-line-number="45"></a>
-<a class="sourceLine" id="cb2-46" data-line-number="46"><span class="kw">kable</span>(genomeStat, <span class="dt">caption =</span> <span class="st">&quot;Reference and query genomes&quot;</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb2-31" data-line-number="31"><span class="cf">if</span> (<span class="kw">length</span>(queryPatterns) <span class="op">!=</span><span class="st"> </span><span class="kw">length</span>(queryGenomeNames)) {</a>
+<a class="sourceLine" id="cb2-32" data-line-number="32">  foundPatterns &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="dt">pattern =</span> queryRegExp, <span class="dt">x =</span> queryGenomeNames, <span class="dt">value =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb2-33" data-line-number="33">  missingPatterns &lt;-<span class="st"> </span><span class="kw">setdiff</span>(queryPatterns, queryGenomeNames)</a>
+<a class="sourceLine" id="cb2-34" data-line-number="34">  <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>, <span class="kw">length</span>(missingPatterns), <span class="st">&quot; Missing genomes: &quot;</span>, <span class="kw">paste</span>(<span class="dt">sep =</span> <span class="st">&quot;, &quot;</span>, missingPatterns))</a>
+<a class="sourceLine" id="cb2-35" data-line-number="35">}</a>
+<a class="sourceLine" id="cb2-36" data-line-number="36"></a>
+<a class="sourceLine" id="cb2-37" data-line-number="37"></a>
+<a class="sourceLine" id="cb2-38" data-line-number="38"><span class="co">## Compute some statistics about genome sizes</span></a>
+<a class="sourceLine" id="cb2-39" data-line-number="39">genomeStat &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
+<a class="sourceLine" id="cb2-40" data-line-number="40">  <span class="dt">row.names =</span> <span class="kw">c</span>(refGenomeName, queryGenomeNames),</a>
+<a class="sourceLine" id="cb2-41" data-line-number="41">  <span class="dt">status =</span> <span class="kw">c</span>(<span class="st">&quot;Reference&quot;</span>, <span class="kw">rep</span>(<span class="st">&quot;Query&quot;</span>, <span class="dt">length.out =</span> <span class="kw">length</span>(queryGenomeNames)))</a>
+<a class="sourceLine" id="cb2-42" data-line-number="42">)</a>
+<a class="sourceLine" id="cb2-43" data-line-number="43"></a>
+<a class="sourceLine" id="cb2-44" data-line-number="44">g &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb2-45" data-line-number="45"><span class="cf">for</span> (g <span class="cf">in</span> <span class="kw">c</span>(refGenomeName, queryGenomeNames)) {</a>
+<a class="sourceLine" id="cb2-46" data-line-number="46">  genomeStat[g, <span class="st">&quot;length&quot;</span>] &lt;-<span class="st"> </span><span class="kw">length</span>(genomes[[g]])</a>
+<a class="sourceLine" id="cb2-47" data-line-number="47">}</a>
+<a class="sourceLine" id="cb2-48" data-line-number="48"></a>
+<a class="sourceLine" id="cb2-49" data-line-number="49"><span class="kw">kable</span>(genomeStat, <span class="dt">caption =</span> <span class="st">&quot;Reference and query genomes&quot;</span>)</a></code></pre></div>
 <table>
 <caption>Reference and query genomes</caption>
 <thead>
@@ -456,42 +475,42 @@ div.tocify {
 </thead>
 <tbody>
 <tr class="odd">
-<td>Human_SARS-CoV-2_Whu1</td>
+<td>HuCoV2_WH01_2019</td>
 <td align="left">Reference</td>
-<td align="right">29903</td>
+<td align="right">29899</td>
 </tr>
 <tr class="even">
-<td>Bat_bat-SL-CoVZC45</td>
-<td align="left">Query</td>
-<td align="right">29802</td>
-</tr>
-<tr class="odd">
-<td>Bat_bat-SL-CoVZXC21</td>
-<td align="left">Query</td>
-<td align="right">29732</td>
-</tr>
-<tr class="even">
-<td>Bat_RaTG13</td>
-<td align="left">Query</td>
-<td align="right">29855</td>
-</tr>
-<tr class="odd">
-<td>Human_SARS-CoV_Frankfurt_1</td>
-<td align="left">Query</td>
-<td align="right">29727</td>
-</tr>
-<tr class="even">
-<td>Pangolin_PCoV_GX-P1E_2017/2020</td>
+<td>PnGX-P1E_2017</td>
 <td align="left">Query</td>
 <td align="right">29801</td>
 </tr>
 <tr class="odd">
-<td>Bat_Yu-RmYN02_2019</td>
+<td>BtZC45</td>
+<td align="left">Query</td>
+<td align="right">29802</td>
+</tr>
+<tr class="even">
+<td>BtZXC21</td>
+<td align="left">Query</td>
+<td align="right">29732</td>
+</tr>
+<tr class="odd">
+<td>BtRaTG13_2013_Yunnan</td>
+<td align="left">Query</td>
+<td align="right">29855</td>
+</tr>
+<tr class="even">
+<td>HuSARS-Frankfurt-1_2003</td>
+<td align="left">Query</td>
+<td align="right">29727</td>
+</tr>
+<tr class="odd">
+<td>BtYu-RmYN02_2019</td>
 <td align="left">Query</td>
 <td align="right">29671</td>
 </tr>
 <tr class="even">
-<td>Pangolin_Gu1_2019</td>
+<td>PnGu1_2019</td>
 <td align="left">Query</td>
 <td align="right">29825</td>
 </tr>
@@ -499,16 +518,23 @@ div.tocify {
 </table>
 <div id="n-to-1-full-genome-alignments" class="section level2">
 <h2>N-to-1 full genome alignments</h2>
-<p>We perform a pairwise lignment between each genome query and the reference genome (Human_SARS-CoV-2_Whu1).</p>
+<p>We perform a pairwise lignment between each genome query and the reference genome (HuCoV2_WH01_2019).</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co">#### N-to-1 genome alignments ####</span></a>
 <a class="sourceLine" id="cb3-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="co">## Get sequences for reference and query genomes</span></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4">refGenome &lt;-<span class="st"> </span>genomes[refGenomeName]</a>
-<a class="sourceLine" id="cb3-5" data-line-number="5">queryGenomes &lt;-<span class="st"> </span>genomes[queryGenomeNames]</a>
-<a class="sourceLine" id="cb3-6" data-line-number="6">genomesNto1 &lt;-<span class="st"> </span><span class="kw">alignNtoOne</span>(<span class="dt">refSequence =</span> refGenome, <span class="dt">querySequences =</span> queryGenomes)</a>
-<a class="sourceLine" id="cb3-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb3-8" data-line-number="8"><span class="kw">kable</span>(genomesNto1<span class="op">$</span>stats[<span class="kw">order</span>(genomesNto1<span class="op">$</span>stats<span class="op">$</span>score, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), ], </a>
-<a class="sourceLine" id="cb3-9" data-line-number="9">      <span class="dt">caption =</span> <span class="st">&quot;N-to-one alignment of full genomes&quot;</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="co">## Define output file for genome alignments</span></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">outfiles[<span class="st">&quot;Genome alignments&quot;</span>] &lt;-<span class="st"> </span><span class="kw">file.path</span>(</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">  dir<span class="op">$</span>outseq, <span class="kw">paste0</span>(<span class="st">&quot;genome_alignments_ref_&quot;</span>, refGenomeName))</a>
+<a class="sourceLine" id="cb3-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb3-7" data-line-number="7"><span class="co">## Get sequences for reference and query genomes</span></a>
+<a class="sourceLine" id="cb3-8" data-line-number="8">refGenome &lt;-<span class="st"> </span>genomes[refGenomeName]</a>
+<a class="sourceLine" id="cb3-9" data-line-number="9">queryGenomes &lt;-<span class="st"> </span>genomes[queryGenomeNames]</a>
+<a class="sourceLine" id="cb3-10" data-line-number="10">genomesNto1 &lt;-<span class="st"> </span><span class="kw">alignNtoOne</span>(</a>
+<a class="sourceLine" id="cb3-11" data-line-number="11">  <span class="dt">refSequence =</span> refGenome, </a>
+<a class="sourceLine" id="cb3-12" data-line-number="12">  <span class="dt">querySequences =</span> queryGenomes,</a>
+<a class="sourceLine" id="cb3-13" data-line-number="13">  <span class="dt">outfile =</span> outfiles[[<span class="st">&quot;Genome alignments&quot;</span>]] )</a>
+<a class="sourceLine" id="cb3-14" data-line-number="14"></a>
+<a class="sourceLine" id="cb3-15" data-line-number="15"><span class="kw">kable</span>(genomesNto1<span class="op">$</span>stats[<span class="kw">order</span>(genomesNto1<span class="op">$</span>stats<span class="op">$</span>score, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), ], </a>
+<a class="sourceLine" id="cb3-16" data-line-number="16">      <span class="dt">caption =</span> <span class="st">&quot;N-to-one alignment of full genomes&quot;</span>)</a></code></pre></div>
 <table>
 <caption>N-to-one alignment of full genomes</caption>
 <thead>
@@ -525,74 +551,74 @@ div.tocify {
 </thead>
 <tbody>
 <tr class="odd">
-<td>Bat_RaTG13</td>
-<td align="right">96.07200</td>
-<td align="right">29888</td>
+<td>BtRaTG13_2013_Yunnan</td>
+<td align="right">96.07482</td>
+<td align="right">29884</td>
 <td align="right">6</td>
-<td align="right">33</td>
+<td align="right">29</td>
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="right">49903.32</td>
+<td align="right">49895.67</td>
 </tr>
 <tr class="even">
-<td>Bat_Yu-RmYN02_2019</td>
-<td align="right">93.71046</td>
+<td>BtYu-RmYN02_2019</td>
+<td align="right">93.70042</td>
 <td align="right">29875</td>
 <td align="right">59</td>
 <td align="right">204</td>
 <td align="right">22</td>
 <td align="right">46</td>
-<td align="right">43742.79</td>
+<td align="right">43735.11</td>
 </tr>
 <tr class="odd">
-<td>Pangolin_Gu1_2019</td>
-<td align="right">90.26895</td>
+<td>PnGu1_2019</td>
+<td align="right">90.25891</td>
 <td align="right">29894</td>
 <td align="right">16</td>
 <td align="right">69</td>
 <td align="right">9</td>
 <td align="right">23</td>
-<td align="right">36107.67</td>
+<td align="right">36100.06</td>
 </tr>
 <tr class="even">
-<td>Bat_bat-SL-CoVZC45</td>
-<td align="right">87.87211</td>
-<td align="right">29931</td>
+<td>BtZC45</td>
+<td align="right">87.87383</td>
+<td align="right">29927</td>
 <td align="right">33</td>
-<td align="right">132</td>
+<td align="right">127</td>
 <td align="right">16</td>
 <td align="right">28</td>
-<td align="right">30527.45</td>
+<td align="right">30517.91</td>
 </tr>
 <tr class="odd">
-<td>Bat_bat-SL-CoVZXC21</td>
-<td align="right">87.61946</td>
-<td align="right">29926</td>
+<td>BtZXC21</td>
+<td align="right">87.62115</td>
+<td align="right">29922</td>
 <td align="right">37</td>
-<td align="right">197</td>
+<td align="right">192</td>
 <td align="right">13</td>
 <td align="right">23</td>
-<td align="right">30030.24</td>
+<td align="right">30020.70</td>
 </tr>
 <tr class="even">
-<td>Pangolin_PCoV_GX-P1E_2017/2020</td>
-<td align="right">85.40635</td>
+<td>PnGX-P1E_2017</td>
+<td align="right">85.39630</td>
 <td align="right">29876</td>
 <td align="right">27</td>
 <td align="right">77</td>
 <td align="right">13</td>
 <td align="right">19</td>
-<td align="right">24440.96</td>
+<td align="right">24433.32</td>
 </tr>
 <tr class="odd">
-<td>Human_SARS-CoV_Frankfurt_1</td>
-<td align="right">79.54068</td>
+<td>HuSARS-Frankfurt-1_2003</td>
+<td align="right">79.53068</td>
 <td align="right">30001</td>
 <td align="right">76</td>
 <td align="right">276</td>
 <td align="right">63</td>
 <td align="right">131</td>
-<td align="right">10318.37</td>
+<td align="right">10310.73</td>
 </tr>
 </tbody>
 </table>
@@ -614,19 +640,65 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 </div>
 <div id="sars-vs-civet" class="section level2">
 <h2>SARS vs Civet</h2>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co">#### Compare SARS (2002) wih the related Civet genome ####</span></a>
-<a class="sourceLine" id="cb5-2" data-line-number="2">SARSvsCivetGenome &lt;-<span class="st"> </span><span class="kw">alignNtoOne</span>(</a>
-<a class="sourceLine" id="cb5-3" data-line-number="3">  <span class="dt">refSequence =</span> genomes[<span class="st">&quot;Human_SARS-CoV_Frankfurt_1&quot;</span>], </a>
-<a class="sourceLine" id="cb5-4" data-line-number="4">  <span class="dt">querySequences =</span> genomes[<span class="st">&quot;Civet_SARS-CoV_007/2004&quot;</span>])</a>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co">## Define output file for genome alignments</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">outfiles[<span class="st">&quot;Genome alignments - SARS&quot;</span>] &lt;-<span class="st"> </span><span class="kw">file.path</span>(</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">  dir<span class="op">$</span>outseq, <span class="kw">paste0</span>(<span class="st">&quot;genome_alignments_ref_&quot;</span>,</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">                     <span class="st">&quot;HuSARS-Frankfurt-1_2003&quot;</span>))</a>
 <a class="sourceLine" id="cb5-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co">## PIP profile of full genome N-to-1 alignments</span></a>
-<a class="sourceLine" id="cb5-7" data-line-number="7"><span class="kw">plotPIPprofiles</span>(<span class="dt">alignments =</span> SARSvsCivetGenome<span class="op">$</span>alignments, </a>
-<a class="sourceLine" id="cb5-8" data-line-number="8">                <span class="dt">windowSize =</span> <span class="dv">500</span>, </a>
-<a class="sourceLine" id="cb5-9" data-line-number="9">                <span class="dt">legend =</span> <span class="kw">paste0</span>(<span class="kw">names</span>(SARSvsCivetGenome<span class="op">$</span>alignments), <span class="st">&quot; (&quot;</span>, <span class="kw">round</span>(<span class="dt">digits =</span> <span class="dv">2</span>, SARSvsCivetGenome<span class="op">$</span>stats<span class="op">$</span>pid), <span class="st">&quot;%)&quot;</span>),</a>
-<a class="sourceLine" id="cb5-10" data-line-number="10">                <span class="dt">main =</span> <span class="kw">paste0</span>(<span class="st">&quot;Percent Identical Positions - Full genome&quot;</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">Ref: &quot;</span>, <span class="st">&quot;Human_SARS-CoV_Frankfurt_1&quot;</span>),</a>
-<a class="sourceLine" id="cb5-11" data-line-number="11">                <span class="dt">legendMargin =</span> <span class="dv">0</span>, <span class="dt">legendCorner =</span> <span class="st">&quot;bottom&quot;</span>, <span class="dt">legendCex =</span> <span class="fl">0.7</span>, <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">40</span>,<span class="dv">100</span>))</a></code></pre></div>
+<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co">#### Compare SARS (2002) wih the related Civet genome ####</span></a>
+<a class="sourceLine" id="cb5-7" data-line-number="7">SARSvsCivetGenome &lt;-<span class="st"> </span><span class="kw">alignNtoOne</span>(</a>
+<a class="sourceLine" id="cb5-8" data-line-number="8">  <span class="dt">refSequence =</span> genomes[<span class="st">&quot;HuSARS-Frankfurt-1_2003&quot;</span>], </a>
+<a class="sourceLine" id="cb5-9" data-line-number="9">  <span class="dt">querySequences =</span> genomes[<span class="kw">c</span>(<span class="st">&quot;Cv007-2004&quot;</span>, </a>
+<a class="sourceLine" id="cb5-10" data-line-number="10">                             <span class="st">&quot;HuCoV2_WH01_2019&quot;</span>)],</a>
+<a class="sourceLine" id="cb5-11" data-line-number="11">  <span class="dt">outfile =</span> outfiles[<span class="st">&quot;Genome alignments - SARS&quot;</span>] )</a>
+<a class="sourceLine" id="cb5-12" data-line-number="12"></a>
+<a class="sourceLine" id="cb5-13" data-line-number="13"><span class="kw">kable</span>(SARSvsCivetGenome<span class="op">$</span>stats[<span class="kw">order</span>(SARSvsCivetGenome<span class="op">$</span>stats<span class="op">$</span>score, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>), ], </a>
+<a class="sourceLine" id="cb5-14" data-line-number="14">      <span class="dt">caption =</span> <span class="st">&quot;SARS (2003). N-to-one alignment of full genomes of the closest animal virus (Civet) and of Human SARS-CoV-2. &quot;</span>)</a></code></pre></div>
+<table>
+<caption>SARS (2003). N-to-one alignment of full genomes of the closest animal virus (Civet) and of Human SARS-CoV-2.</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">pid</th>
+<th align="right">nchar</th>
+<th align="right">insertNb</th>
+<th align="right">insertLen</th>
+<th align="right">delNb</th>
+<th align="right">delLen</th>
+<th align="right">score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Cv007-2004</td>
+<td align="right">99.51634</td>
+<td align="right">29566</td>
+<td align="right">1</td>
+<td align="right">26</td>
+<td align="right">1</td>
+<td align="right">29</td>
+<td align="right">56768.85</td>
+</tr>
+<tr class="even">
+<td>HuCoV2_WH01_2019</td>
+<td align="right">79.52735</td>
+<td align="right">30001</td>
+<td align="right">63</td>
+<td align="right">131</td>
+<td align="right">75</td>
+<td align="right">274</td>
+<td align="right">10434.99</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co">## PIP profile of full genome N-to-1 alignments</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw">plotPIPprofiles</span>(<span class="dt">alignments =</span> SARSvsCivetGenome<span class="op">$</span>alignments, </a>
+<a class="sourceLine" id="cb6-3" data-line-number="3">                <span class="dt">windowSize =</span> <span class="dv">500</span>, </a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">                <span class="dt">legend =</span> <span class="kw">paste0</span>(<span class="kw">names</span>(SARSvsCivetGenome<span class="op">$</span>alignments), <span class="st">&quot; (&quot;</span>, <span class="kw">round</span>(<span class="dt">digits =</span> <span class="dv">2</span>, SARSvsCivetGenome<span class="op">$</span>stats<span class="op">$</span>pid), <span class="st">&quot;%)&quot;</span>),</a>
+<a class="sourceLine" id="cb6-5" data-line-number="5">                <span class="dt">main =</span> <span class="kw">paste0</span>(<span class="st">&quot;Percent Identical Positions - Full genome&quot;</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">Ref: &quot;</span>, <span class="st">&quot;Human_SARS-CoV_Frankfurt_1&quot;</span>),</a>
+<a class="sourceLine" id="cb6-6" data-line-number="6">                <span class="dt">legendMargin =</span> <span class="dv">0</span>, <span class="dt">legendCorner =</span> <span class="st">&quot;bottom&quot;</span>, <span class="dt">legendCex =</span> <span class="fl">0.7</span>, <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">40</span>,<span class="dv">100</span>))</a></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="figures/cov-seq_SARS_vs_civet_genome-1.png" alt="Percent Identical Positions profile over the whole genome of SARS (2002-2003). " width="100%" />
+<img src="figures/cov-seq_PIP_SARS_vs_civet_genome-1.png" alt="Percent Identical Positions profile over the whole genome of SARS (2002-2003). " width="100%" />
 <p class="caption">
 Percent Identical Positions profile over the whole genome of SARS (2002-2003).
 </p>
@@ -634,15 +706,22 @@ Percent Identical Positions profile over the whole genome of SARS (2002-2003).
 </div>
 <div id="n-to-1-alignemnts-of-spike-genes" class="section level2">
 <h2>N-to-1 alignemnts of spike genes</h2>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co">#### N-to-1 alignments of spike-coding sequences ####</span></a>
-<a class="sourceLine" id="cb6-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="co">## Get sequences for reference and query genomes</span></a>
-<a class="sourceLine" id="cb6-4" data-line-number="4">refSpike &lt;-<span class="st"> </span><span class="kw">subseq</span>(genomes[refGenomeName], <span class="dt">start =</span> refSpikeLimits[<span class="dv">1</span>], <span class="dt">end =</span> refSpikeLimits[<span class="dv">2</span>])</a>
-<a class="sourceLine" id="cb6-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb6-6" data-line-number="6">spikesNto1 &lt;-<span class="st"> </span><span class="kw">alignNtoOne</span>(<span class="dt">refSequence =</span> refSpike, <span class="dt">querySequences =</span> queryGenomes, <span class="dt">type =</span> <span class="st">&quot;global-local&quot;</span>)</a>
-<a class="sourceLine" id="cb6-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb6-8" data-line-number="8">  <span class="kw">kable</span>(spikesNto1<span class="op">$</span>stats[<span class="kw">order</span>(spikesNto1<span class="op">$</span>stat<span class="op">$</span>score, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>),], </a>
-<a class="sourceLine" id="cb6-9" data-line-number="9">      <span class="dt">caption =</span> <span class="st">&quot;N-to-one alignment of S genes&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="co">#### N-to-1 alignments of spike-coding sequences ####</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3">outfiles[<span class="st">&quot;S gene alignments&quot;</span>]  &lt;-<span class="st"> </span><span class="kw">file.path</span>(</a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">  dir<span class="op">$</span>outseq, <span class="kw">paste0</span>(<span class="st">&quot;S-gene_alignments&quot;</span>))</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5">  </a>
+<a class="sourceLine" id="cb7-6" data-line-number="6"><span class="co">## Get sequences for reference and query genomes</span></a>
+<a class="sourceLine" id="cb7-7" data-line-number="7">refSpike &lt;-<span class="st"> </span><span class="kw">subseq</span>(genomes[refGenomeName], <span class="dt">start =</span> refSpikeLimits[<span class="dv">1</span>], <span class="dt">end =</span> refSpikeLimits[<span class="dv">2</span>])</a>
+<a class="sourceLine" id="cb7-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb7-9" data-line-number="9">spikesNto1 &lt;-<span class="st"> </span><span class="kw">alignNtoOne</span>(</a>
+<a class="sourceLine" id="cb7-10" data-line-number="10">  <span class="dt">refSequence =</span> refSpike, </a>
+<a class="sourceLine" id="cb7-11" data-line-number="11">  <span class="dt">querySequences =</span> queryGenomes[<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>], </a>
+<a class="sourceLine" id="cb7-12" data-line-number="12">  <span class="dt">type =</span> <span class="st">&quot;global-local&quot;</span>,</a>
+<a class="sourceLine" id="cb7-13" data-line-number="13">  <span class="dt">outfile =</span> outfiles[<span class="st">&quot;S gene alignments&quot;</span>])</a>
+<a class="sourceLine" id="cb7-14" data-line-number="14"></a>
+<a class="sourceLine" id="cb7-15" data-line-number="15"><span class="kw">kable</span>(spikesNto1<span class="op">$</span>stats[<span class="kw">order</span>(spikesNto1<span class="op">$</span>stat<span class="op">$</span>score, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>),], </a>
+<a class="sourceLine" id="cb7-16" data-line-number="16">      <span class="dt">caption =</span> <span class="st">&quot;N-to-one alignment of S genes&quot;</span>)</a></code></pre></div>
 <table>
 <caption>N-to-one alignment of S genes</caption>
 <thead>
@@ -659,27 +738,7 @@ Percent Identical Positions profile over the whole genome of SARS (2002-2003).
 </thead>
 <tbody>
 <tr class="odd">
-<td>Bat_RaTG13</td>
-<td align="right">92.85714</td>
-<td align="right">3822</td>
-<td align="right">1</td>
-<td align="right">12</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">5435.6235</td>
-</tr>
-<tr class="even">
-<td>Pangolin_Gu1_2019</td>
-<td align="right">84.22836</td>
-<td align="right">3836</td>
-<td align="right">12</td>
-<td align="right">38</td>
-<td align="right">6</td>
-<td align="right">14</td>
-<td align="right">2752.7136</td>
-</tr>
-<tr class="odd">
-<td>Pangolin_PCoV_GX-P1E_2017/2020</td>
+<td>PnGX-P1E_2017</td>
 <td align="right">83.42050</td>
 <td align="right">3824</td>
 <td align="right">8</td>
@@ -689,7 +748,7 @@ Percent Identical Positions profile over the whole genome of SARS (2002-2003).
 <td align="right">2534.8452</td>
 </tr>
 <tr class="even">
-<td>Bat_bat-SL-CoVZC45</td>
+<td>BtZC45</td>
 <td align="right">76.61458</td>
 <td align="right">3840</td>
 <td align="right">24</td>
@@ -698,46 +757,16 @@ Percent Identical Positions profile over the whole genome of SARS (2002-2003).
 <td align="right">18</td>
 <td align="right">405.0663</td>
 </tr>
-<tr class="odd">
-<td>Bat_bat-SL-CoVZXC21</td>
-<td align="right">75.87285</td>
-<td align="right">3838</td>
-<td align="right">24</td>
-<td align="right">100</td>
-<td align="right">9</td>
-<td align="right">16</td>
-<td align="right">198.5031</td>
-</tr>
-<tr class="even">
-<td>Bat_Yu-RmYN02_2019</td>
-<td align="right">74.75980</td>
-<td align="right">3851</td>
-<td align="right">43</td>
-<td align="right">167</td>
-<td align="right">14</td>
-<td align="right">29</td>
-<td align="right">-226.3011</td>
-</tr>
-<tr class="odd">
-<td>Human_SARS-CoV_Frankfurt_1</td>
-<td align="right">73.76921</td>
-<td align="right">3839</td>
-<td align="right">21</td>
-<td align="right">90</td>
-<td align="right">13</td>
-<td align="right">17</td>
-<td align="right">-465.0419</td>
-</tr>
 </tbody>
 </table>
-<div id="spike-protein-pip-plot" class="section level3">
-<h3>Spike protein PIP plot</h3>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="co">## PIP profile of spike N-to-1 alignments</span></a>
-<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="kw">plotPIPprofiles</span>(<span class="dt">alignments =</span> spikesNto1<span class="op">$</span>alignments, </a>
-<a class="sourceLine" id="cb7-3" data-line-number="3">                <span class="dt">windowSize =</span> <span class="dv">200</span>, </a>
-<a class="sourceLine" id="cb7-4" data-line-number="4">                <span class="dt">legend =</span> <span class="kw">paste0</span>(<span class="kw">names</span>(spikesNto1<span class="op">$</span>alignments), <span class="st">&quot; (&quot;</span>, <span class="kw">round</span>(<span class="dt">digits =</span> <span class="dv">2</span>, spikesNto1<span class="op">$</span>stats<span class="op">$</span>pid), <span class="st">&quot;%)&quot;</span>),</a>
-<a class="sourceLine" id="cb7-5" data-line-number="5">                <span class="dt">main =</span> <span class="kw">paste0</span>(<span class="st">&quot;S gene - PIP profile&quot;</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">Ref: &quot;</span>, refGenomeName),</a>
-<a class="sourceLine" id="cb7-6" data-line-number="6">                <span class="dt">legendMargin =</span> <span class="dv">0</span>, <span class="dt">legendCorner =</span> <span class="st">&quot;bottomright&quot;</span>, <span class="dt">legendCex =</span> <span class="fl">0.8</span>, <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">30</span>, <span class="dv">100</span>))</a></code></pre></div>
+<div id="spike-gene-pip-plot" class="section level3">
+<h3>Spike gene PIP plot</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co">## PIP profile of spike N-to-1 alignments</span></a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="kw">plotPIPprofiles</span>(<span class="dt">alignments =</span> spikesNto1<span class="op">$</span>alignments, </a>
+<a class="sourceLine" id="cb8-3" data-line-number="3">                <span class="dt">windowSize =</span> <span class="dv">200</span>, </a>
+<a class="sourceLine" id="cb8-4" data-line-number="4">                <span class="dt">legend =</span> <span class="kw">paste0</span>(<span class="kw">names</span>(spikesNto1<span class="op">$</span>alignments), <span class="st">&quot; (&quot;</span>, <span class="kw">round</span>(<span class="dt">digits =</span> <span class="dv">2</span>, spikesNto1<span class="op">$</span>stats<span class="op">$</span>pid), <span class="st">&quot;%)&quot;</span>),</a>
+<a class="sourceLine" id="cb8-5" data-line-number="5">                <span class="dt">main =</span> <span class="kw">paste0</span>(<span class="st">&quot;S gene - PIP profile&quot;</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">Ref: &quot;</span>, refGenomeName),</a>
+<a class="sourceLine" id="cb8-6" data-line-number="6">                <span class="dt">legendMargin =</span> <span class="dv">0</span>, <span class="dt">legendCorner =</span> <span class="st">&quot;bottomright&quot;</span>, <span class="dt">legendCex =</span> <span class="fl">0.8</span>, <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">30</span>, <span class="dv">100</span>))</a></code></pre></div>
 <div class="figure" style="text-align: center">
 <img src="figures/cov-seq_Sgene_pip-1.png" alt="Percent Identical Positions profile over the whole genome of SARS-CoV-2. " width="100%" />
 <p class="caption">
@@ -745,16 +774,96 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 </p>
 </div>
 </div>
-<div id="getting-spike-proteins-in-all-the-selected-coronavirus-genomes" class="section level3">
-<h3>Getting spike proteins in all the selected coronavirus genomes</h3>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co">#### N-to-1 alignments of all spike-coding sequences ####</span></a>
-<a class="sourceLine" id="cb8-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb8-3" data-line-number="3"><span class="co">## Get sequences for reference and query genomes</span></a>
-<a class="sourceLine" id="cb8-4" data-line-number="4">spikesNto1All &lt;-<span class="st"> </span><span class="kw">alignNtoOne</span>(<span class="dt">refSequence =</span> refSpike, <span class="dt">querySequences =</span> genomes, <span class="dt">type =</span> <span class="st">&quot;global-local&quot;</span>)</a>
-<a class="sourceLine" id="cb8-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb8-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb8-7" data-line-number="7"><span class="kw">kable</span>(spikesNto1All<span class="op">$</span>stats[<span class="kw">order</span>(spikesNto1All<span class="op">$</span>stat<span class="op">$</span>score, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>),], </a>
-<a class="sourceLine" id="cb8-8" data-line-number="8">      <span class="dt">caption =</span> <span class="st">&quot;N-to-one alignment of S genes&quot;</span>)</a></code></pre></div>
+<div id="getting-sequences-of-spike-gene-in-all-the-selected-coronavirus-genomes" class="section level3">
+<h3>Getting sequences of spike gene in all the selected coronavirus genomes</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="co">#&#39; @title Export sequencesquery + subject sequences from N-to-1 alignments</span></a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="co">#&#39; @author Jacques.van-Helden@france)bioinformatique.fr</span></a>
+<a class="sourceLine" id="cb9-3" data-line-number="3"><span class="co">#&#39; @param refsequence  sequence used as reference (DB) for the N-to-1 alignment</span></a>
+<a class="sourceLine" id="cb9-4" data-line-number="4"><span class="co">#&#39; @param genomes genome sequences</span></a>
+<a class="sourceLine" id="cb9-5" data-line-number="5"><span class="co">#&#39; @param IDsuffix=NULL if not null, append the suffix to the sequence name for the fasta header</span></a>
+<a class="sourceLine" id="cb9-6" data-line-number="6"><span class="co">#&#39; @param outfile=NULL output file. If specified, the matches will be exported as fasta-formatted sequences.</span></a>
+<a class="sourceLine" id="cb9-7" data-line-number="7"><span class="co">#&#39; @export</span></a>
+<a class="sourceLine" id="cb9-8" data-line-number="8">ExportSegmentMatches &lt;-<span class="st"> </span><span class="cf">function</span>(refsequence,</a>
+<a class="sourceLine" id="cb9-9" data-line-number="9">                                 genomes,</a>
+<a class="sourceLine" id="cb9-10" data-line-number="10">                                 <span class="dt">IDsuffix =</span> <span class="ot">NULL</span>,</a>
+<a class="sourceLine" id="cb9-11" data-line-number="11">                                 <span class="dt">outfile=</span><span class="ot">NULL</span>) {</a>
+<a class="sourceLine" id="cb9-12" data-line-number="12">  </a>
+<a class="sourceLine" id="cb9-13" data-line-number="13">  <span class="co">#### N-to-1 alignments of all spike-coding sequences ####</span></a>
+<a class="sourceLine" id="cb9-14" data-line-number="14">  </a>
+<a class="sourceLine" id="cb9-15" data-line-number="15">  <span class="co">## Get sequences for reference and query genomes</span></a>
+<a class="sourceLine" id="cb9-16" data-line-number="16">  alignmentsNto1 &lt;-<span class="st"> </span><span class="kw">alignNtoOne</span>(</a>
+<a class="sourceLine" id="cb9-17" data-line-number="17">    <span class="dt">refSequence =</span> refsequence, </a>
+<a class="sourceLine" id="cb9-18" data-line-number="18">    <span class="dt">querySequences =</span> genomes, </a>
+<a class="sourceLine" id="cb9-19" data-line-number="19">    <span class="dt">type =</span> <span class="st">&quot;global-local&quot;</span>)</a>
+<a class="sourceLine" id="cb9-20" data-line-number="20">  </a>
+<a class="sourceLine" id="cb9-21" data-line-number="21">  <span class="cf">if</span> (<span class="op">!</span><span class="kw">is.null</span>(outfile)) {</a>
+<a class="sourceLine" id="cb9-22" data-line-number="22">    </a>
+<a class="sourceLine" id="cb9-23" data-line-number="23">    <span class="co">## Write the reference sequence in the output fle</span></a>
+<a class="sourceLine" id="cb9-24" data-line-number="24">    <span class="kw">writeXStringSet</span>(refsequence, <span class="dt">filepath =</span> outfile, <span class="dt">format =</span> <span class="st">&quot;fasta&quot;</span>)</a>
+<a class="sourceLine" id="cb9-25" data-line-number="25">    </a>
+<a class="sourceLine" id="cb9-26" data-line-number="26">    i &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb9-27" data-line-number="27">    nbAlignments &lt;-<span class="st"> </span><span class="kw">length</span>(alignmentsNto1<span class="op">$</span>alignments)</a>
+<a class="sourceLine" id="cb9-28" data-line-number="28">    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>nbAlignments) {</a>
+<a class="sourceLine" id="cb9-29" data-line-number="29">      genomeName &lt;-<span class="st"> </span><span class="kw">names</span>(genomes[i])</a>
+<a class="sourceLine" id="cb9-30" data-line-number="30">      alignment &lt;-<span class="st"> </span>alignmentsNto1<span class="op">$</span>alignments[[i]]</a>
+<a class="sourceLine" id="cb9-31" data-line-number="31">      subject &lt;-<span class="st"> </span><span class="kw">subject</span>(alignment)</a>
+<a class="sourceLine" id="cb9-32" data-line-number="32">      </a>
+<a class="sourceLine" id="cb9-33" data-line-number="33">      <span class="co">## Suppress the dashes from the alignment to get the raw sequence</span></a>
+<a class="sourceLine" id="cb9-34" data-line-number="34">      sequence &lt;-<span class="st"> </span><span class="kw">as.character</span>(subject)</a>
+<a class="sourceLine" id="cb9-35" data-line-number="35">      sequenceDesaligned &lt;-<span class="st"> </span><span class="kw">gsub</span>(<span class="dt">pattern =</span> <span class="st">&quot;-&quot;</span>, <span class="dt">replacement =</span> <span class="st">&quot;&quot;</span>, <span class="dt">x =</span> sequence)</a>
+<a class="sourceLine" id="cb9-36" data-line-number="36">      seqStringSet &lt;-<span class="st"> </span><span class="kw">DNAStringSet</span>(<span class="dt">x =</span> sequenceDesaligned) <span class="co">#, start = start(subject), end=end(subject))</span></a>
+<a class="sourceLine" id="cb9-37" data-line-number="37"></a>
+<a class="sourceLine" id="cb9-38" data-line-number="38">            </a>
+<a class="sourceLine" id="cb9-39" data-line-number="39">      <span class="co">## Define a sequence ID for the fasta header</span></a>
+<a class="sourceLine" id="cb9-40" data-line-number="40">      sequenceID &lt;-<span class="st"> </span>genomeName</a>
+<a class="sourceLine" id="cb9-41" data-line-number="41">      <span class="cf">if</span> (<span class="op">!</span><span class="kw">is.null</span>(IDsuffix)) {</a>
+<a class="sourceLine" id="cb9-42" data-line-number="42">        sequenceID &lt;-<span class="st"> </span><span class="kw">paste0</span>(sequenceID, IDsuffix)</a>
+<a class="sourceLine" id="cb9-43" data-line-number="43">      } </a>
+<a class="sourceLine" id="cb9-44" data-line-number="44">      sequenceID &lt;-<span class="st"> </span><span class="kw">paste0</span>(sequenceID, <span class="st">&quot;_&quot;</span>, <span class="kw">start</span>(subject), <span class="st">&quot;-&quot;</span>, <span class="kw">end</span>(subject))</a>
+<a class="sourceLine" id="cb9-45" data-line-number="45">      <span class="kw">names</span>(seqStringSet) &lt;-<span class="st"> </span>sequenceID</a>
+<a class="sourceLine" id="cb9-46" data-line-number="46">      <span class="co"># </span></a>
+<a class="sourceLine" id="cb9-47" data-line-number="47">      <span class="co">## Write pairwise alignment (temporarily disaactivated)</span></a>
+<a class="sourceLine" id="cb9-48" data-line-number="48">      <span class="co"># alignmentFile &lt;- paste0(&quot;pairwise-alignment_&quot;, </span></a>
+<a class="sourceLine" id="cb9-49" data-line-number="49">      <span class="co">#                         # gsub(pattern = &quot;/&quot;, replacement = &quot;-&quot;, x = genomeName), </span></a>
+<a class="sourceLine" id="cb9-50" data-line-number="50">      <span class="co">#                         &quot;.txt&quot;)</span></a>
+<a class="sourceLine" id="cb9-51" data-line-number="51">      <span class="co"># writePairwiseAlignments(x = alignment, file = outfile)</span></a>
+<a class="sourceLine" id="cb9-52" data-line-number="52"></a>
+<a class="sourceLine" id="cb9-53" data-line-number="53">      <span class="co">## Append the sequence to the file</span></a>
+<a class="sourceLine" id="cb9-54" data-line-number="54">      <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Appending sequence &quot;</span>, i, <span class="st">&quot;/&quot;</span>, nbAlignments, <span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>, sequenceID)</a>
+<a class="sourceLine" id="cb9-55" data-line-number="55">      <span class="kw">writeXStringSet</span>(seqStringSet,</a>
+<a class="sourceLine" id="cb9-56" data-line-number="56">                      <span class="dt">filepath =</span> outfile, <span class="dt">format =</span> <span class="st">&quot;fasta&quot;</span>, <span class="dt">append =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb9-57" data-line-number="57">      </a>
+<a class="sourceLine" id="cb9-58" data-line-number="58">    }</a>
+<a class="sourceLine" id="cb9-59" data-line-number="59">    <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Exported alignments to</span><span class="ch">\t</span><span class="st">&quot;</span>, outfile)</a>
+<a class="sourceLine" id="cb9-60" data-line-number="60">    </a>
+<a class="sourceLine" id="cb9-61" data-line-number="61">  } </a>
+<a class="sourceLine" id="cb9-62" data-line-number="62">  <span class="kw">return</span>(alignmentsNto1)</a>
+<a class="sourceLine" id="cb9-63" data-line-number="63">  </a>
+<a class="sourceLine" id="cb9-64" data-line-number="64">}</a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co">#### Export S gene sequences found in the reference genomes ####</span></a>
+<a class="sourceLine" id="cb10-2" data-line-number="2"><span class="co"># toString(refSpike)</span></a>
+<a class="sourceLine" id="cb10-3" data-line-number="3"><span class="kw">writeXStringSet</span>(</a>
+<a class="sourceLine" id="cb10-4" data-line-number="4">  refSpike, </a>
+<a class="sourceLine" id="cb10-5" data-line-number="5">  <span class="dt">filepath =</span> <span class="kw">file.path</span>(</a>
+<a class="sourceLine" id="cb10-6" data-line-number="6">    dir<span class="op">$</span>outseq, </a>
+<a class="sourceLine" id="cb10-7" data-line-number="7">    <span class="kw">paste0</span>(<span class="st">&quot;S-gene_&quot;</span>, refGenomeName, <span class="st">&quot;.fasta&quot;</span>)), </a>
+<a class="sourceLine" id="cb10-8" data-line-number="8">  <span class="dt">format =</span> <span class="st">&quot;fasta&quot;</span>)</a>
+<a class="sourceLine" id="cb10-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb10-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb10-11" data-line-number="11"><span class="co">## Export matches to S-gene</span></a>
+<a class="sourceLine" id="cb10-12" data-line-number="12">outfiles[<span class="st">&quot;S gene matches&quot;</span>] &lt;-<span class="st"> </span><span class="kw">file.path</span>(</a>
+<a class="sourceLine" id="cb10-13" data-line-number="13">  dir<span class="op">$</span>outseq, </a>
+<a class="sourceLine" id="cb10-14" data-line-number="14">  <span class="kw">paste0</span>(<span class="st">&quot;S-gene_&quot;</span>, refGenomeName, <span class="st">&quot;_matches.fasta&quot;</span>))</a>
+<a class="sourceLine" id="cb10-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb10-16" data-line-number="16">spikesNto1All &lt;-<span class="st"> </span><span class="kw">ExportSegmentMatches</span>(</a>
+<a class="sourceLine" id="cb10-17" data-line-number="17">  <span class="dt">refsequence =</span> refSpike,</a>
+<a class="sourceLine" id="cb10-18" data-line-number="18">  <span class="dt">genomes =</span> genomes, </a>
+<a class="sourceLine" id="cb10-19" data-line-number="19">  <span class="dt">IDsuffix =</span> <span class="st">&quot;_S-gene&quot;</span>,</a>
+<a class="sourceLine" id="cb10-20" data-line-number="20">  <span class="dt">outfile =</span> outfiles[<span class="st">&quot;S gene matches&quot;</span>])</a>
+<a class="sourceLine" id="cb10-21" data-line-number="21"></a>
+<a class="sourceLine" id="cb10-22" data-line-number="22">  </a>
+<a class="sourceLine" id="cb10-23" data-line-number="23"><span class="kw">kable</span>(spikesNto1All<span class="op">$</span>stats[<span class="kw">order</span>(spikesNto1All<span class="op">$</span>stat<span class="op">$</span>score, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>),], </a>
+<a class="sourceLine" id="cb10-24" data-line-number="24">        <span class="dt">caption =</span> <span class="st">&quot;N-to-one alignment of S genes&quot;</span>)</a></code></pre></div>
 <table>
 <caption>N-to-one alignment of S genes</caption>
 <thead>
@@ -771,7 +880,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 </thead>
 <tbody>
 <tr class="odd">
-<td>Human_SARS-CoV-2_Whu1</td>
+<td>HuCoV2_WH01_2019</td>
 <td align="right">100.00000</td>
 <td align="right">3822</td>
 <td align="right">0</td>
@@ -781,7 +890,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">7574.5405</td>
 </tr>
 <tr class="even">
-<td>Bat_RaTG13</td>
+<td>BtRaTG13_2013_Yunnan</td>
 <td align="right">92.85714</td>
 <td align="right">3822</td>
 <td align="right">1</td>
@@ -791,7 +900,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">5435.6235</td>
 </tr>
 <tr class="odd">
-<td>Pangolin_Gu1_2019</td>
+<td>PnGu1_2019</td>
 <td align="right">84.22836</td>
 <td align="right">3836</td>
 <td align="right">12</td>
@@ -801,7 +910,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">2752.7136</td>
 </tr>
 <tr class="even">
-<td>Pangolin_PCoV_GX-P1E_2017/2020</td>
+<td>PnGX-P1E_2017</td>
 <td align="right">83.42050</td>
 <td align="right">3824</td>
 <td align="right">8</td>
@@ -811,7 +920,17 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">2534.8452</td>
 </tr>
 <tr class="odd">
-<td>Bat_bat-SL-CoVZC45</td>
+<td>PnGX-P2V_2018</td>
+<td align="right">83.35511</td>
+<td align="right">3827</td>
+<td align="right">4</td>
+<td align="right">17</td>
+<td align="right">4</td>
+<td align="right">5</td>
+<td align="right">2525.7588</td>
+</tr>
+<tr class="even">
+<td>BtZC45</td>
 <td align="right">76.61458</td>
 <td align="right">3840</td>
 <td align="right">24</td>
@@ -820,8 +939,8 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">18</td>
 <td align="right">405.0663</td>
 </tr>
-<tr class="even">
-<td>Bat_bat-SL-CoVZXC21</td>
+<tr class="odd">
+<td>BtZXC21</td>
 <td align="right">75.87285</td>
 <td align="right">3838</td>
 <td align="right">24</td>
@@ -830,8 +949,8 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">16</td>
 <td align="right">198.5031</td>
 </tr>
-<tr class="odd">
-<td>Bat_Yu-RmYN02_2019</td>
+<tr class="even">
+<td>BtYu-RmYN02_2019</td>
 <td align="right">74.75980</td>
 <td align="right">3851</td>
 <td align="right">43</td>
@@ -840,8 +959,8 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">29</td>
 <td align="right">-226.3011</td>
 </tr>
-<tr class="even">
-<td>Bat_LYRa11</td>
+<tr class="odd">
+<td>BtLYRa11</td>
 <td align="right">74.17926</td>
 <td align="right">3838</td>
 <td align="right">25</td>
@@ -850,8 +969,8 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">16</td>
 <td align="right">-335.2238</td>
 </tr>
-<tr class="odd">
-<td>Human_SARS-CoV_Frankfurt_1</td>
+<tr class="even">
+<td>HuSARS-Frankfurt-1_2003</td>
 <td align="right">73.76921</td>
 <td align="right">3839</td>
 <td align="right">21</td>
@@ -860,8 +979,8 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">17</td>
 <td align="right">-465.0419</td>
 </tr>
-<tr class="even">
-<td>Bat_SZ3</td>
+<tr class="odd">
+<td>BtRs4874</td>
 <td align="right">73.96619</td>
 <td align="right">3845</td>
 <td align="right">26</td>
@@ -870,8 +989,8 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">23</td>
 <td align="right">-477.7650</td>
 </tr>
-<tr class="odd">
-<td>Bat_BtRs-BetaCoV/YN2018B</td>
+<tr class="even">
+<td>BtYN2018B</td>
 <td align="right">73.90739</td>
 <td align="right">3844</td>
 <td align="right">25</td>
@@ -880,8 +999,8 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">22</td>
 <td align="right">-493.6092</td>
 </tr>
-<tr class="even">
-<td>Civet_SARS-CoV_007/2004</td>
+<tr class="odd">
+<td>Cv007-2004</td>
 <td align="right">73.57999</td>
 <td align="right">3838</td>
 <td align="right">20</td>
@@ -890,8 +1009,8 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">16</td>
 <td align="right">-505.9898</td>
 </tr>
-<tr class="odd">
-<td>Bat_HKU3-12</td>
+<tr class="even">
+<td>BtHKU3-12</td>
 <td align="right">72.94975</td>
 <td align="right">3841</td>
 <td align="right">29</td>
@@ -900,8 +1019,8 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">19</td>
 <td align="right">-714.8980</td>
 </tr>
-<tr class="even">
-<td>Bat-recombinant_Bat-SRBD</td>
+<tr class="odd">
+<td>Btrec-SARS_2008</td>
 <td align="right">72.87165</td>
 <td align="right">3841</td>
 <td align="right">29</td>
@@ -910,8 +1029,8 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">19</td>
 <td align="right">-738.5422</td>
 </tr>
-<tr class="odd">
-<td>Bat_Bat_SARS_CoV_Rm1/2004</td>
+<tr class="even">
+<td>BtRm1/2004</td>
 <td align="right">72.73201</td>
 <td align="right">3836</td>
 <td align="right">27</td>
@@ -920,18 +1039,8 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">14</td>
 <td align="right">-743.2681</td>
 </tr>
-<tr class="even">
-<td>Bat_HKU3-8</td>
-<td align="right">72.90692</td>
-<td align="right">3846</td>
-<td align="right">30</td>
-<td align="right">129</td>
-<td align="right">15</td>
-<td align="right">24</td>
-<td align="right">-749.6403</td>
-</tr>
 <tr class="odd">
-<td>Bat_BtRs-BetaCoV/YN2013</td>
+<td>BtYN2013</td>
 <td align="right">72.76518</td>
 <td align="right">3837</td>
 <td align="right">33</td>
@@ -941,7 +1050,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">-759.7230</td>
 </tr>
 <tr class="even">
-<td>Bat_Rp3/2004</td>
+<td>BtRp3-2004</td>
 <td align="right">72.55668</td>
 <td align="right">3837</td>
 <td align="right">25</td>
@@ -951,7 +1060,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">-812.6312</td>
 </tr>
 <tr class="odd">
-<td>Bat_BtRs-BetaCoV/GX2013</td>
+<td>BtGX2013</td>
 <td align="right">72.41919</td>
 <td align="right">3836</td>
 <td align="right">27</td>
@@ -961,7 +1070,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">-825.9421</td>
 </tr>
 <tr class="even">
-<td>Bat_Rp/Shaanxi2011</td>
+<td>BtRp-Shaanxi2011</td>
 <td align="right">72.33212</td>
 <td align="right">3842</td>
 <td align="right">26</td>
@@ -971,7 +1080,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">-883.9606</td>
 </tr>
 <tr class="odd">
-<td>Bat_Cp/Yunnan2011</td>
+<td>BtCp-Yun_2011</td>
 <td align="right">72.14695</td>
 <td align="right">3838</td>
 <td align="right">25</td>
@@ -981,7 +1090,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">-902.9724</td>
 </tr>
 <tr class="even">
-<td>Bat_Rs_672/2006</td>
+<td>BtRs_672-2006</td>
 <td align="right">72.08637</td>
 <td align="right">3844</td>
 <td align="right">27</td>
@@ -991,7 +1100,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">-925.0091</td>
 </tr>
 <tr class="odd">
-<td>Bat_BtRl-BetaCoV/SC2018</td>
+<td>BtSC2018</td>
 <td align="right">72.22512</td>
 <td align="right">3838</td>
 <td align="right">30</td>
@@ -1001,7 +1110,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">-927.4298</td>
 </tr>
 <tr class="even">
-<td>Bat_BtRs-BetaCoV/YN2018C</td>
+<td>BtYN2018C</td>
 <td align="right">72.03125</td>
 <td align="right">3840</td>
 <td align="right">28</td>
@@ -1011,7 +1120,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">-970.8171</td>
 </tr>
 <tr class="odd">
-<td>Pangolin_MP789</td>
+<td>PnMP789</td>
 <td align="right">70.19281</td>
 <td align="right">3838</td>
 <td align="right">27</td>
@@ -1021,7 +1130,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">-1081.8977</td>
 </tr>
 <tr class="even">
-<td>Bat_YNLF_31C</td>
+<td>BtYNLF_31C</td>
 <td align="right">71.16085</td>
 <td align="right">3842</td>
 <td align="right">32</td>
@@ -1031,7 +1140,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">-1267.2054</td>
 </tr>
 <tr class="odd">
-<td>Bat_JL2012</td>
+<td>BtJL2012</td>
 <td align="right">70.55167</td>
 <td align="right">3861</td>
 <td align="right">34</td>
@@ -1041,7 +1150,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">-1450.2301</td>
 </tr>
 <tr class="even">
-<td>Bat_BM48-31</td>
+<td>BtBM48-31</td>
 <td align="right">69.85485</td>
 <td align="right">3858</td>
 <td align="right">22</td>
@@ -1051,7 +1160,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">-1664.0186</td>
 </tr>
 <tr class="odd">
-<td>Bat_BtKY72</td>
+<td>BtBtKY72</td>
 <td align="right">69.87296</td>
 <td align="right">3857</td>
 <td align="right">28</td>
@@ -1061,7 +1170,7 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">-1717.2273</td>
 </tr>
 <tr class="even">
-<td>Pangolin_Gu-P2S_2019</td>
+<td>PnGu-P2S_2019</td>
 <td align="right">57.71847</td>
 <td align="right">3822</td>
 <td align="right">2</td>
@@ -1071,7 +1180,17 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">-3342.9629</td>
 </tr>
 <tr class="odd">
-<td>Human_h-MERS_KOR/CNUH_SNU/172_06_2015</td>
+<td>HuOC43</td>
+<td align="right">52.55767</td>
+<td align="right">3988</td>
+<td align="right">126</td>
+<td align="right">406</td>
+<td align="right">65</td>
+<td align="right">166</td>
+<td align="right">-7831.1919</td>
+</tr>
+<tr class="even">
+<td>HuMERS_172-06_2015</td>
 <td align="right">51.83897</td>
 <td align="right">4024</td>
 <td align="right">114</td>
@@ -1080,8 +1199,8 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">202</td>
 <td align="right">-8043.8848</td>
 </tr>
-<tr class="even">
-<td>Camel_MERS</td>
+<tr class="odd">
+<td>CmMERS</td>
 <td align="right">51.83988</td>
 <td align="right">4022</td>
 <td align="right">116</td>
@@ -1090,48 +1209,233 @@ Percent Identical Positions profile over the whole genome of SARS-CoV-2.
 <td align="right">200</td>
 <td align="right">-8057.5645</td>
 </tr>
+<tr class="even">
+<td>PiSADS</td>
+<td align="right">50.25394</td>
+<td align="right">3938</td>
+<td align="right">157</td>
+<td align="right">633</td>
+<td align="right">59</td>
+<td align="right">116</td>
+<td align="right">-8372.1523</td>
+</tr>
+<tr class="odd">
+<td>HuNL63</td>
+<td align="right">50.55276</td>
+<td align="right">3980</td>
+<td align="right">140</td>
+<td align="right">523</td>
+<td align="right">72</td>
+<td align="right">158</td>
+<td align="right">-8448.9961</td>
+</tr>
+<tr class="even">
+<td>HuTGEV</td>
+<td align="right">51.58691</td>
+<td align="right">4096</td>
+<td align="right">128</td>
+<td align="right">420</td>
+<td align="right">101</td>
+<td align="right">274</td>
+<td align="right">-8482.6543</td>
+</tr>
+<tr class="odd">
+<td>Hu229E</td>
+<td align="right">50.78849</td>
+<td align="right">3995</td>
+<td align="right">158</td>
+<td align="right">535</td>
+<td align="right">73</td>
+<td align="right">173</td>
+<td align="right">-8542.2529</td>
+</tr>
+<tr class="even">
+<td>PiPRCV</td>
+<td align="right">49.77330</td>
+<td align="right">3970</td>
+<td align="right">157</td>
+<td align="right">635</td>
+<td align="right">62</td>
+<td align="right">148</td>
+<td align="right">-8550.0039</td>
+</tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="co">#### Export S gene sequences found in the regerence genomes ####</span></a>
-<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="co"># toString(refSpike)</span></a>
-<a class="sourceLine" id="cb9-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb9-4" data-line-number="4">dir<span class="op">$</span>outseq &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>main, <span class="st">&quot;results&quot;</span>, <span class="st">&quot;S-gene&quot;</span>, <span class="st">&quot;Nto1_alignments&quot;</span>)</a>
-<a class="sourceLine" id="cb9-5" data-line-number="5"><span class="kw">dir.create</span>(dir<span class="op">$</span>outseq, <span class="dt">showWarnings =</span> <span class="ot">FALSE</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb9-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb9-7" data-line-number="7">outfiles &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
-<a class="sourceLine" id="cb9-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb9-9" data-line-number="9"><span class="kw">writeXStringSet</span>(refSpike, </a>
-<a class="sourceLine" id="cb9-10" data-line-number="10">                <span class="dt">filepath =</span> <span class="kw">file.path</span>(dir<span class="op">$</span>outseq, <span class="kw">paste0</span>(<span class="st">&quot;S-gene_&quot;</span>, refGenomeName, <span class="st">&quot;.fasta&quot;</span>)), <span class="dt">format =</span> <span class="st">&quot;fasta&quot;</span>)</a>
-<a class="sourceLine" id="cb9-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb9-12" data-line-number="12">outfiles<span class="op">$</span>Smatches &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>outseq, <span class="kw">paste0</span>(<span class="st">&quot;S-gene_&quot;</span>, refGenomeName, <span class="st">&quot;_matches.fasta&quot;</span>))</a>
-<a class="sourceLine" id="cb9-13" data-line-number="13"><span class="kw">writeXStringSet</span>(refSpike, </a>
-<a class="sourceLine" id="cb9-14" data-line-number="14">                <span class="dt">filepath =</span> outfiles<span class="op">$</span>Smatches, <span class="dt">format =</span> <span class="st">&quot;fasta&quot;</span>)</a>
-<a class="sourceLine" id="cb9-15" data-line-number="15"></a>
-<a class="sourceLine" id="cb9-16" data-line-number="16">i &lt;-<span class="st"> </span><span class="dv">1</span></a>
-<a class="sourceLine" id="cb9-17" data-line-number="17">nbAlignments &lt;-<span class="st"> </span><span class="kw">length</span>(spikesNto1All<span class="op">$</span>alignments)</a>
-<a class="sourceLine" id="cb9-18" data-line-number="18"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>nbAlignments) {</a>
-<a class="sourceLine" id="cb9-19" data-line-number="19">  genomeName &lt;-<span class="st"> </span><span class="kw">names</span>(genomes[i])</a>
-<a class="sourceLine" id="cb9-20" data-line-number="20">  alignment &lt;-<span class="st"> </span>spikesNto1All<span class="op">$</span>alignments[[i]]</a>
-<a class="sourceLine" id="cb9-21" data-line-number="21">  </a>
-<a class="sourceLine" id="cb9-22" data-line-number="22">  alignmentFile &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;pairwise-alignment_&quot;</span>, </a>
-<a class="sourceLine" id="cb9-23" data-line-number="23">                       <span class="co"># gsub(pattern = &quot;/&quot;, replacement = &quot;-&quot;, x = genomeName), </span></a>
-<a class="sourceLine" id="cb9-24" data-line-number="24">                       <span class="st">&quot;.txt&quot;</span>)</a>
-<a class="sourceLine" id="cb9-25" data-line-number="25">  <span class="kw">writePairwiseAlignments</span>(<span class="dt">x =</span> alignment, <span class="dt">file =</span> <span class="kw">file.path</span>(dir<span class="op">$</span>outseq, alignmentFile))</a>
-<a class="sourceLine" id="cb9-26" data-line-number="26">  </a>
-<a class="sourceLine" id="cb9-27" data-line-number="27">  subject &lt;-<span class="st"> </span><span class="kw">subject</span>(alignment)</a>
-<a class="sourceLine" id="cb9-28" data-line-number="28">  sequence &lt;-<span class="st"> </span><span class="kw">as.character</span>(subject)</a>
-<a class="sourceLine" id="cb9-29" data-line-number="29">  sequenceDesaligned &lt;-<span class="st"> </span><span class="kw">gsub</span>(<span class="dt">pattern =</span> <span class="st">&quot;-&quot;</span>, <span class="dt">replacement =</span> <span class="st">&quot;&quot;</span>, <span class="dt">x =</span> sequence)</a>
-<a class="sourceLine" id="cb9-30" data-line-number="30">  sequenceID &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>, genomeName, <span class="st">&quot;S-gene&quot;</span>, <span class="kw">start</span>(subject), <span class="kw">end</span>(subject))</a>
-<a class="sourceLine" id="cb9-31" data-line-number="31">  seqStringSet &lt;-<span class="st"> </span><span class="kw">DNAStringSet</span>(<span class="dt">x =</span> sequenceDesaligned) <span class="co">#, start = start(subject), end=end(subject))</span></a>
-<a class="sourceLine" id="cb9-32" data-line-number="32">  <span class="kw">names</span>(seqStringSet) &lt;-<span class="st"> </span>sequenceID</a>
-<a class="sourceLine" id="cb9-33" data-line-number="33">  <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Appending sequence &quot;</span>, i, <span class="st">&quot;/&quot;</span>, nbAlignments, <span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>, sequenceID)</a>
-<a class="sourceLine" id="cb9-34" data-line-number="34">  <span class="kw">writeXStringSet</span>(seqStringSet,</a>
-<a class="sourceLine" id="cb9-35" data-line-number="35">                  <span class="dt">filepath =</span> outfiles<span class="op">$</span>Smatches, <span class="dt">format =</span> <span class="st">&quot;fasta&quot;</span>, <span class="dt">append =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb9-36" data-line-number="36"></a>
-<a class="sourceLine" id="cb9-37" data-line-number="37">}</a>
-<a class="sourceLine" id="cb9-38" data-line-number="38"><span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>, outfiles<span class="op">$</span>Smatches)</a>
-<a class="sourceLine" id="cb9-39" data-line-number="39"><span class="co"># </span></a></code></pre></div>
 </div>
+</div>
+<div id="export-matches-to-the-coding-sequence-of-the-s1-cleavage-produc" class="section level2">
+<h2>Export matches to the coding sequence of the S1 cleavage produc</h2>
+</div>
+<div id="n-to-1-alignemnts-of-s1-coding-sequences" class="section level2">
+<h2>N-to-1 alignemnts of S1 coding sequences</h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">refS1Limits &lt;-<span class="st"> </span>refSpikeLimits[<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span><span class="dv">3</span><span class="op">*</span><span class="kw">c</span>(<span class="dv">13</span>,  <span class="dv">685</span>)</a>
+<a class="sourceLine" id="cb11-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb11-3" data-line-number="3"><span class="co">#### N-to-1 alignments of S1-coding sequences ####</span></a>
+<a class="sourceLine" id="cb11-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb11-5" data-line-number="5"><span class="co">## Get sequences for reference and query genomes</span></a>
+<a class="sourceLine" id="cb11-6" data-line-number="6">refS1 &lt;-<span class="st"> </span><span class="kw">subseq</span>(genomes[refGenomeName], <span class="dt">start =</span> refS1Limits[<span class="dv">1</span>], <span class="dt">end =</span> refS1Limits[<span class="dv">2</span>])</a>
+<a class="sourceLine" id="cb11-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb11-8" data-line-number="8">S1Nto1 &lt;-<span class="st"> </span><span class="kw">alignNtoOne</span>(<span class="dt">refSequence =</span> refS1, <span class="dt">querySequences =</span> queryGenomes, <span class="dt">type =</span> <span class="st">&quot;global-local&quot;</span>)</a>
+<a class="sourceLine" id="cb11-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb11-10" data-line-number="10"><span class="kw">kable</span>(S1Nto1<span class="op">$</span>stats[<span class="kw">order</span>(S1Nto1<span class="op">$</span>stat<span class="op">$</span>score, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>),], </a>
+<a class="sourceLine" id="cb11-11" data-line-number="11">      <span class="dt">caption =</span> <span class="st">&quot;N-to-one alignment of S1 coding sequence&quot;</span>)</a></code></pre></div>
+<table>
+<caption>N-to-one alignment of S1 coding sequence</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">pid</th>
+<th align="right">nchar</th>
+<th align="right">insertNb</th>
+<th align="right">insertLen</th>
+<th align="right">delNb</th>
+<th align="right">delLen</th>
+<th align="right">score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>BtRaTG13_2013_Yunnan</td>
+<td align="right">91.12543</td>
+<td align="right">2017</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">2586.5037</td>
+</tr>
+<tr class="even">
+<td>PnGX-P1E_2017</td>
+<td align="right">79.28642</td>
+<td align="right">2018</td>
+<td align="right">7</td>
+<td align="right">25</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">674.2804</td>
+</tr>
+<tr class="odd">
+<td>PnGu1_2019</td>
+<td align="right">78.77591</td>
+<td align="right">2026</td>
+<td align="right">9</td>
+<td align="right">24</td>
+<td align="right">5</td>
+<td align="right">9</td>
+<td align="right">548.8749</td>
+</tr>
+<tr class="even">
+<td>BtZC45</td>
+<td align="right">69.08284</td>
+<td align="right">2028</td>
+<td align="right">22</td>
+<td align="right">92</td>
+<td align="right">7</td>
+<td align="right">11</td>
+<td align="right">-1016.7921</td>
+</tr>
+<tr class="odd">
+<td>BtZXC21</td>
+<td align="right">67.93291</td>
+<td align="right">2027</td>
+<td align="right">20</td>
+<td align="right">84</td>
+<td align="right">6</td>
+<td align="right">10</td>
+<td align="right">-1187.1256</td>
+</tr>
+<tr class="even">
+<td>HuSARS-Frankfurt-1_2003</td>
+<td align="right">67.89941</td>
+<td align="right">2028</td>
+<td align="right">18</td>
+<td align="right">85</td>
+<td align="right">10</td>
+<td align="right">11</td>
+<td align="right">-1209.2263</td>
+</tr>
+<tr class="odd">
+<td>BtYu-RmYN02_2019</td>
+<td align="right">61.76471</td>
+<td align="right">2040</td>
+<td align="right">39</td>
+<td align="right">153</td>
+<td align="right">12</td>
+<td align="right">23</td>
+<td align="right">-2280.1426</td>
+</tr>
+</tbody>
+</table>
+<div id="s1-gene-pip-plot" class="section level3">
+<h3>S1 gene PIP plot</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="co">## PIP profile of S1 N-to-1 alignments</span></a>
+<a class="sourceLine" id="cb12-2" data-line-number="2"><span class="kw">plotPIPprofiles</span>(<span class="dt">alignments =</span> S1Nto1<span class="op">$</span>alignments, </a>
+<a class="sourceLine" id="cb12-3" data-line-number="3">                <span class="dt">windowSize =</span> <span class="dv">200</span>, </a>
+<a class="sourceLine" id="cb12-4" data-line-number="4">                <span class="dt">legend =</span> <span class="kw">paste0</span>(<span class="kw">names</span>(S1Nto1<span class="op">$</span>alignments), <span class="st">&quot; (&quot;</span>, <span class="kw">round</span>(<span class="dt">digits =</span> <span class="dv">2</span>, S1Nto1<span class="op">$</span>stats<span class="op">$</span>pid), <span class="st">&quot;%)&quot;</span>),</a>
+<a class="sourceLine" id="cb12-5" data-line-number="5">                <span class="dt">main =</span> <span class="kw">paste0</span>(<span class="st">&quot;S1 coding sequence - PIP profile&quot;</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">Ref: &quot;</span>, refGenomeName),</a>
+<a class="sourceLine" id="cb12-6" data-line-number="6">                <span class="dt">legendMargin =</span> <span class="dv">0</span>, <span class="dt">legendCorner =</span> <span class="st">&quot;bottomleft&quot;</span>, <span class="dt">legendCex =</span> <span class="fl">0.8</span>, <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">30</span>, <span class="dv">100</span>))</a></code></pre></div>
+<div class="figure" style="text-align: center">
+<img src="figures/cov-seq_S1_pip-1.png" alt="Percent Identical Positions profile over the whole genome of SARS-CoV-2. " width="100%" />
+<p class="caption">
+Percent Identical Positions profile over the whole genome of SARS-CoV-2.
+</p>
+</div>
+</div>
+</div>
+<div id="output-files" class="section level2">
+<h2>Output files</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw">kable</span>(outfiles, <span class="dt">caption =</span> <span class="st">&quot;Output files&quot;</span>)</a></code></pre></div>
+<table>
+<caption>Output files</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">x</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Genome alignments</td>
+<td align="left">../results/S-gene/Nto1_alignments/genome_alignments_ref_HuCoV2_WH01_2019</td>
+</tr>
+<tr class="even">
+<td>Genome alignments - SARS</td>
+<td align="left">../results/S-gene/Nto1_alignments/genome_alignments_ref_HuSARS-Frankfurt-1_2003</td>
+</tr>
+<tr class="odd">
+<td>S gene alignments</td>
+<td align="left">../results/S-gene/Nto1_alignments/S-gene_alignments</td>
+</tr>
+<tr class="even">
+<td>S gene matches</td>
+<td align="left">../results/S-gene/Nto1_alignments/S-gene_HuCoV2_WH01_2019_matches.fasta</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="session-info" class="section level2">
+<h2>Session info</h2>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="kw">sessionInfo</span>()</a></code></pre></div>
+<pre><code>R version 3.6.1 (2019-07-05)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS Mojave 10.14.6
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats4    parallel  stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] Biostrings_2.52.0   XVector_0.24.0      IRanges_2.18.3      S4Vectors_0.22.1    BiocGenerics_0.30.0 knitr_1.28         
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.4          digest_0.6.25       magrittr_1.5        evaluate_0.14       highr_0.8           zlibbioc_1.30.0     rlang_0.4.5         stringi_1.4.6       rmarkdown_2.1       tools_3.6.1         stringr_1.4.0       xfun_0.12           yaml_2.2.1          compiler_3.6.1     
+[15] BiocManager_1.30.10 htmltools_0.4.0    </code></pre>
 </div>
 
 
