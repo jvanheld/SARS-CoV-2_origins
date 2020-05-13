@@ -36,6 +36,15 @@ targets:
 	@echo "	align_muscle_all		align spike sequences from Uniprot for all the groups above"
 	@echo
 	@echo "	identify_insertions		locate the insertions in a chosen sequence"
+	@echo
+	@echo "	translate_matches		translate matches from a given gene (e.g. S) to proteins"
+	@echo
+	@echo "NCBI + GISAID sequences"
+	@echo "	merge_gisaid			merge S protein sequences from GISAID with the NCBI Genbank collections"
+	@echo "	align_ncbi-plus-gisaid_selected		Align selected spike sequences  from NCBI + GISAID"
+	@echo "	align_ncbi-plus-gisaid_around-CoV-2	Align spike sequences around CoV2 from NCBI + GISAID"
+	@echo "	align_ncbi-plus-gisaid_all		Align all spike sequences from NCBI + GISAID"
+
 
 ################################################################
 ## Run all targets
@@ -150,13 +159,14 @@ align_muscle:
 	@echo "	Result directory"
 	@echo "	DATA_DIR		${DATA_DIR}"
 	@echo "	MUSCLE_DIR		${MUSCLE_DIR}"
+	@echo "	MUSCLE_IN		${MUSCLE_IN}"
 	@echo "	MUSCLE_PREFIX		${MUSCLE_PREFIX}"
 	@echo "	MUSCLE_LOG		${MUSCLE_LOG}"
 	@mkdir -p ${MUSCLE_DIR}
 	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT= MUSCLE_EXT=fa
 	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=-clw MUSCLE_EXT=aln
-	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=-msf
-	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=-html
+	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=-msf MUSCLE_EXT=msf
+	@${MAKE} _align_muscle_one_format MUSCLE_FORMAT=-html MUSCLE_EXT=html
 
 _align_muscle_one_format:
 	time muscle -in ${MUSCLE_IN}.fasta ${MUSCLE_FORMAT} ${MUSCLE_OPT} \
@@ -175,7 +185,7 @@ tree_from_muscle:
 	time clustalw -bootstrap=100 \
 		-infile=${MUSCLE_PREFIX}.aln -type=dna \
 		-clustering=NJ 
-	@echo "	${CLUSTALW_PREFIX}.ph"
+	@echo "	${MUSCLE_PREFIX}.ph"
 
 align_selected:
 	@echo "Aligning selected spike sequences"
@@ -213,4 +223,67 @@ identify_insertions:
 	@echo "${OUTPUT_DIR}"
 	@mkdir -p ${OUTPUT_DIR}
 	python scripts/python/detection_insertion.py ${CLW_FILE} ${REFERENCE} ${CSV_NAME}
+
+################################################################
+## Translate S gene matches.
+## 
+## This enables us to recover the protein sequence from a few GISAID
+## genomes that are occupy crucial positions in the phylognetic tree
+## of the virus.
+GENE_PREFIX=S-gene
+GENE_SEQ=results/${GENE_PREFIX}/Nto1_alignments/${GENE_PREFIX}_HuCoV2_WH01_2019_matches.fasta
+PROTEIN_SEQ=results/${GENE_PREFIX}/Nto1_alignments/${GENE_PREFIX}_HuCoV2_WH01_2019_matches_translated.fasta
+
+translate_matches:
+	@echo
+	@echo "Translating ${GENE_PREFIX} matches to get protein sequences"
+	transeq ${GENE_SEQ} ${PROTEIN_SEQ}
+	@echo "	GENE_SEQ	${GENE_SEQ}"
+	@echo "	PROTEIN_SEQ	${PROTEIN_SEQ}"
+
+
+################################################################
+## Merge a given collection with GISAID sequences
+COLLECTION=selected
+merge_gisaid:
+	@for collection in all selected around-CoV-2; do \
+		${MAKE} _merge_gisaid_one_collection COLLECTION=$${collection} ; \
+	done
+
+GISAID_DIR=data/GISAID_genomes
+NCBI_SEQ=data/spike_proteins/${COLLECTION}_coronavirus_spike_proteins.fasta
+GISAID_SEQ=${GISAID_DIR}/coronavirus_S_proteins_from_GISAID.fasta
+MERGED_SEQ=${GISAID_DIR}/${COLLECTION}_coronavirus_spike_proteins-plus-GISAID.fasta
+_merge_gisaid_one_collection:
+	@echo
+	@echo "Merging collection ${COLLECTION}"
+	@cat ${NCBI_SEQ} ${GISAID_SEQ} > ${MERGED_SEQ}
+	@echo "	NCBI_SEQ	${NCBI_SEQ}"
+	@echo "	GISAID_SEQ	${GISAID_SEQ}"
+	@echo "	MERGED_SEQ	${MERGED_SEQ}"
+
+################################################################
+## Align spike sequences from NCBi + GISAID
+align_ncbi-plus-gisaid:
+	@${MAKE}
+	@echo "Aligning NCBI selected + GISAID spike sequences"
+	@${MAKE} align_muscle \
+		MUSCLE_DIR=${GISAID_DIR}/muscle_alignments  \
+		MUSCLE_IN=${GISAID_DIR}/${COLLECTION}_coronavirus_spike_proteins-plus-GISAID \
+		MUSCLE_PREFIX=${GISAID_DIR}/muscle_alignments/${COLLECTION}_coronavirus_spike_proteins-plus-GISAID_aligned_muscle
+
+################################################################
+## Align spike sequences selected from NCBI + GISAID 
+align_ncbi-plus-gisaid_selected:
+	@${MAKE} align_ncbi-plus-gisaid COLLECTION=selected
+
+################################################################
+## Align spike sequences around-CoV2 from NCBI + GISAID 
+align_ncbi-plus-gisaid_around-CoV-2:
+	@${MAKE} align_ncbi-plus-gisaid COLLECTION=around-CoV-2
+
+################################################################
+## Align all spike sequences from NCBI + GISAID 
+align_ncbi-plus-gisaid_all:
+	@${MAKE} align_ncbi-plus-gisaid COLLECTION=all
 
