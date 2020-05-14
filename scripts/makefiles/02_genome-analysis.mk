@@ -1,7 +1,7 @@
 ## Makefile to run the different scripts for the analysis of
 ## SARS-CoV-2 sequences and their comparison with HIV sequences.
 
-MAKEFILE=scripts/makefiles/02_genome-anlaysis.mk
+MAKEFILE=scripts/makefiles/02_genome-analysis.mk
 MAKE=make -f ${MAKEFILE}
 
 ################################################################
