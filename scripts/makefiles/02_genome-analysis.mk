@@ -3,6 +3,7 @@
 
 MAKEFILE=scripts/makefiles/02_genome-analysis.mk
 MAKE=make -f ${MAKEFILE}
+TIME=time
 
 ################################################################
 ## List targets
@@ -182,7 +183,7 @@ align_genomes_muscle: list_param
 	@echo "	GENOME_SEQ	${GENOME_SEQ}"
 	@echo "	MUSCLE_DIR	${MUSCLE_DIR}"
 	@mkdir -p ${MUSCLE_DIR}
-	time muscle -in ${GENOME_SEQ} -${MUSCLE_FORMAT} ${MUSCLE_OPT} \
+	${TIME} muscle -in ${GENOME_SEQ} -${MUSCLE_FORMAT} ${MUSCLE_OPT} \
 		-log ${MUSCLE_LOG} \
 		-out ${MUSCLE_PREFIX}.${MUSCLE_EXT}
 	@echo "	${MUSCLE_PREFIX}.${MUSCLE_EXT}"
@@ -200,7 +201,7 @@ align_genomes_clustalw:
 	@echo "	CLUSTALW_DIR	${CLUSTALW_DIR}"
 	@echo "	CLUSTALW_PREFIX	${CLUSTALW_PREFIX}"
 	@mkdir -p ${CLUSTALW_DIR}
-	time clustalw -infile=${INSEQ_FILE} \
+	${TIME} clustalw -infile=${INSEQ_FILE} \
 		-align -type=dna -quicktree \
 		-outfile=${CLUSTALW_PREFIX}.aln
 	@echo "	${CLUSTALW_PREFIX}.aln"
@@ -241,10 +242,10 @@ gblocks_clean:
 nj_tree:
 	@echo
 	@echo "Generating species tree from aligned genomes with Neighbour-Joining method"
-	time clustalw -tree \
+	${TIME} clustalw -tree \
 		-infile=${MALIGN_PREFIX}.aln -type=dna \
 		-clustering=NJ
-	time clustalw -bootstrap=100 \
+	${TIME} clustalw -bootstrap=100 \
 		-infile=${MALIGN_PREFIX}.aln -type=dna \
 		-clustering=NJ 
 	@echo "	${MALIGN_PREFIX}.ph"
@@ -283,7 +284,7 @@ run_phyml:
 	@echo "	${MALIGN_PREFIX}_gblocks.phy"
 	@echo
 	@echo "Inferring phylogeny with phyml"
-	time mpirun -n ${PHYML_THREADS} phyml-mpi --input ${MALIGN_PREFIX}_gblocks.phy ${PHYML_OPT}
+	${TIME} mpirun -n ${PHYML_THREADS} phyml-mpi --input ${MALIGN_PREFIX}_gblocks.phy ${PHYML_OPT}
 
 ################################################################
 ## Phylogey inference for all the genomes downloaded from Genbank.
