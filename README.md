@@ -46,9 +46,44 @@ make -f scripts/makefiles/01_software-environment.mk
 ## Install the environment
 make -f scripts/makefiles/01_software-environment.mk install_env
 
-## See the list of targets for the other steps
+```
+
+The software environment can then be loaded with the command
 
 ```
+conda activate covid-19
+```
+
+Additional tasks are described in the help message
+
+```
+make -f scripts/makefiles/01_software-environment.mk 
+```
+
+### Phylogenetic inference
+
+The commands to run the phylogenetic analysis of coronavirus genomic sequences can be listed as follows. 
+
+```
+make -f scripts/makefiles/02_genome-analysis.mk
+```
+
+The script includes parameters that can be modified to address specific querries or to tune the computing according to your local configurtion. 
+
+
+```
+make -f scripts/makefiles/02_genome-analysis.mk  list_param
+```
+
+In particular the variable `PHYML_THREADS` should be adapted to the number of CPUs of your computer. 
+
+
+#### Inferring the tree of virus strains from full genome alignments
+
+```
+
+```
+
 
 ### Analysis of the spike protein sequences
 
