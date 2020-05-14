@@ -1,1 +1,1 @@
-scripts/makefiles/02_genome-blast.mk
+scripts/makefiles/02_genome-analysis.mk
