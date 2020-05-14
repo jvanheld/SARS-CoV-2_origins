@@ -5,9 +5,9 @@
 targets:
 	@echo "Targets:"
 	@echo "	links			list relevant links for this analysis"
-	@echo "	install_env		install the conta environment"
-	@echo "	update_env		update the conta environment"
-	@echo "	start_env		start the conta environment"
+	@echo "	install_env		install the conda environment"
+	@echo "	update_env		update the conda environment"
+	@echo "	start_env		start the conda environment"
 
 ################################################################
 ## Relevant links
