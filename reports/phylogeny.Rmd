@@ -107,65 +107,7 @@ dir["genomes"] <- file.path(dir["results"], "genome_phylogeny", "clustalw_alignm
 
 ```
 
-
-
-
-
-
-## Phylogeny from full genomes
-
-We inferred a phylogeny of virus strains based ontheir full genomes. 
-
-A multiple alignment of genome sequences was performed with a progressive method (`clustalw`). The tree of virus strains was inferred with a maximum likelihood approach (`phyml` software).
-
-```{r load_genome_tree}
-genomeTreeFile <- file.path(
-  dir["genomes"],
-  "coronavirus_selected-plus-GISAID_genomes_clustalw_gblocks.phy_phyml_tree.phb")
-
-## Load the tree with phytools
-genomeTree <- ape::read.tree(file = genomeTreeFile)
-# genomeTree <- phytools::read.newick(file = genomeTreeFile)
-# plot(genomeTree)
-# nodelabels()
-
-## Enroot the tree
-# genomeTree$tip.label
-# outgroup <- c("HuOC43",
-#               "CmMERS",
-#               "HuMERS_17",
-#               "PiPRCV",
-#               "HuTGEV",
-#               "PiSADS",
-#               "Hu229E",
-#               "HuNL63")
-# genomeTree <- root(genomeTree, outgroup = outgroup, resolve.root = TRUE)
-
-## Define the root
-# nodelabels()
-rootNode <- 41
-genomeTree <- reroot(genomeTree, node = rootNode)
-# #genomeTree <-reroot(genomeTree, interactive=TRUE)
-genomeTree <- rotate(genomeTree, 39)
-genomeTree <- rotate(genomeTree, 44)
-genomeTree <- rotate(genomeTree, 45)
-# nodelabels()
-
-if (is.binary(genomeTree)) {
-  treeType <- "binary"
-} else {
-  treeType <- "non-binary"
-}
-message("\tLoaded ", treeType, " genome tree", 
-        " with ", Ntip(genomeTree), " tips",
-        " and ", Nnode(genomeTree), " internal nodes")
-
-## Check theinternal structure of the tree
-# str(genomeTree)
-# genomeTree$node.label
-#  dim(genomeTree$edge)
-#  genomeTree$tip.label
-#  class(genomeTree)
+```{r parameters}
 
 ## Color palette per species
 speciesPalette <- list(
@@ -177,82 +119,183 @@ speciesPalette <- list(
   Civet = "#0000BB"
 )
 
-
-## Tip parametes
-tipParam <- data.frame(
-  row.names = genomeTree$tip.label,
-  color = rep(x = "grey", length.out = length(genomeTree$tip.label)))
-tipParam$species <- "NONE"
-
-## Identify species per tip
+## Species prefix in the tip labels
 speciesPrefix <- c("Hu" = "Human",
                    "Bt" = "Bat",
                    "Pn" = "Pangolin",
                    "Cm" = "Camel",
                    "Pi" = "Pig",
                    "Cv" = "Civet")
-for (prefix in names(speciesPrefix)) {
-  tipParam[grep(pattern = paste0("^", prefix), x = row.names(tipParam), perl = TRUE), "species"] <- speciesPrefix[prefix]
-  
-}
-# table(tipParam$species)
-# View(tipParam)
-
-## Assign tip color accoding to species
-tipParam$color <- unlist(speciesPalette[tipParam$species])
-# table(tipParam$color, tipParam$species)
-# table(tipParam$color)
-
-## Identify CoV2 tips
-cov2Tips <- grep(pattern = "CoV2", x = genomeTree$tip.label, perl = TRUE, value = TRUE)
-
-
-
+## Outgroup
+outgroup <- c("HuOC43",
+              "CmMERS",
+              "HuMERS_17",
+              "PiPRCV",
+              "HuTGEV",
+              "PiSADS",
+              "Hu229E",
+              "HuNL63")
 
 
 ```
 
 
 
+
+
+## Phylogeny from full genomes
+
+We inferred a phylogeny of virus strains based ontheir full genomes. 
+
+A multiple alignment of genome sequences was performed with a progressive method (`clustalw`). The tree of virus strains was inferred with a maximum likelihood approach (`phyml` software).
+
+
+```{r load_tree_function}
+#### Define a function to load a tree ####
+
+#' @title Load a tree and prepare if for the plot
+#' @author Jacques van Helden
+#' @param file file containing the tree (must  be  format supported by ape::read.tree)
+#' @param outgroup=NULL out group used to define the root. Should be a vector of tip labels.
+#' @param rootNode=NULL alternative to outgroup: define the root based on an internal node number
+#' @param rotateNodes=NULL a vector of internal node numbers to rotate for the plot
+loadTree <- function(file, 
+                       outgroup = NULL,
+                       rootNode = NULL,
+                       rotateNodes = NULL
+                       ) {
+  
+  
+  ## Load the tree with phytools
+  tree <- ape::read.tree(file = file)
+  # tree <- phytools::read.newick(file = treeFile)
+  # plot(tree)
+  # nodelabels()
+  
+  ## Define the root
+  if (!is.null(outgroup)) {
+    tree <- root(tree, outgroup = outgroup, resolve.root = TRUE)
+  } else if (!is.null(root)) {
+    tree <- reroot(tree, node = rootNode)  
+  }
+  
+  # Rotate user-specified nodes
+  if (!is.null(rotateNodes)) {
+    for (node in rotateNodes) {
+      tree <- rotate(tree, node)
+    }
+    
+  }
+  #tree <- rotate(tree, 39)
+  #tree <- rotate(tree, 44)
+  # tree <- rotate(tree, 75)
+  # nodelabels()
+  
+  if (is.binary(tree)) {
+    treeType <- "binary"
+  } else {
+    treeType <- "non-binary"
+  }
+  message("\tLoaded ", treeType, " genome tree", 
+          " with ", Ntip(tree), " tips",
+          " and ", Nnode(tree), " internal nodes")
+  
+  ## Check theinternal structure of the tree
+  # str(tree)
+  # tree$node.label
+  #  dim(tree$edge)
+  #  tree$tip.label
+  #  class(tree)
+  
+  ## Tip parametes
+  tipParam <- data.frame(
+    row.names = tree$tip.label,
+    color = rep(x = "grey", length.out = length(tree$tip.label)))
+  tipParam$species <- "NONE"
+  
+  
+  ## Identify species per tip
+  for (prefix in names(speciesPrefix)) {
+    tipParam[grep(pattern = paste0("^", prefix), x = row.names(tipParam), perl = TRUE), "species"] <- speciesPrefix[prefix]
+    
+  }
+  # table(tipParam$species)
+  # View(tipParam)
+  
+  ## Assign tip color accoding to species
+  tipParam$color <- unlist(speciesPalette[tipParam$species])
+  # table(tipParam$color, tipParam$species)
+  # table(tipParam$color)
+  
+  # ## Identify CoV2 tips
+  # cov2Tips <- grep(pattern = "CoV2", x = tree$tip.label, perl = TRUE, value = TRUE)
+  result <- list(tree = tree, 
+                 tipParam = tipParam)
+  return(result)
+}
+
+```
+
+
+```{r plot_my_tree_function}
+plotMyTree <- function(myTree, ...) {
+  ## Plot the tree
+  ape::plot.phylo(myTree$tree, 
+                  type = "phylogram", 
+                  show.node.label = FALSE,
+                  show.tip.label = TRUE,
+                  edge.color = "grey",
+                  tip.color = myTree$tipParam$color,
+                  #         ftype = "off",
+                  edge.width = 2,
+                  label.offset = 0.1, 
+                  lwd = 2,
+                  # fsize = 0.7,
+                  cex = 0.7,
+                  color = speciesPalette$Bat, 
+                  nomargin = FALSE,
+                  font = 1, 
+                  ...)
+  add.scale.bar(cex = 1, font = 2, col = "blue", length = 0.2, 
+                lwd = 2, lcol = "blue")
+  # add.arrow(myTree$tree, tip = cov2Tips, 
+  #           arrl = 0.3, 
+  #           col = speciesPalette$Human)
+  
+  # length(myTree$tree$node.label)
+  # nodelabels(cex = 0.5)
+  # sort(as.numeric(myTree$tree$node.label))
+  # tiplabels()
+  
+}
+
+```
+
+
+
+
 ```{r genome_tree, fig.width=7, fig.height=10,  out.width="80%", fig.cap="Genome tree of selected coronaviruses.  The tree was inferred by maximum likelihood apprroach (PhyML) based on a progressive multiple alignment (clustalw). "}
 
-#### Plot the genome tree ####
+#### Load and plot the genome tree ####
 
-genomeTree <- paintSubTree(tree = genomeTree, node = 49, state = "CoV2")
+genomeTreeFile <- file.path(
+  dir["genomes"],
+  "coronavirus_selected-plus-GISAID_genomes_clustalw_gblocks.phy_phyml_tree.phb")
 
-## Plot the tree
-ape::plot.phylo(genomeTree, 
-                type = "phylogram", 
-                show.node.label = FALSE,
-                show.tip.label = TRUE,
-                edge.color = "grey",
-                tip.color = tipParam$color,
-                #         ftype = "off",
-                edge.width = 2,
-                label.offset = 0.1, 
-                lwd = 2,
-                # fsize = 0.7,
-                cex = 0.7,
-                color = speciesPalette$Bat, 
-                nomargin = FALSE,
-                font = 1)
-add.scale.bar(cex = 1, font = 2, col = "blue", length = 0.2, 
-              lwd = 2, lcol = "blue")
-# add.arrow(genomeTree, tip = cov2Tips, 
-#           arrl = 0.3, 
-#           col = speciesPalette$Human)
 
-# length(genomeTree$node.label)
-# nodelabels(cex = 0.5)
-# sort(as.numeric(genomeTree$node.label))
-# tiplabels()
+genomeTree <- loadTree(
+  file = genomeTreeFile, 
+  outgroup = outgroup, rootNode = NULL, 
+  rotateNodes = c(39, 75))
+# genomeTree <- paintSubTree(tree = genomeTree, node = 49, state = "CoV2")
+# nodelabels(cex = 0.4)
+
+plotMyTree(genomeTree, main  = "Genome-based virus tree")
 
 ## Identify some clades
-cladelabels(genomeTree, "CoV2", 49, cex = 0.7, orientation = "horizontal", offset = 5)
-cladelabels(genomeTree, "MERS",46, cex = 0.7, orientation = "horizontal", offset = 3)
-cladelabels(genomeTree, "SARS", 72, cex = 0.7, orientation = "horizontal", offset = 3)
-
-
+cladelabels(genomeTree$tree, "CoV2", 46, cex = 0.7, orientation = "horizontal", offset = 5)
+cladelabels(genomeTree$tree, "MERS", 43, cex = 0.7, orientation = "horizontal", offset = 3)
+cladelabels(genomeTree$tree, "SARS", 69, cex = 0.7, orientation = "horizontal", offset = 3)
 
 ```
 
