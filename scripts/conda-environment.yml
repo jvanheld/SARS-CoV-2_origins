@@ -9,24 +9,29 @@ channels:
 
 dependencies:
 
-  ## Tools
-  - bioconda::muscle    # iterative multiple sequence alignment
-  - bioconda::clustalw  # progressive multiple sequence alignment
+  ## Command-line tools
+  - tpeulen::pymol-open-source  # structure analysis and visualisation. Note: the conda package does not work on Mac OS X, but the tool can be installed with brew
+  - bioconda::clustalw  # Multiple alignment of nucleic acid and protein sequences
+  - bioconda::muscle    # MUSCLE: multiple sequence alignment with high accuracy and high throughput
+  - bioconda::mafft     # Multiple alignment program for amino acid or nucleotide sequences based on fast Fourier transform
   - bioconda::gblocks   # to clean multiple alignments - suppress gap positions - before phylogeny inference
   - bioconda::blast     # similarity searches bewteen sequences
   - bioconda::emboss    # classical sequence analysis tools, used here for sequence shuffling
   - bioconda::cd-hit    # to generate non-redundant protein sequence sets
   - bioconda::phyml     # maximum likelo-ihood-based phylogenetic inference
+  - bioconda::iqtree    # phylogeny by mmaximum-likelihood approach
   - bioconda::figtree   # a graphical viewer of phylogenetic trees and as a program for producing publication-ready figures.
   - bioconda::jalview   # a free program for multiple sequence alignment editing, visualisation and analysis
-  - tpeulen::pymol-open-source  # structure analysis and visualisation. Note: does not work on Mac OS X
 
   ## R dependencies
   - r-base
 
   ## R packages
-  - bioconda::bioconductor-biostrings
-
+  - r::r-knitr # General-purpose tool for dynamic report generation in R using Literate Programming techniques.
+  - r::r-ape # Functions for reading, writing, plotting, and manipulating phylogenetic trees ...
+  - bioconda::r-phytools # Phylogenetic tools for comparative biology
+  - bioconda::bioconductor-biostrings # Efficient manipulation of biological strings
+  
   ## Python
   - python
   - conda-forge::pandas
