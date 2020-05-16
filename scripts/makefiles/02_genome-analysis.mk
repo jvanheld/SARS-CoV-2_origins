@@ -40,9 +40,10 @@ targets:
 	@echo "	around-cov2-gisaid_genomes	Close selection around CoV-2 from Genbank + GISAID"
 	@echo
 	@echo "S-gene phylogeny"
+	@echo "	Sgenes_around-cov2		S-gene phylogeny inference for strains from Genbank around SARS-CoV-2"
 	@echo "	Sgenes_selected			S-gene phylogeny inference for selected strains from Genbank"
-	@echo "	Sgenes_selected_gisaid		S-gene phylogeny inference for selected strains from Genbank + GISAID"
 	@echo "	Sgenes_around-cov-2_gisaid	S-gene phylogeny inference for strains from Genbank + GISAID around SARS-CoV-2"
+	@echo "	Sgenes_selected_gisaid		S-gene phylogeny inference for selected strains from Genbank + GISAID"
 
 
 ################################################################
@@ -57,28 +58,26 @@ targets:
 #FEATURE=genomes
 FEATURE=S-gene
 COLLECTION=around-CoV-2
+GISAID_DIR=data/GISAID_genomes
 INSEQ_DIR=data/${FEATURE}
 INSEQ_PREFIX=${FEATURE}_${COLLECTION}
 INSEQ_FILE=${INSEQ_DIR}/${INSEQ_PREFIX}.fasta
 INSEQ_NB=`grep '^>' ${INSEQ_FILE} | wc -l | awk '{print $$1}'`
 PHYLO_TASKS=multialign_clustalw gblocks_clean run_phyml
-GISAID_DIR=data/GISAID_genomes
+PHYLO_DIR=results/${FEATURE}_${COLLECTION}/
+
 list_param:
 	@echo
 	@echo "Generic parameters"
 	@echo "	FEATURE			${FEATURE}"
 	@echo "	COLLECTION		${COLLECTION}"
+	@echo
+	@echo "Input sequences"
 	@echo "	INSEQ_DIR		${INSEQ_DIR}"
+	@echo "	GISAID_DIR		${GISAID_DIR}"
 	@echo "	INSEQ_PREFIX		${INSEQ_PREFIX}"
 	@echo "	INSEQ_FILE		${INSEQ_FILE}"
 	@echo "	INSEQ_NB		${INSEQ_NB}"
-#	@echo "	GENOME_DIR		${GENOME_DIR}"
-#	@echo "	GENOME_PREFIX		${GENOME_PREFIX}"
-#	@echo "	GENOME_SEQ		${GENOME_SEQ}"
-#	@echo "	SGENE_DIR		${SGENE_DIR}"
-#	@echo "	SGENE_PREFIX		${SGENE_PREFIX}"
-	@echo "	GISAID_DIR		${GISAID_DIR}"
-	@echo "	PHYLO_TASKS		${PHYLO_TASKS}"
 	@echo
 	@echo "Similarity searches with blastn"
 	@echo "	DB_TAXON_NAME		${DB_TAXON_NAME}"
@@ -89,10 +88,7 @@ list_param:
 	@echo "Multiple alignments"
 	@echo "	MUSCLE_DIR		${MUSCLE_DIR}"
 	@echo "	MUSCLE_PREFIX		${MUSCLE_PREFIX}"
-	@echo
-	@echo "	CLUSTALW_DIR		${CLUSTALW_DIR}"
 	@echo "	CLUSTALW_PREFIX		${CLUSTALW_PREFIX}"
-	@echo
 	@echo "	MALIGN_SOFT		${MALIGN_SOFT}"
 	@echo "	MALIGN_DIR		${MALIGN_DIR}"
 	@echo "	MALIGN_PEFIX		${MALIGN_PREFIX}"
@@ -100,9 +96,14 @@ list_param:
 	@echo "Alignemtn cleaning with gblocks"
 	@echo "	GBLOCKS_PREFIX		${GBLOCKS_PREFIX}"
 	@echo
+	@echo "Molecular phylogeny"
+	@echo "	PHYLO_DIR		${PHYLO_DIR}"
+	@echo "	PHYLO_TASKS		${PHYLO_TASKS}"
+	@echo
 	@echo "PhyML parameters"
 	@echo "	PHYML_THREAD  		${PHYML_THREADS}"
 	@echo "	PHYML_OPT		${PHYML_OPT}"
+	@echo "	PHYML_TREE		${PHYML_TREE}"
 	@echo
 
 
@@ -201,17 +202,16 @@ multalign_muscle: list_param
 
 ################################################################
 ## Align reference genomes with clustalw
-CLUSTALW_DIR=results/${FEATURE}_${COLLECTION}/
-CLUSTALW_PREFIX=${CLUSTALW_DIR}/${INSEQ_PREFIX}_clustalw
+CLUSTALW_PREFIX=${PHYLO_DIR}/${INSEQ_PREFIX}_clustalw
 CLUSTALW_FILE=${CLUSTALW_PREFIX}.aln
 multialign_clustalw: 
 	@echo "Aligning reference genomes wih clustalw"
 #	@echo "	INSEQ_DIR	${INSEQ_DIR}"
 #	@echo "	INSEQ_PREFIX	${INSEQ_PREFIX}"
 	@echo "	INSEQ_FILE	${INSEQ_FILE}"
-	@echo "	CLUSTALW_DIR	${CLUSTALW_DIR}"
+	@echo "	PHYLO_DIR	${PHYLO_DIR}"
 	@echo "	CLUSTALW_PREFIX	${CLUSTALW_PREFIX}"
-	@mkdir -p ${CLUSTALW_DIR}
+	@mkdir -p ${PHYLO_DIR}
 	${TIME} clustalw -infile=${INSEQ_FILE} \
 		-align -type=dna -quicktree \
 		-outfile=${CLUSTALW_FILE}
@@ -225,7 +225,7 @@ multialign_clustalw:
 ################################################################
 ## Clean the multiple alignments with gblocks
 MALIGN_SOFT=clustalw
-MALIGN_DIR=${CLUSTALW_DIR}
+MALIGN_DIR=${PHYLO_DIR}
 MALIGN_PREFIX=${CLUSTALW_PREFIX}
 GBLOCKS_OPT=-t=d -b3=8 -b4=10 -g -q -boum
 GBLOCKS_PREFIX=${MALIGN_PREFIX}.pir-gb
@@ -281,6 +281,8 @@ nj_tree:
 PHYML_THREADS=5
 PHYML_BOOTSTRAP=100
 PHYML_OPT=--datatype nt --bootstrap ${PHYML_BOOTSTRAP} --model HKY85
+PHYML_PREFIX=${MALIGN_PREFIX}_gblocks.phy_phyml_tree
+PHYML_TREE=${MALIGN_PREFIX}_gblocks.phy_phyml_tree.phb
 run_phyml:
 	@echo "Shortening sequence names"
 	@perl -pe 's|^>(.{12}).*|>$$1|' ${GBLOCKS_PREFIX} > ${GBLOCKS_PREFIX}_shortnames
@@ -297,6 +299,11 @@ run_phyml:
 	@echo
 	@echo "Inferring phylogeny with phyml"
 	${TIME} mpirun -n ${PHYML_THREADS} phyml-mpi --input ${MALIGN_PREFIX}_gblocks.phy ${PHYML_OPT}
+	cp ${PHYML_PREFIX}.txt ${PHYML_TREE}
+	@echo "	"
+	@echo "	PHYLO_DIR		${PHYLO_DIR}"
+	@echo "	PHYML_TREE		${PHYML_TREE}"
+	@echo "Job done	`date`"
 
 ################################################################
 ## Phylogey inference for all the genomes downloaded from Genbank.
@@ -354,8 +361,11 @@ _Sgenes:
 	@${MAKE} ${PHYLO_TASKS} FEATURE=S-gene
 # \
 # 		INSEQ_PREFIX=S-gene_${COLLECTION} \
-# 		CLUSTALW_DIR=results/S-gene/clustalw_alignments \
+# 		PHYLO_DIR=results/S-gene/clustalw_alignments \
 # 		CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_${COLLECTION}
+
+Sgenes_around-cov2:
+	@${MAKE} _Sgenes COLLECTION=around-CoV-2
 
 Sgenes_selected:
 	@${MAKE} _Sgenes COLLECTION=selected 
@@ -363,7 +373,7 @@ Sgenes_selected:
 # ${PHYLO_TASKS}\
 # 	INSEQ_DIR=${SGENE_DIR} \
 # 	INSEQ_PREFIX=S-gene_selected \
-# 	CLUSTALW_DIR=results/S-gene/clustalw_alignments \
+# 	PHYLO_DIR=results/S-gene/clustalw_alignments \
 # 	CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_selected
 
 ################################################################
@@ -376,7 +386,7 @@ Sgenes_selected_gisaid:
 # @${MAKE} ${PHYLO_TASKS}\
 # 	INSEQ_DIR=${GISAID_DIR} \
 # 	INSEQ_PREFIX=S-gene_selected-plus-GISAID \
-# 	CLUSTALW_DIR=results/S-gene/clustalw_alignments \
+# 	PHYLO_DIR=results/S-gene/clustalw_alignments \
 # 	CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_selected-plus-GISAID
 
 ################################################################
@@ -389,5 +399,5 @@ Sgenes_around-cov-2_gisaid:
 #	@${MAKE} ${PHYLO_TASKS}\
 #		INSEQ_DIR=${GISAID_DIR} \
 #		INSEQ_PREFIX=S-gene_around-cov-2-plus-GISAID \
-#		CLUSTALW_DIR=results/S-gene/clustalw_alignments \
+#		PHYLO_DIR=results/S-gene/clustalw_alignments \
 #		CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_around-cov-2-plus-GISAID
