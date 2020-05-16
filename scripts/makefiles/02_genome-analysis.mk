@@ -231,7 +231,7 @@ GBLOCKS_OPT=-t=d -b3=8 -b4=10 -g -q -boum
 GBLOCKS_PREFIX=${MALIGN_PREFIX}.pir-gb
 GBLOCKS_LOG=${GBLOCKS_PREFIX}_logs.txt
 _gblocks_clean:
-	gblocks ${MALIGN_PREFIX}.pir ${GBLOCKS_OPT} >& ${GBLOCKS_LOG}
+	Gblocks ${MALIGN_PREFIX}.pir ${GBLOCKS_OPT} >& ${GBLOCKS_LOG}
 
 gblocks_clean:
 	@echo

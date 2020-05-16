@@ -14,7 +14,7 @@ dependencies:
   - bioconda::clustalw  # Multiple alignment of nucleic acid and protein sequences
   - bioconda::muscle    # MUSCLE: multiple sequence alignment with high accuracy and high throughput
   - bioconda::mafft     # Multiple alignment program for amino acid or nucleotide sequences based on fast Fourier transform
-  - bioconda::gblocks   # to clean multiple alignments - suppress gap positions - before phylogeny inference
+  - bioconda::gblocks   # Selection of conserved blocks from multiple alignments for their use in phylogenetic analysis.
   - bioconda::blast     # similarity searches bewteen sequences
   - bioconda::emboss    # classical sequence analysis tools, used here for sequence shuffling
   - bioconda::cd-hit    # to generate non-redundant protein sequence sets
