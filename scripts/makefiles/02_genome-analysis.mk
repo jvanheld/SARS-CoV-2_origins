@@ -92,7 +92,7 @@ list_param:
 	@echo "	GBLOCKS_PREFIX		${GBLOCKS_PREFIX}"
 	@echo
 	@echo "PhyML parameters"
-	@echo "	PHYML_THEADS		${PHYML_THREADS}"
+	@echo "	PHYML_THREADS		${PHYML_THREADS}"
 	@echo "	PHYML_OPT		${PHYML_OPT}"
 	@echo
 
