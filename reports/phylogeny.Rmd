@@ -98,7 +98,7 @@ par.ori <- par(no.readonly = TRUE)
 
 ```{r directories}
 dir <- vector()
-dir["main"] <- "../"
+dir["main"] <- ".."
 
 dir["results"] <- file.path(dir["main"], "results")
 dir["genomes"] <- file.path(dir["results"], "genome_phylogeny", "clustalw_alignments")
@@ -128,8 +128,6 @@ speciesPrefix <- c("Hu" = "Human",
                    "Cv" = "Civet")
 ## Outgroup
 outgroup <- c("HuOC43",
-              "CmMERS",
-              "HuMERS_17",
               "PiPRCV",
               "HuTGEV",
               "PiSADS",
@@ -238,11 +236,12 @@ loadTree <- function(file,
 
 
 ```{r plot_my_tree_function}
-plotMyTree <- function(myTree, ...) {
+plotMyTree <- function(myTree, 
+                       show.node.label = FALSE, ...) {
   ## Plot the tree
   ape::plot.phylo(myTree$tree, 
                   type = "phylogram", 
-                  show.node.label = FALSE,
+                  show.node.label = show.node.label,
                   show.tip.label = TRUE,
                   edge.color = "grey",
                   tip.color = myTree$tipParam$color,
@@ -274,7 +273,7 @@ plotMyTree <- function(myTree, ...) {
 
 
 
-```{r genome_tree, fig.width=7, fig.height=10,  out.width="80%", fig.cap="Genome tree of selected coronaviruses.  The tree was inferred by maximum likelihood apprroach (PhyML) based on a progressive multiple alignment (clustalw). "}
+```{r genome_tree, fig.width=12, fig.height=7,  out.width="100%", fig.cap="Genome tree of selected coronaviruses.  The tree was inferred by maximum likelihood apprroach (PhyML) based on a progressive multiple alignment (clustalw). "}
 
 #### Load and plot the genome tree ####
 
@@ -285,17 +284,49 @@ genomeTreeFile <- file.path(
 
 genomeTree <- loadTree(
   file = genomeTreeFile, 
-  outgroup = outgroup, rootNode = NULL, 
-  rotateNodes = c(39, 75))
+  outgroup = outgroup, 
+  rootNode = NULL, 
+  rotateNodes = c(39, 75, 42))
 # genomeTree <- paintSubTree(tree = genomeTree, node = 49, state = "CoV2")
 # nodelabels(cex = 0.4)
 
-plotMyTree(genomeTree, main  = "Genome-based virus tree")
+plotMyTree(genomeTree, main  = "Genome-based virus tree", show.node.label = TRUE)
 
 ## Identify some clades
 cladelabels(genomeTree$tree, "CoV2", 46, cex = 0.7, orientation = "horizontal", offset = 5)
-cladelabels(genomeTree$tree, "MERS", 43, cex = 0.7, orientation = "horizontal", offset = 3)
-cladelabels(genomeTree$tree, "SARS", 69, cex = 0.7, orientation = "horizontal", offset = 3)
+cladelabels(genomeTree$tree, "MERS", 43, cex = 0.7, orientation = "horizontal", offset = 5)
+cladelabels(genomeTree$tree, "SARS", 69, cex = 0.7, orientation = "horizontal", offset = 5)
 
 ```
+
+
+
+```{r S_gene_tree, fig.width=12, fig.height=7,  out.width="100%", fig.cap="Phylogenetic tree of the S gene for selected coronaviruses.  The tree was inferred by maximum likelihood apprroach (PhyML) based on a progressive multiple alignment (clustalw). "}
+
+treeFiles <- vector()
+trees <- vector()
+
+#### Load and plot the genome tree ####
+treeFiles["S gene"] <- file.path(
+  dir["results"],
+  "S-gene", "clustalw_alignments", 
+  "S-gene_around-cov-2-plus-GISAID_gblocks.phy_phyml_boot_trees.phb")
+
+trees["S gene"] <- loadTree(
+  file = treeFiles["S gene"], 
+  outgroup = NULL, 
+  rootNode = NULL, 
+  rotateNodes = NULL)
+# genomeTree <- paintSubTree(tree = genomeTree, node = 49, state = "CoV2")
+# nodelabels(cex = 0.4)
+
+plotMyTree(genomeTree, main  = "Genome-based virus tree", show.node.label = FALSE)
+
+## Identify some clades
+cladelabels(genomeTree$tree, "CoV2", 46, cex = 0.7, orientation = "horizontal", offset = 5)
+cladelabels(genomeTree$tree, "MERS", 43, cex = 0.7, orientation = "horizontal", offset = 5)
+cladelabels(genomeTree$tree, "SARS", 69, cex = 0.7, orientation = "horizontal", offset = 5)
+
+```
+
 
