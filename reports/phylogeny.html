@@ -381,13 +381,11 @@ div.tocify {
 <a class="sourceLine" id="cb2-17" data-line-number="17">                   <span class="st">&quot;Cv&quot;</span> =<span class="st"> &quot;Civet&quot;</span>)</a>
 <a class="sourceLine" id="cb2-18" data-line-number="18"><span class="co">## Outgroup</span></a>
 <a class="sourceLine" id="cb2-19" data-line-number="19">outgroup &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;HuOC43&quot;</span>,</a>
-<a class="sourceLine" id="cb2-20" data-line-number="20">              <span class="st">&quot;CmMERS&quot;</span>,</a>
-<a class="sourceLine" id="cb2-21" data-line-number="21">              <span class="st">&quot;HuMERS_17&quot;</span>,</a>
-<a class="sourceLine" id="cb2-22" data-line-number="22">              <span class="st">&quot;PiPRCV&quot;</span>,</a>
-<a class="sourceLine" id="cb2-23" data-line-number="23">              <span class="st">&quot;HuTGEV&quot;</span>,</a>
-<a class="sourceLine" id="cb2-24" data-line-number="24">              <span class="st">&quot;PiSADS&quot;</span>,</a>
-<a class="sourceLine" id="cb2-25" data-line-number="25">              <span class="st">&quot;Hu229E&quot;</span>,</a>
-<a class="sourceLine" id="cb2-26" data-line-number="26">              <span class="st">&quot;HuNL63&quot;</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb2-20" data-line-number="20">              <span class="st">&quot;PiPRCV&quot;</span>,</a>
+<a class="sourceLine" id="cb2-21" data-line-number="21">              <span class="st">&quot;HuTGEV&quot;</span>,</a>
+<a class="sourceLine" id="cb2-22" data-line-number="22">              <span class="st">&quot;PiSADS&quot;</span>,</a>
+<a class="sourceLine" id="cb2-23" data-line-number="23">              <span class="st">&quot;Hu229E&quot;</span>,</a>
+<a class="sourceLine" id="cb2-24" data-line-number="24">              <span class="st">&quot;HuNL63&quot;</span>)</a></code></pre></div>
 <div id="phylogeny-from-full-genomes" class="section level2">
 <h2>Phylogeny from full genomes</h2>
 <p>We inferred a phylogeny of virus strains based ontheir full genomes.</p>
@@ -474,36 +472,37 @@ div.tocify {
 <a class="sourceLine" id="cb3-80" data-line-number="80">                 <span class="dt">tipParam =</span> tipParam)</a>
 <a class="sourceLine" id="cb3-81" data-line-number="81">  <span class="kw">return</span>(result)</a>
 <a class="sourceLine" id="cb3-82" data-line-number="82">}</a></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">plotMyTree &lt;-<span class="st"> </span><span class="cf">function</span>(myTree, ...) {</a>
-<a class="sourceLine" id="cb4-2" data-line-number="2">  <span class="co">## Plot the tree</span></a>
-<a class="sourceLine" id="cb4-3" data-line-number="3">  ape<span class="op">::</span><span class="kw">plot.phylo</span>(myTree<span class="op">$</span>tree, </a>
-<a class="sourceLine" id="cb4-4" data-line-number="4">                  <span class="dt">type =</span> <span class="st">&quot;phylogram&quot;</span>, </a>
-<a class="sourceLine" id="cb4-5" data-line-number="5">                  <span class="dt">show.node.label =</span> <span class="ot">FALSE</span>,</a>
-<a class="sourceLine" id="cb4-6" data-line-number="6">                  <span class="dt">show.tip.label =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb4-7" data-line-number="7">                  <span class="dt">edge.color =</span> <span class="st">&quot;grey&quot;</span>,</a>
-<a class="sourceLine" id="cb4-8" data-line-number="8">                  <span class="dt">tip.color =</span> myTree<span class="op">$</span>tipParam<span class="op">$</span>color,</a>
-<a class="sourceLine" id="cb4-9" data-line-number="9">                  <span class="co">#         ftype = &quot;off&quot;,</span></a>
-<a class="sourceLine" id="cb4-10" data-line-number="10">                  <span class="dt">edge.width =</span> <span class="dv">2</span>,</a>
-<a class="sourceLine" id="cb4-11" data-line-number="11">                  <span class="dt">label.offset =</span> <span class="fl">0.1</span>, </a>
-<a class="sourceLine" id="cb4-12" data-line-number="12">                  <span class="dt">lwd =</span> <span class="dv">2</span>,</a>
-<a class="sourceLine" id="cb4-13" data-line-number="13">                  <span class="co"># fsize = 0.7,</span></a>
-<a class="sourceLine" id="cb4-14" data-line-number="14">                  <span class="dt">cex =</span> <span class="fl">0.7</span>,</a>
-<a class="sourceLine" id="cb4-15" data-line-number="15">                  <span class="dt">color =</span> speciesPalette<span class="op">$</span>Bat, </a>
-<a class="sourceLine" id="cb4-16" data-line-number="16">                  <span class="dt">nomargin =</span> <span class="ot">FALSE</span>,</a>
-<a class="sourceLine" id="cb4-17" data-line-number="17">                  <span class="dt">font =</span> <span class="dv">1</span>, </a>
-<a class="sourceLine" id="cb4-18" data-line-number="18">                  ...)</a>
-<a class="sourceLine" id="cb4-19" data-line-number="19">  <span class="kw">add.scale.bar</span>(<span class="dt">cex =</span> <span class="dv">1</span>, <span class="dt">font =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="dt">length =</span> <span class="fl">0.2</span>, </a>
-<a class="sourceLine" id="cb4-20" data-line-number="20">                <span class="dt">lwd =</span> <span class="dv">2</span>, <span class="dt">lcol =</span> <span class="st">&quot;blue&quot;</span>)</a>
-<a class="sourceLine" id="cb4-21" data-line-number="21">  <span class="co"># add.arrow(myTree$tree, tip = cov2Tips, </span></a>
-<a class="sourceLine" id="cb4-22" data-line-number="22">  <span class="co">#           arrl = 0.3, </span></a>
-<a class="sourceLine" id="cb4-23" data-line-number="23">  <span class="co">#           col = speciesPalette$Human)</span></a>
-<a class="sourceLine" id="cb4-24" data-line-number="24">  </a>
-<a class="sourceLine" id="cb4-25" data-line-number="25">  <span class="co"># length(myTree$tree$node.label)</span></a>
-<a class="sourceLine" id="cb4-26" data-line-number="26">  <span class="co"># nodelabels(cex = 0.5)</span></a>
-<a class="sourceLine" id="cb4-27" data-line-number="27">  <span class="co"># sort(as.numeric(myTree$tree$node.label))</span></a>
-<a class="sourceLine" id="cb4-28" data-line-number="28">  <span class="co"># tiplabels()</span></a>
-<a class="sourceLine" id="cb4-29" data-line-number="29">  </a>
-<a class="sourceLine" id="cb4-30" data-line-number="30">}</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">plotMyTree &lt;-<span class="st"> </span><span class="cf">function</span>(myTree, </a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">                       <span class="dt">show.node.label =</span> <span class="ot">FALSE</span>, ...) {</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">  <span class="co">## Plot the tree</span></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">  ape<span class="op">::</span><span class="kw">plot.phylo</span>(myTree<span class="op">$</span>tree, </a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">                  <span class="dt">type =</span> <span class="st">&quot;phylogram&quot;</span>, </a>
+<a class="sourceLine" id="cb4-6" data-line-number="6">                  <span class="dt">show.node.label =</span> show.node.label,</a>
+<a class="sourceLine" id="cb4-7" data-line-number="7">                  <span class="dt">show.tip.label =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb4-8" data-line-number="8">                  <span class="dt">edge.color =</span> <span class="st">&quot;grey&quot;</span>,</a>
+<a class="sourceLine" id="cb4-9" data-line-number="9">                  <span class="dt">tip.color =</span> myTree<span class="op">$</span>tipParam<span class="op">$</span>color,</a>
+<a class="sourceLine" id="cb4-10" data-line-number="10">                  <span class="co">#         ftype = &quot;off&quot;,</span></a>
+<a class="sourceLine" id="cb4-11" data-line-number="11">                  <span class="dt">edge.width =</span> <span class="dv">2</span>,</a>
+<a class="sourceLine" id="cb4-12" data-line-number="12">                  <span class="dt">label.offset =</span> <span class="fl">0.1</span>, </a>
+<a class="sourceLine" id="cb4-13" data-line-number="13">                  <span class="dt">lwd =</span> <span class="dv">2</span>,</a>
+<a class="sourceLine" id="cb4-14" data-line-number="14">                  <span class="co"># fsize = 0.7,</span></a>
+<a class="sourceLine" id="cb4-15" data-line-number="15">                  <span class="dt">cex =</span> <span class="fl">0.7</span>,</a>
+<a class="sourceLine" id="cb4-16" data-line-number="16">                  <span class="dt">color =</span> speciesPalette<span class="op">$</span>Bat, </a>
+<a class="sourceLine" id="cb4-17" data-line-number="17">                  <span class="dt">nomargin =</span> <span class="ot">FALSE</span>,</a>
+<a class="sourceLine" id="cb4-18" data-line-number="18">                  <span class="dt">font =</span> <span class="dv">1</span>, </a>
+<a class="sourceLine" id="cb4-19" data-line-number="19">                  ...)</a>
+<a class="sourceLine" id="cb4-20" data-line-number="20">  <span class="kw">add.scale.bar</span>(<span class="dt">cex =</span> <span class="dv">1</span>, <span class="dt">font =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="dt">length =</span> <span class="fl">0.2</span>, </a>
+<a class="sourceLine" id="cb4-21" data-line-number="21">                <span class="dt">lwd =</span> <span class="dv">2</span>, <span class="dt">lcol =</span> <span class="st">&quot;blue&quot;</span>)</a>
+<a class="sourceLine" id="cb4-22" data-line-number="22">  <span class="co"># add.arrow(myTree$tree, tip = cov2Tips, </span></a>
+<a class="sourceLine" id="cb4-23" data-line-number="23">  <span class="co">#           arrl = 0.3, </span></a>
+<a class="sourceLine" id="cb4-24" data-line-number="24">  <span class="co">#           col = speciesPalette$Human)</span></a>
+<a class="sourceLine" id="cb4-25" data-line-number="25">  </a>
+<a class="sourceLine" id="cb4-26" data-line-number="26">  <span class="co"># length(myTree$tree$node.label)</span></a>
+<a class="sourceLine" id="cb4-27" data-line-number="27">  <span class="co"># nodelabels(cex = 0.5)</span></a>
+<a class="sourceLine" id="cb4-28" data-line-number="28">  <span class="co"># sort(as.numeric(myTree$tree$node.label))</span></a>
+<a class="sourceLine" id="cb4-29" data-line-number="29">  <span class="co"># tiplabels()</span></a>
+<a class="sourceLine" id="cb4-30" data-line-number="30">  </a>
+<a class="sourceLine" id="cb4-31" data-line-number="31">}</a></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co">#### Load and plot the genome tree ####</span></a>
 <a class="sourceLine" id="cb5-2" data-line-number="2"></a>
 <a class="sourceLine" id="cb5-3" data-line-number="3">genomeTreeFile &lt;-<span class="st"> </span><span class="kw">file.path</span>(</a>
@@ -513,19 +512,20 @@ div.tocify {
 <a class="sourceLine" id="cb5-7" data-line-number="7"></a>
 <a class="sourceLine" id="cb5-8" data-line-number="8">genomeTree &lt;-<span class="st"> </span><span class="kw">loadTree</span>(</a>
 <a class="sourceLine" id="cb5-9" data-line-number="9">  <span class="dt">file =</span> genomeTreeFile, </a>
-<a class="sourceLine" id="cb5-10" data-line-number="10">  <span class="dt">outgroup =</span> outgroup, <span class="dt">rootNode =</span> <span class="ot">NULL</span>, </a>
-<a class="sourceLine" id="cb5-11" data-line-number="11">  <span class="dt">rotateNodes =</span> <span class="kw">c</span>(<span class="dv">39</span>, <span class="dv">75</span>))</a>
-<a class="sourceLine" id="cb5-12" data-line-number="12"><span class="co"># genomeTree &lt;- paintSubTree(tree = genomeTree, node = 49, state = &quot;CoV2&quot;)</span></a>
-<a class="sourceLine" id="cb5-13" data-line-number="13"><span class="co"># nodelabels(cex = 0.4)</span></a>
-<a class="sourceLine" id="cb5-14" data-line-number="14"></a>
-<a class="sourceLine" id="cb5-15" data-line-number="15"><span class="kw">plotMyTree</span>(genomeTree, <span class="dt">main  =</span> <span class="st">&quot;Genome-based virus tree&quot;</span>)</a>
-<a class="sourceLine" id="cb5-16" data-line-number="16"></a>
-<a class="sourceLine" id="cb5-17" data-line-number="17"><span class="co">## Identify some clades</span></a>
-<a class="sourceLine" id="cb5-18" data-line-number="18"><span class="kw">cladelabels</span>(genomeTree<span class="op">$</span>tree, <span class="st">&quot;CoV2&quot;</span>, <span class="dv">46</span>, <span class="dt">cex =</span> <span class="fl">0.7</span>, <span class="dt">orientation =</span> <span class="st">&quot;horizontal&quot;</span>, <span class="dt">offset =</span> <span class="dv">5</span>)</a>
-<a class="sourceLine" id="cb5-19" data-line-number="19"><span class="kw">cladelabels</span>(genomeTree<span class="op">$</span>tree, <span class="st">&quot;MERS&quot;</span>, <span class="dv">43</span>, <span class="dt">cex =</span> <span class="fl">0.7</span>, <span class="dt">orientation =</span> <span class="st">&quot;horizontal&quot;</span>, <span class="dt">offset =</span> <span class="dv">3</span>)</a>
-<a class="sourceLine" id="cb5-20" data-line-number="20"><span class="kw">cladelabels</span>(genomeTree<span class="op">$</span>tree, <span class="st">&quot;SARS&quot;</span>, <span class="dv">69</span>, <span class="dt">cex =</span> <span class="fl">0.7</span>, <span class="dt">orientation =</span> <span class="st">&quot;horizontal&quot;</span>, <span class="dt">offset =</span> <span class="dv">3</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb5-10" data-line-number="10">  <span class="dt">outgroup =</span> outgroup, </a>
+<a class="sourceLine" id="cb5-11" data-line-number="11">  <span class="dt">rootNode =</span> <span class="ot">NULL</span>, </a>
+<a class="sourceLine" id="cb5-12" data-line-number="12">  <span class="dt">rotateNodes =</span> <span class="kw">c</span>(<span class="dv">39</span>, <span class="dv">75</span>))</a>
+<a class="sourceLine" id="cb5-13" data-line-number="13"><span class="co"># genomeTree &lt;- paintSubTree(tree = genomeTree, node = 49, state = &quot;CoV2&quot;)</span></a>
+<a class="sourceLine" id="cb5-14" data-line-number="14"><span class="co"># nodelabels(cex = 0.4)</span></a>
+<a class="sourceLine" id="cb5-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb5-16" data-line-number="16"><span class="kw">plotMyTree</span>(genomeTree, <span class="dt">main  =</span> <span class="st">&quot;Genome-based virus tree&quot;</span>, <span class="dt">show.node.label =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb5-17" data-line-number="17"></a>
+<a class="sourceLine" id="cb5-18" data-line-number="18"><span class="co">## Identify some clades</span></a>
+<a class="sourceLine" id="cb5-19" data-line-number="19"><span class="kw">cladelabels</span>(genomeTree<span class="op">$</span>tree, <span class="st">&quot;CoV2&quot;</span>, <span class="dv">46</span>, <span class="dt">cex =</span> <span class="fl">0.7</span>, <span class="dt">orientation =</span> <span class="st">&quot;horizontal&quot;</span>, <span class="dt">offset =</span> <span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb5-20" data-line-number="20"><span class="kw">cladelabels</span>(genomeTree<span class="op">$</span>tree, <span class="st">&quot;MERS&quot;</span>, <span class="dv">43</span>, <span class="dt">cex =</span> <span class="fl">0.7</span>, <span class="dt">orientation =</span> <span class="st">&quot;horizontal&quot;</span>, <span class="dt">offset =</span> <span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb5-21" data-line-number="21"><span class="kw">cladelabels</span>(genomeTree<span class="op">$</span>tree, <span class="st">&quot;SARS&quot;</span>, <span class="dv">69</span>, <span class="dt">cex =</span> <span class="fl">0.7</span>, <span class="dt">orientation =</span> <span class="st">&quot;horizontal&quot;</span>, <span class="dt">offset =</span> <span class="dv">5</span>)</a></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="figures/phylogeny/CoV_genome_tree-1.png" alt="Genome tree of selected coronaviruses.  The tree was inferred by maximum likelihood apprroach (PhyML) based on a progressive multiple alignment (clustalw). " width="80%" />
+<img src="figures/phylogeny/CoV_genome_tree-1.png" alt="Genome tree of selected coronaviruses.  The tree was inferred by maximum likelihood apprroach (PhyML) based on a progressive multiple alignment (clustalw). " width="100%" />
 <p class="caption">
 Genome tree of selected coronaviruses. The tree was inferred by maximum likelihood apprroach (PhyML) based on a progressive multiple alignment (clustalw).
 </p>
