@@ -2,7 +2,7 @@
 ## SARS-CoV-2 sequences and their comparison with HIV sequences.
 
 MAKEFILE=scripts/makefiles/02_genome-analysis.mk
-MAKE=make -f ${MAKEFILE}
+MAKE=make -s -f ${MAKEFILE}
 TIME=time
 
 ################################################################
@@ -40,20 +40,21 @@ targets:
 	@echo "	around-cov2-gisaid_genomes	Close selection around CoV-2 from Genbank + GISAID"
 	@echo
 	@echo "S-gene phylogeny"
-	@echo "	selected_Sgenes			S-gene phylogeny inference for selected strains from Genbank"
-	@echo "	selected_gisaid_Sgenes		S-gene phylogeny inference for selected strains from Genbank + GISAID"
-	@echo "	around-cov-2_gisaid_Sgenes	S-gene phylogeny inference for strains from Genbank + GISAID around SARS-CoV-2"
+	@echo "	Sgenes_selected			S-gene phylogeny inference for selected strains from Genbank"
+	@echo "	Sgenes_selected_gisaid		S-gene phylogeny inference for selected strains from Genbank + GISAID"
+	@echo "	Sgenes_around-cov-2_gisaid	S-gene phylogeny inference for strains from Genbank + GISAID around SARS-CoV-2"
 
 
 ################################################################
 ## List parameters
 GENOME_DIR=data/virus_genomes
-GENOME_PREFIX=coronavirus_selected_genomes
+COLLECTION=around-CoV-2
+GENOME_PREFIX=coronavirus_${COLLECTION}_genomes
 GENOME_SEQ=${GENOME_DIR}/${GENOME_PREFIX}.fasta
 GISAID_DIR=data/GISAID_genomes
 PHYLO_TASKS=align_genomes_clustalw gblocks_clean run_phyml
 SGENE_DIR=data/S-gene
-SGENE_PREFIX=coronavirus_selected_S-genes
+SGENE_PREFIX=coronavirus_${COLLECTION}_S-genes
 INSEQ_DIR=${GENOME_DIR}
 INSEQ_PREFIX=${GENOME_PREFIX}
 INSEQ_FILE=${INSEQ_DIR}/${INSEQ_PREFIX}.fasta
@@ -298,49 +299,53 @@ all_genomes:
 selected_genomes:
 	@${MAKE} ${PHYLO_TASKS}\
 		INSEQ_DIR=${GENOME_DIR} \
-		INSEQ_PREFIX=coronavirus_selected_genomes
+		INSEQ_PREFIX=coronavirus_${COLLECTION}_genomes
 
 
 ################################################################
 ## Phylogeny inference for selected genomes from Genbank + a few
 ## genomes imported from GISAID (login required to download them,
 ## cannot be redistributed in the github).
+_merge_gisaid:
+	@echo
+	@echo "Merging Genbank and GISAID sequences for collection ${COLLECTION}"
+	@cat ${GENOME_DIR}/coronavirus_${COLLECTION}_genomes.fasta \
+		${GISAID_DIR}/coronavirus-genomes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
+		> ${GISAID_DIR}/coronavirus_${COLLECTION}-plus-GISAID_genomes.fasta
+	@echo "	genomes	${GISAID_DIR}/coronavirus_${COLLECTION}-plus-GISAID_genomes.fasta"
+	@cat ${SGENE_DIR}/S-gene_${COLLECTION}.fasta \
+		${GISAID_DIR}/coronavirus-S-genes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
+		> ${GISAID_DIR}/S-gene_${COLLECTION}-plus-GISAID.fasta
+	@echo "	S-genes	${GISAID_DIR}/S-gene_${COLLECTION}-plus-GISAID_genomes.fasta"
+
 merge_gisaid:
-	@echo
-	@echo "Merging Genbank and GISAID genomes"
-	@cat ${GENOME_DIR}/coronavirus_selected_genomes.fasta \
-		${GISAID_DIR}/coronavirus-genomes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
-		> ${GISAID_DIR}/coronavirus_selected-plus-GISAID_genomes.fasta
-	@echo "	${GISAID_DIR}/coronavirus_selected-plus-GISAID_genomes.fasta"
-	@cat ${GENOME_DIR}/coronavirus_all_genomes.fasta \
-		${GISAID_DIR}/coronavirus-genomes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
-		> ${GISAID_DIR}/coronavirus_all-plus-GISAID_genomes.fasta
-	@echo "	${GISAID_DIR}/coronavirus_all-plus-GISAID_genomes.fasta"
-	@cat ${GENOME_DIR}/coronavirus_around-CoV-2_genomes.fasta \
-		${GISAID_DIR}/coronavirus-genomes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
-		> ${GISAID_DIR}/coronavirus_around-CoV-2-plus-GISAID_genomes.fasta
-	@echo "	${GISAID_DIR}/coronavirus_around-CoV-2-plus-GISAID_genomes.fasta"
-	@echo
-	@echo "Merging Genbank and GISAID S-genes"
-	@cat ${SGENE_DIR}/S-gene_selected.fasta \
-		${GISAID_DIR}/coronavirus-S-genes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
-		> ${GISAID_DIR}/S-gene_selected-plus-GISAID.fasta
-	@echo "	${GISAID_DIR}/S-gene_selected-plus-GISAID_genomes.fasta"
-#	@cat ${SGENE_DIR}/S-gene_all.fasta \
-#		${GISAID_DIR}/coronavirus-S-genes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
-#		> ${GISAID_DIR}/S-gene_all-plus-GISAID.fasta
-#	@echo "	${GISAID_DIR}/S-gene_all-plus-GISAID_genomes.fasta"
-	@cat ${SGENE_DIR}/S-gene_around-CoV-2.fasta \
-		${GISAID_DIR}/coronavirus-S-genes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
-		> ${GISAID_DIR}/S-gene_around-CoV-2-plus-GISAID.fasta
-	@echo "	${GISAID_DIR}/S-gene_around-CoV-2-plus-GISAID.fasta"
+	@for collection in around-CoV-2 selected all; do \
+		${MAKE} _merge_gisaid COLLECTION=$${collection}; \
+	done
+
+# 	@cat ${GENOME_DIR}/coronavirus_all_genomes.fasta \
+# 		${GISAID_DIR}/coronavirus-genomes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
+# 		> ${GISAID_DIR}/coronavirus_all-plus-GISAID_genomes.fasta
+# 	@echo "	${GISAID_DIR}/coronavirus_all-plus-GISAID_genomes.fasta"
+# 	@cat ${GENOME_DIR}/coronavirus_around-CoV-2_genomes.fasta \
+# 		${GISAID_DIR}/coronavirus-genomes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
+# 		> ${GISAID_DIR}/coronavirus_around-CoV-2-plus-GISAID_genomes.fasta
+# 	@echo "	${GISAID_DIR}/coronavirus_around-CoV-2-plus-GISAID_genomes.fasta"
+# #	@cat ${SGENE_DIR}/S-gene_all.fasta \
+# #		${GISAID_DIR}/coronavirus-S-genes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
+# #		> ${GISAID_DIR}/S-gene_all-plus-GISAID.fasta
+# #	@echo "	${GISAID_DIR}/S-gene_all-plus-GISAID_genomes.fasta"
+# 	@cat ${SGENE_DIR}/S-gene_around-CoV-2.fasta \
+# 		${GISAID_DIR}/coronavirus-S-genes_from_GISAID_DO_NOT_REDISTRIBUTE.fasta \
+# 		> ${GISAID_DIR}/S-gene_around-CoV-2-plus-GISAID.fasta
+# 	@echo "	${GISAID_DIR}/S-gene_around-CoV-2-plus-GISAID.fasta"
 
 ################################################################
 ## Selected from Genbank + GISAID
 selected-gisaid_genomes:
 	@${MAKE} ${PHYLO_TASKS} \
-		INSEQ_DIR=${GISAID_DIR}/ \
-		INSEQ_PREFIX=coronavirus_selected-plus-GISAID_genomes
+		INSEQ_DIR=${GISAID_DIR} \
+		COLLECTION=selected 
 
 ################################################################
 ## Close selection around CoV-2 from Genbank + GISAID
@@ -351,27 +356,39 @@ around-cov2-gisaid_genomes:
 
 ################################################################
 ## S-gene phylogeny for selected genomes from Genbank
-selected_Sgenes:
+_Sgenes:
 	@${MAKE} ${PHYLO_TASKS}\
-		INSEQ_DIR=${SGENE_DIR} \
-		INSEQ_PREFIX=S-gene_selected \
+		INSEQ_PREFIX=S-gene_${COLLECTION} \
 		CLUSTALW_DIR=results/S-gene/clustalw_alignments \
-		CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_selected
+		CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_${COLLECTION}
+
+Sgenes_selected:
+	@${MAKE} _Sgenes COLLECTION=selected INSEQ_DIR=${SGENE_DIR}
+
+# ${PHYLO_TASKS}\
+# 	INSEQ_DIR=${SGENE_DIR} \
+# 	INSEQ_PREFIX=S-gene_selected \
+# 	CLUSTALW_DIR=results/S-gene/clustalw_alignments \
+# 	CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_selected
 
 ################################################################
 ## S-gene phylogeny for selected genomes from Genbank + GISAID
-selected_gisaid_Sgenes:
-	@${MAKE} ${PHYLO_TASKS}\
-		INSEQ_DIR=${GISAID_DIR} \
-		INSEQ_PREFIX=S-gene_selected-plus-GISAID \
-		CLUSTALW_DIR=results/S-gene/clustalw_alignments \
-		CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_selected-plus-GISAID
+Sgenes_selected_gisaid:
+	@${MAKE} _Sgenes COLLECTION=selected-plus-GISAID
+
+# @${MAKE} ${PHYLO_TASKS}\
+# 	INSEQ_DIR=${GISAID_DIR} \
+# 	INSEQ_PREFIX=S-gene_selected-plus-GISAID \
+# 	CLUSTALW_DIR=results/S-gene/clustalw_alignments \
+# 	CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_selected-plus-GISAID
 
 ################################################################
 ## S-gene phylogeny for genomes from Genbank + GISAID around-cov-2
-around-cov-2_gisaid_Sgenes:
-	@${MAKE} ${PHYLO_TASKS}\
-		INSEQ_DIR=${GISAID_DIR} \
-		INSEQ_PREFIX=S-gene_around-cov-2-plus-GISAID \
-		CLUSTALW_DIR=results/S-gene/clustalw_alignments \
-		CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_around-cov-2-plus-GISAID
+Sgenes_around-cov-2_gisaid:
+	@${MAKE} _Sgenes COLLECTION=around-CoV-2-plus-GISAID INSEQ_DIR=${GISAID_DIR}
+
+#	@${MAKE} ${PHYLO_TASKS}\
+#		INSEQ_DIR=${GISAID_DIR} \
+#		INSEQ_PREFIX=S-gene_around-cov-2-plus-GISAID \
+#		CLUSTALW_DIR=results/S-gene/clustalw_alignments \
+#		CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_around-cov-2-plus-GISAID
