@@ -44,33 +44,57 @@ targets:
 	@echo "	Sgenes_selected			S-gene phylogeny inference for selected strains from Genbank"
 	@echo "	Sgenes_around-cov-2_gisaid	S-gene phylogeny inference for strains from Genbank + GISAID around SARS-CoV-2"
 	@echo "	Sgenes_selected_gisaid		S-gene phylogeny inference for selected strains from Genbank + GISAID"
+	@echo
+	@echo "Genomic features"
 	@echo "	all_features			phylogeny of genomic features extracted by one-to-N alignment with h-CoV-2"
 
 
 ################################################################
 ## List parameters
 
-# GENOME_DIR=data/genomes
-#GENOME_PREFIX=coronavirus_${COLLECTION}_genomes
-#GENOME_SEQ=${GENOME_DIR}/${GENOME_PREFIX}.fasta
-#SGENE_DIR=data/S-gene
-#SGENE_PREFIX=coronavirus_${COLLECTION}_S-genes
-
-#FEATURE=genomes
+FEATURES= 		\
+	S1 		\
+	S2 		\
+	RBD 		\
+	S-gene 		\
+	Recomb-reg-1 	\
+	Recomb-reg-2 	\
+	Recomb-reg-3 	\
+	CDS-S		\
+	CDS-E		\
+	CDS-M 		\
+	CDS-N		\
+	CDS-ORF10	\
+	CDS-ORF1ab	\
+	CDS-ORF3a	\
+	CDS-ORF6	\
+	CDS-ORF7a	\
+	CDS-ORF8	\
+	genomes
 FEATURE=S-gene
+
+## Collections of genomes
+COLLECTIONS=around-CoV-2-plus-GISAID selected all
 COLLECTION=around-CoV-2
+
+
+## Directories and input sequence file
 GISAID_DIR=data/GISAID_genomes
 INSEQ_DIR=data/${FEATURE}
 INSEQ_PREFIX=${FEATURE}_${COLLECTION}
 INSEQ_FILE=${INSEQ_DIR}/${INSEQ_PREFIX}.fasta
 INSEQ_NB=`grep '^>' ${INSEQ_FILE} | wc -l | awk '{print $$1}'`
+
+## Parameters for the phylogenetic analysis
 PHYLO_TASKS=multialign_clustalw gblocks_clean run_phyml
 PHYLO_DIR=results/${FEATURE}_${COLLECTION}/
 
 list_param:
 	@echo
 	@echo "Generic parameters"
+	@echo "	FEATURES		${FEATURES}"
 	@echo "	FEATURE			${FEATURE}"
+	@echo "	COLLECTIONS		${COLLECTIONS}"
 	@echo "	COLLECTION		${COLLECTION}"
 	@echo
 	@echo "Input sequences"
@@ -408,30 +432,13 @@ Sgenes_around-cov-2_gisaid:
 ################################################################
 ## Run phylogenic analysis on genomic regions obtained by one-to-N
 ## alignment with selected h-CoV-2 features
-FEATURES= 		\
-	Recomb-reg-1 	\
-	Recomb-reg-2 	\
-	Recomb-reg-3 	\
-	S-gene 		\
-	CDS-S		\
-	CDS-E		\
-	CDS-M 		\
-	CDS-N		\
-	CDS-ORF10	\
-	CDS-ORF1ab	\
-	CDS-ORF3a	\
-	CDS-ORF6	\
-	CDS-ORF7a	\
-	CDS-ORF8
 
-#FEATURES=Recomb-reg-3
-FEATURE_COLLECTIONS=around-CoV-2-plus-GISAID
 all_features:
 	@echo
 	@echo "Running phylogenetic analysis for genomic features"
 	@echo "	FEATURES	${FEATURES}"
 	@for feature in ${FEATURES} ; do \
-		for collection in ${FEATURE_COLLECTIONS} ; do \
+		for collection in ${COLLECTIONS} ; do \
 			${MAKE} FEATURE=$${feature} COLLECTION=$${collection} ${PHYLO_TASKS} ; \
 		done ; \
 	done
