@@ -28,7 +28,7 @@ targets:
 	@echo "	multialign_clustalw		multiple alignment between reference genomes with clustalw"
 	@echo
 	@echo "Phylogeny inference methods"
-	@echo "	gblocks_clean			clearn the multiple alignments with gblocks"
+	@echo "	gblocks_clean			clear the multiple alignments (suppress gap-containing columns) with gblocks"
 	@echo "	nj_tree				generate a species tree from the aligned genomes with clustalw NJ"
 	@echo "	run_phyml			generate species tree from aligned genomes with PhyML"
 	@echo
@@ -44,6 +44,7 @@ targets:
 	@echo "	Sgenes_selected			S-gene phylogeny inference for selected strains from Genbank"
 	@echo "	Sgenes_around-cov-2_gisaid	S-gene phylogeny inference for strains from Genbank + GISAID around SARS-CoV-2"
 	@echo "	Sgenes_selected_gisaid		S-gene phylogeny inference for selected strains from Genbank + GISAID"
+	@echo "	all_features			phylogeny of genomic features extracted by one-to-N alignment with h-CoV-2"
 
 
 ################################################################
@@ -281,9 +282,10 @@ nj_tree:
 ## genomes, using maximum-likelihood approach (phyml tool).
 PHYML_THREADS=5
 PHYML_BOOTSTRAP=100
-PHYML_OPT=--datatype nt --bootstrap ${PHYML_BOOTSTRAP} --model HKY85
+PHYML_MODEL=GTR
+PHYML_OPT=--datatype nt --bootstrap ${PHYML_BOOTSTRAP} --model ${PHYML_MODEL}
 PHYML_PREFIX=${MALIGN_PREFIX}_gblocks.phy_phyml_tree
-PHYML_TREE=${MALIGN_PREFIX}_gblocks.phy_phyml_tree.phb
+PHYML_TREE=${PHYML_PREFIX}_${PHYML_MODEL}.phb
 run_phyml:
 	@echo "Shortening sequence names"
 	@perl -pe 's|^>(.{12}).*|>$$1|' ${GBLOCKS_PREFIX} > ${GBLOCKS_PREFIX}_shortnames
@@ -402,3 +404,34 @@ Sgenes_around-cov-2_gisaid:
 #		INSEQ_PREFIX=S-gene_around-cov-2-plus-GISAID \
 #		PHYLO_DIR=results/S-gene/clustalw_alignments \
 #		CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_around-cov-2-plus-GISAID
+
+################################################################
+## Run phylogenic analysis on genomic regions obtained by one-to-N
+## alignment with selected h-CoV-2 features
+FEATURES= 		\
+	Recomb-reg-1 	\
+	Recomb-reg-2 	\
+	Recomb-reg-3 	\
+	S-gene 		\
+	CDS-S		\
+	CDS-E		\
+	CDS-M 		\
+	CDS-N		\
+	CDS-ORF10	\
+	CDS-ORF1ab	\
+	CDS-ORF3a	\
+	CDS-ORF6	\
+	CDS-ORF7a	\
+	CDS-ORF8
+
+#FEATURES=Recomb-reg-3
+FEATURE_COLLECTIONS=around-CoV-2-plus-GISAID
+all_features:
+	@echo
+	@echo "Running phylogenetic analysis for genomic features"
+	@echo "	FEATURES	${FEATURES}"
+	@for feature in ${FEATURES} ; do \
+		for collection in ${FEATURE_COLLECTIONS} ; do \
+			${MAKE} FEATURE=$${feature} COLLECTION=$${collection} ${PHYLO_TASKS} ; \
+		done ; \
+	done
