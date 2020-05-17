@@ -6,7 +6,7 @@
 #' @param ... additional parameters are passed to ape::plot.phylo
 plotMyTree <- function(myTree, 
                        show.node.label = FALSE, 
-                       scaleLength = 0.2,
+                       scaleLength = 0.05,
                        ...) {
   ## Plot the tree
   ape::plot.phylo(myTree$tree, 
@@ -25,8 +25,12 @@ plotMyTree <- function(myTree,
                   nomargin = FALSE,
                   font = 1, 
                   ...)
-  add.scale.bar(cex = 1, font = 2, col = "blue", length = scaleLength, 
-                lwd = 2, lcol = "blue")
+  add.scale.bar(cex = 1, 
+                font = 2, 
+                col = "blue", 
+                length = scaleLength, 
+                lwd = 2, 
+                lcol = "blue")
   # add.arrow(myTree$tree, tip = cov2Tips, 
   #           arrl = 0.3, 
   #           col = speciesPalette$Human)
