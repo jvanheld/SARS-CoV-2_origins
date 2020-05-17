@@ -254,8 +254,8 @@ for (feature in features) {
   
   plotMyTree(treeData[[feature]], 
              main  = paste0(feature, " tree"), 
-             scaleLength = 0.1,
-             show.node.label = TRUE)
+             scaleLength = 0.02,
+             show.node.label = FALSE)
   
   # ## Identify some clades
   # cladelabels(genomeTree$tree, "CoV2", 46, cex = 0.7, orientation = "horizontal", offset = 5)
