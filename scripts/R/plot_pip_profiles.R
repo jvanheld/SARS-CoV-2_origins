@@ -3,6 +3,8 @@
 #' @author Jacques.van-Helden@france-bioinformatique.fr
 #' @param alignments a list of pairwise alignments produced by Biostrings::pairwiseAlignment
 #' @param windowSize=100 size of the sliding window to compute the rolling average PIP
+#' @param leftLimit=NULL specify the starting position of the region to be displayed. If not specified use the beginning of the sequence
+#' @param rightLimit=NULL specify the ending position of the region to be displayed. If not specified use the end of the sequence
 #' @param legend=names(alignments) legend labels
 #' @param colors=rainbow(n=length(alignments)) color per line
 #' @param legendMargin=0.25 proportion to add on the right side for the legend (sequence names)
@@ -12,43 +14,81 @@
 #' @param ... additional parameters are passed to plot()
 #' @export
 plotPIPprofiles <-  function(alignments, 
-                     windowSize = 100,
-                     legend = names(alignments),
-                     colors = rainbow(n = length(alignments)),
-                     legendMargin = 0.25,
-                     legendCorner = "topright",
-                     legendCex = 0.7,
-                     ylim = c(50,100),
-                     ... ) {
+                             windowSize = 100,
+                             leftLimit = NULL,
+                             rightLimit = NULL,
+                             legend = NULL,
+                             colors = rainbow(n = length(alignments)),
+                             legendMargin = 0.25,
+                             legendCorner = "topright",
+                             legendCex = 0.7,
+                             ylim = c(50,100),
+                             ... ) {
+  ## Initialise variables  
+  meanPIPs <- vector() ## Mean PIP per sequence
+  i <- 1 # 
+  nbAlignments <- length(alignments)
   
-  i <- 1
   for (i in 1:length(alignments)) {
     subject <- names(alignments)[i]
     alignment <- alignments[[i]]
     
     ## Get the aligned reference and query sequences 
     refSeq <- unlist(strsplit(as.character(pattern(alignment)), split = "")) 
-    querySeq <- unlist(strsplit(as.character(subject(alignment)), split = ""))
+    subjectSeq <- unlist(strsplit(as.character(subject(alignment)), split = "")) 
     # compareStrings(genomesNto1$alignments[[1]]) ## TO TEST: is this fastest ? Does it give the same result ?
+    # length(refSeq)
+    # table(refSeq)
+    # sum(is.na(refSeq))
     
-    ## Only keep the positions corresponding to the reference sequence (no gap in ref)
+    # ## Only keep the positions corresponding to the reference sequence (no gap in ref)
     refPositions <- refSeq != "-"
+    table(refPositions)
+    # table(refPositions)
     
     ## Compute identity per position
-    identityProfile <- refSeq[refPositions] == querySeq[refPositions]
+    identityProfile <- refSeq[refPositions] == subjectSeq[refPositions]
+    # table(identityProfile)
+    #    identityProfile <- refSeq == querySeq
     
     ## Compute PIP profile
     pipProfile <- 100 * filter(identityProfile, filter = rep(1/windowSize, windowSize))
+
+    
+    ## Compute PIP limits
+    if (is.null(leftLimit)) {
+      pipStart <- 1
+    } else {
+      pipStart <- leftLimit
+    }
+    if (is.null(rightLimit)) {
+      pipEnd <- length(identityProfile)
+    } else {
+      pipEnd <- rightLimit
+    }
+    
+    ## Compute mean PIP over the specified limits (pipStart, pipEnd)
+    ## leftLimit <- NULL
+    ## pipEnd <- NULL
+    ## class(pipProfile)
+    ## table(identityProfile)
+    meanPIP <- round(digits = 3, 100 * sum(identityProfile[pipStart:pipEnd],na.rm = TRUE) / length(identityProfile))
+    meanPIPs <- c(meanPIPs, meanPIP)
     
     
-    message("\t", i, "/", nbQueryGenomes,
+    message("\t", i, "/", nbAlignments,
             "\tpid = ", round(digits = 2, pid(alignment)), 
-            "\t", subject
+            "\t", subject,
+            "\tfrom ", pipStart,
+            "\tto ", pipEnd,
+            "\tmeanPIP = ", meanPIP
     )
     
+    
+    ## Plot PIP profiles
     if (i == 1) {
-      plot(1:length(identityProfile),
-           pipProfile, 
+      plot(pipStart:pipEnd,
+           pipProfile[pipStart:pipEnd], 
            type = "l",
            xlab = "Position", 
            ylab = paste0("PIP (", windowSize," bp-averaged)"),
@@ -64,14 +104,22 @@ plotPIPprofiles <-  function(alignments,
       ) 
       
     } else {
-      lines(1:length(identityProfile),
-            pipProfile, 
+      lines(pipStart:pipEnd,
+            pipProfile[pipStart:pipEnd], 
             type = "l",
             col = colors[i]
       )
       
     }
   }
+  
+  
+  ## Default legend
+  if (is.null(legend)) {
+    legend <- paste(names(alignments), "(", round(digits = 1, meanPIPs), "%)")
+  }
+  
+  ## Draw the legend
   legend(legendCorner, 
          legend = legend, 
          col = colors, 
