@@ -129,3 +129,41 @@ make -f scripts/makefiles/05_ACE2_analysis.mk compare_ACE2_with_human
 ```
 
 
+## Running the scripts on the IFB core cluster
+
+
+### Opening the connection 
+
+```
+## Define your login on the IFB-core cluster
+IFB_LOGIN=jvanhelden
+
+## open a connection to the cluster
+ssh ${IFB_LOGIN}@core.cluster.france-bioinformatique.fr
+
+cd coronavirus_insertions
+
+```
+
+### Loading the environment
+
+
+```
+module load conda 
+conda activate covid-19
+
+```
+
+### Running a single task via srun
+
+**Never run the tasks on the login node!**
+
+
+```
+## Run genome alignments
+srun --cpus=50  --mem=32GB   --partition=fast  \
+  make -f scripts/makefiles/02_genome-analysis.mk  \
+      PHYML_THREADS=50 TIME='' \
+      Sgenes_around-cov2
+```
+
