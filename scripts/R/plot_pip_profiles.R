@@ -18,7 +18,7 @@ plotPIPprofiles <-  function(alignments,
                              leftLimit = NULL,
                              rightLimit = NULL,
                              legend = NULL,
-                             colors = rainbow(n = length(alignments)),
+                             colors = NULL,
                              legendMargin = 0.25,
                              legendCorner = "topright",
                              legendCex = 0.7,
@@ -29,6 +29,15 @@ plotPIPprofiles <-  function(alignments,
   i <- 1 # 
   nbAlignments <- length(alignments)
   
+  ## Color palette
+  if (is.null(colors)) {
+    colors <- rainbow(n = length(alignments))
+    names(colors) <- names(alignments)
+  }
+  
+
+  
+  ## Plot PIP profiles
   for (i in 1:length(alignments)) {
     subject <- names(alignments)[i]
     alignment <- alignments[[i]]
@@ -84,6 +93,12 @@ plotPIPprofiles <-  function(alignments,
             "\tmeanPIP = ", meanPIP
     )
     
+    ## Sequence color
+    if (is.null(colors[subject])) {
+      seqColor <- colors[i]
+    } else {
+      seqColor <- colors[subject]
+    }
     
     ## Plot PIP profiles
     if (i == 1) {
@@ -99,7 +114,7 @@ plotPIPprofiles <-  function(alignments,
              abline(h = seq(0, 100, 10), col = "#DDDDDD"),
              abline(h = c(0,100), col = "black"),
              abline(v = seq(0, length(refPositions), windowSize * 5), col = "#DDDDDD")),
-           col = colors[i],
+           col = seqColor,
            ...
       ) 
       
@@ -107,7 +122,7 @@ plotPIPprofiles <-  function(alignments,
       lines(pipStart:pipEnd,
             pipProfile[pipStart:pipEnd], 
             type = "l",
-            col = colors[i]
+            col = seqColor
       )
       
     }

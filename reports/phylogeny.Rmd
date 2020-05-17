@@ -96,16 +96,6 @@ par.ori <- par(no.readonly = TRUE)
 
 ```
 
-```{r directories}
-dir <- vector()
-dir["main"] <- ".."
-
-dir["results"] <- file.path(dir["main"], "results")
-dir["genomes"] <- file.path(dir["results"], "genome_phylogeny", "clustalw_alignments")
-
-
-
-```
 
 ```{r parameters}
 
@@ -126,17 +116,71 @@ speciesPrefix <- c("Hu" = "Human",
                    "Cm" = "Camel",
                    "Pi" = "Pig",
                    "Cv" = "Civet")
-## Outgroup
-outgroup <- c("HuOC43",
-              "PiPRCV",
-              "HuTGEV",
-              "PiSADS",
-              "Hu229E",
-              "HuNL63")
 
+## Define feature types
+features <- c(
+  # "genomes", 
+  # "S-gene", 
+  "S1",  
+  "S2", 
+  "RBD", 
+#  "Recomb-Xiao",
+  "Recomb-reg-1",
+  "Recomb-reg-2",
+  "Recomb-reg-3",
+  "CDS-ORF1ab",
+  "CDS-S",
+  "CDS-ORF3a",
+  "CDS-E",
+  "CDS-M",
+  "CDS-ORF6",
+  "CDS-ORF7a",
+  "CDS-ORF8",
+  "CDS-N",
+  "CDS-ORF10")
+feature <- "S-gene"
+
+## Define collections
+collections <- c("around-CoV-2", "selected")
+collection <- "around-CoV-2" # default for testing
+
+## Outgroup per collection
+outgroups <- list()
+outgroups[["selected"]] <- c(
+  "HuOC43",
+  "PiPRCV",
+  "HuTGEV",
+  "PiSADS",
+  "Hu229E",
+  "HuNL63")
+outgroups[["around-CoV-2"]] <- "BtBM48-31"
+
+## Use GISAID data
+useGISAID <- TRUE
+if (useGISAID) {
+  collections <- paste0(collections, "-plus-GISAID")
+  for (collection in names(outgroups)) {
+    outgroups[[paste0(collection, "-plus-GISAID")]] <- outgroups[[collection]]
+  }
+  collection <- paste0(collection, "-plus-GISAID")
+}
 
 ```
 
+
+
+```{r directories}
+dir <- vector()
+dir["main"] <- ".."
+dir["results"] <- file.path(dir["main"], "results")
+dir["genomes"] <- file.path(dir["results"], "genome_phylogeny", "clustalw_alignments")
+
+dir["R"] <- file.path(dir["main"], "scripts", "R")
+# list.files(dir["R"])
+source(file.path(dir["R"], "load_tree.R"))
+source(file.path(dir["R"], "plot_my_tree.R"))
+
+```
 
 
 
@@ -148,149 +192,27 @@ We inferred a phylogeny of virus strains based ontheir full genomes.
 A multiple alignment of genome sequences was performed with a progressive method (`clustalw`). The tree of virus strains was inferred with a maximum likelihood approach (`phyml` software).
 
 
-```{r load_tree_function}
-#### Define a function to load a tree ####
-
-#' @title Load a tree and prepare if for the plot
-#' @author Jacques van Helden
-#' @param file file containing the tree (must  be  format supported by ape::read.tree)
-#' @param outgroup=NULL out group used to define the root. Should be a vector of tip labels.
-#' @param rootNode=NULL alternative to outgroup: define the root based on an internal node number
-#' @param rotateNodes=NULL a vector of internal node numbers to rotate for the plot
-loadTree <- function(file, 
-                       outgroup = NULL,
-                       rootNode = NULL,
-                       rotateNodes = NULL
-                       ) {
-  
-  
-  ## Load the tree with phytools
-  tree <- ape::read.tree(file = file)
-  # tree <- phytools::read.newick(file = treeFile)
-  # plot(tree)
-  # nodelabels()
-  
-  ## Define the root
-  if (!is.null(outgroup)) {
-    tree <- root(tree, outgroup = outgroup, resolve.root = TRUE)
-  } else if (!is.null(root)) {
-    tree <- reroot(tree, node = rootNode)  
-  }
-  
-  # Rotate user-specified nodes
-  if (!is.null(rotateNodes)) {
-    for (node in rotateNodes) {
-      tree <- rotate(tree, node)
-    }
-    
-  }
-  #tree <- rotate(tree, 39)
-  #tree <- rotate(tree, 44)
-  # tree <- rotate(tree, 75)
-  # nodelabels()
-  
-  if (is.binary(tree)) {
-    treeType <- "binary"
-  } else {
-    treeType <- "non-binary"
-  }
-  message("\tLoaded ", treeType, " genome tree", 
-          " with ", Ntip(tree), " tips",
-          " and ", Nnode(tree), " internal nodes")
-  
-  ## Check theinternal structure of the tree
-  # str(tree)
-  # tree$node.label
-  #  dim(tree$edge)
-  #  tree$tip.label
-  #  class(tree)
-  
-  ## Tip parametes
-  tipParam <- data.frame(
-    row.names = tree$tip.label,
-    color = rep(x = "grey", length.out = length(tree$tip.label)))
-  tipParam$species <- "NONE"
-  
-  
-  ## Identify species per tip
-  for (prefix in names(speciesPrefix)) {
-    tipParam[grep(pattern = paste0("^", prefix), x = row.names(tipParam), perl = TRUE), "species"] <- speciesPrefix[prefix]
-    
-  }
-  # table(tipParam$species)
-  # View(tipParam)
-  
-  ## Assign tip color accoding to species
-  tipParam$color <- unlist(speciesPalette[tipParam$species])
-  # table(tipParam$color, tipParam$species)
-  # table(tipParam$color)
-  
-  # ## Identify CoV2 tips
-  # cov2Tips <- grep(pattern = "CoV2", x = tree$tip.label, perl = TRUE, value = TRUE)
-  result <- list(tree = tree, 
-                 tipParam = tipParam)
-  return(result)
-}
-
-```
-
-
-```{r plot_my_tree_function}
-plotMyTree <- function(myTree, 
-                       show.node.label = FALSE, ...) {
-  ## Plot the tree
-  ape::plot.phylo(myTree$tree, 
-                  type = "phylogram", 
-                  show.node.label = show.node.label,
-                  show.tip.label = TRUE,
-                  edge.color = "grey",
-                  tip.color = myTree$tipParam$color,
-                  #         ftype = "off",
-                  edge.width = 2,
-                  label.offset = 0.1, 
-                  lwd = 2,
-                  # fsize = 0.7,
-                  cex = 0.7,
-                  color = speciesPalette$Bat, 
-                  nomargin = FALSE,
-                  font = 1, 
-                  ...)
-  add.scale.bar(cex = 1, font = 2, col = "blue", length = 0.2, 
-                lwd = 2, lcol = "blue")
-  # add.arrow(myTree$tree, tip = cov2Tips, 
-  #           arrl = 0.3, 
-  #           col = speciesPalette$Human)
-  
-  # length(myTree$tree$node.label)
-  # nodelabels(cex = 0.5)
-  # sort(as.numeric(myTree$tree$node.label))
-  # tiplabels()
-  
-}
-
-```
-
-
 
 
 ```{r genome_tree, fig.width=12, fig.height=7,  out.width="100%", fig.cap="Genome tree of selected coronaviruses.  The tree was inferred by maximum likelihood apprroach (PhyML) based on a progressive multiple alignment (clustalw). "}
 
 #### Load and plot the genome tree ####
-
 genomeTreeFile <- file.path(
   dir["genomes"],
   "coronavirus_selected-plus-GISAID_genomes_clustalw_gblocks.phy_phyml_tree.phb")
 
 
 genomeTree <- loadTree(
-  file = genomeTreeFile, 
-  outgroup = outgroup, 
+  treeFile = genomeTreeFile, 
+  outgroup = outgroups[['selected']], 
   rootNode = NULL, 
-  rotateNodes = c(39, 75, 42))
+  nodesToRotate = c(39, 75, 42))
 # genomeTree <- paintSubTree(tree = genomeTree, node = 49, state = "CoV2")
-# nodelabels(cex = 0.4)
 
-plotMyTree(genomeTree, main  = "Genome-based virus tree", show.node.label = TRUE)
+plotMyTree(genomeTree, main  = "Genome-based virus tree", 
+           scaleLength = 0.2,
+           show.node.label = FALSE)
+# nodelabels(cex = 0.4)
 
 ## Identify some clades
 cladelabels(genomeTree$tree, "CoV2", 46, cex = 0.7, orientation = "horizontal", offset = 5)
@@ -299,33 +221,47 @@ cladelabels(genomeTree$tree, "SARS", 69, cex = 0.7, orientation = "horizontal", 
 
 ```
 
+## Tree per feature
 
+```{r feature_tree, fig.width=5, fig.height=5,  out.width="100%", fig.cap="Feature-specific tree.  The tree was inferred by maximum likelihood apprroach (PhyML) based on a progressive multiple alignment (clustalw). "}
 
-```{r S_gene_tree, fig.width=12, fig.height=7,  out.width="100%", fig.cap="Phylogenetic tree of the S gene for selected coronaviruses.  The tree was inferred by maximum likelihood apprroach (PhyML) based on a progressive multiple alignment (clustalw). "}
+#### Load and plot feature-specific trees ####
 
+## Define vectors to hold the results and enable tree comparisons
 treeFiles <- vector()
-trees <- vector()
+treeData <- list()
 
-#### Load and plot the genome tree ####
-treeFiles["S gene"] <- file.path(
-  dir["results"],
-  "S-gene", "clustalw_alignments", 
-  "S-gene_around-cov-2-plus-GISAID_gblocks.phy_phyml_boot_trees.phb")
+## Define the path to the tre file
+feature <- "S1"
 
-trees["S gene"] <- loadTree(
-  file = treeFiles["S gene"], 
-  outgroup = NULL, 
-  rootNode = NULL, 
-  rotateNodes = NULL)
-# genomeTree <- paintSubTree(tree = genomeTree, node = 49, state = "CoV2")
-# nodelabels(cex = 0.4)
-
-plotMyTree(genomeTree, main  = "Genome-based virus tree", show.node.label = FALSE)
-
-## Identify some clades
-cladelabels(genomeTree$tree, "CoV2", 46, cex = 0.7, orientation = "horizontal", offset = 5)
-cladelabels(genomeTree$tree, "MERS", 43, cex = 0.7, orientation = "horizontal", offset = 5)
-cladelabels(genomeTree$tree, "SARS", 69, cex = 0.7, orientation = "horizontal", offset = 5)
+for (feature in features) {
+  message("\n\tReading tree for feature ", feature)
+  prefix <- paste0(feature, "_", collection)
+  treeFile <- file.path(
+    dir["results"],
+    prefix, 
+    paste0(prefix, "_clustalw_gblocks.phy_phyml_tree_GTR.phb"))
+  treeFiles[feature] <- treeFile
+  
+  
+  
+  ## Load the  tree
+  treeData[[feature]] <- loadTree(
+    treeFile = treeFiles[feature], 
+    outgroup = outgroups[[collection]], 
+    rootNode = NULL, 
+    nodesToRotate = NULL)
+  
+  plotMyTree(treeData[[feature]], 
+             main  = paste0(feature, " tree"), 
+             scaleLength = 0.1,
+             show.node.label = TRUE)
+  
+  # ## Identify some clades
+  # cladelabels(genomeTree$tree, "CoV2", 46, cex = 0.7, orientation = "horizontal", offset = 5)
+  # cladelabels(genomeTree$tree, "MERS", 43, cex = 0.7, orientation = "horizontal", offset = 5)
+  # cladelabels(genomeTree$tree, "SARS", 69, cex = 0.7, orientation = "horizontal", offset = 5)
+}
 
 ```
 
