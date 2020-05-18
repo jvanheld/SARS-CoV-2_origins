@@ -74,7 +74,7 @@ FEATURES= 		\
 FEATURE=S-gene
 
 ## Collections of genomes
-COLLECTIONS=around-CoV-2-plus-GISAID selected all
+COLLECTIONS=around-CoV-2-plus-GISAID selected-plus-GISAID around-CoV-2 selected
 COLLECTION=around-CoV-2
 
 
@@ -432,11 +432,17 @@ Sgenes_around-cov-2_gisaid:
 ################################################################
 ## Run phylogenic analysis on genomic regions obtained by one-to-N
 ## alignment with selected h-CoV-2 features
+one_feature:
+	@echo
+	@echo "	FEATURE		 ${FEATURE}"
+	@echo "	COLLECTION	 ${COLLECTION}"
+	@${MAKE} ${PHYLO_TASKS}
 
 all_features:
 	@echo
 	@echo "Running phylogenetic analysis for genomic features"
 	@echo "	FEATURES	${FEATURES}"
+	@echo "	COLLECTIONS	${COLLECTIONS}"
 	@for feature in ${FEATURES} ; do \
 		for collection in ${COLLECTIONS} ; do \
 			${MAKE} FEATURE=$${feature} COLLECTION=$${collection} ${PHYLO_TASKS} ; \
