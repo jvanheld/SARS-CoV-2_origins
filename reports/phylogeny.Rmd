@@ -3,16 +3,11 @@ title: "Phylogenetic analysis of coronavirus sequences"
 author: "Jacques van Helden"
 date: "`r Sys.Date()`"
 output:
-  html_document:
-    df_print: paged
-    code_folding: hide
+  pdf_document:
     fig_caption: yes
     highlight: zenburn
-    self_contained: no
-    theme: cerulean
     toc: yes
     toc_depth: 3
-    toc_float: yes
   ioslides_presentation:
     colortheme: dolphin
     fig_caption: yes
@@ -49,11 +44,16 @@ output:
     theme: cerulean
     toc: yes
     widescreen: yes
-  pdf_document:
+  html_document:
+    df_print: paged
+    code_folding: hide
     fig_caption: yes
     highlight: zenburn
+    self_contained: no
+    theme: cerulean
     toc: yes
     toc_depth: 3
+    toc_float: yes
 font-import: http://fonts.googleapis.com/css?family=Risque
 font-family: Garamond
 transition: linear
@@ -102,8 +102,8 @@ par.ori <- par(no.readonly = TRUE)
 ## Color palette per species
 speciesPalette <- list(
   Human = "#880000",
-  Bat = "#BBBBBB",
-  Pangolin = "#00BB00",
+  Bat = "#666666",
+  Pangolin = "#008800",
   Camel = "#BB8800",
   Pig = "#FFBBBB",
   Civet = "#0000BB"
@@ -117,6 +117,13 @@ speciesPrefix <- c("Hu" = "Human",
                    "Pi" = "Pig",
                    "Cv" = "Civet")
 
+## Strain-specific colors
+strainColor <- c(
+  "BtRaTG13_" = "black",
+  "BtYu-RmYN" = "black",
+  "BtZXC21" = "black", 
+  "BtZC45" = "black")
+
 ## Define feature types
 features <- c(
   # "genomes", 
@@ -129,6 +136,7 @@ features <- c(
   "Recomb-reg-2",
   "Recomb-reg-3",
   "CDS-ORF1ab",
+  "After-ORF1ab", 
   "CDS-S",
   "CDS-ORF3a",
   "CDS-E",
@@ -206,11 +214,12 @@ genomeTree <- loadTree(
   treeFile = genomeTreeFile, 
   outgroup = outgroups[['selected']], 
   rootNode = NULL, 
+  tipColor = strainColor,
   nodesToRotate = c(39, 75, 42))
 # genomeTree <- paintSubTree(tree = genomeTree, node = 49, state = "CoV2")
 
 plotMyTree(genomeTree, main  = "Genome-based virus tree", 
-           scaleLength = 0.2,
+           scaleLength = 0.1,
            show.node.label = FALSE)
 # nodelabels(cex = 0.4)
 
@@ -223,7 +232,7 @@ cladelabels(genomeTree$tree, "SARS", 69, cex = 0.7, orientation = "horizontal", 
 
 ## Tree per feature
 
-```{r feature_tree, fig.width=5, fig.height=5,  out.width="100%", fig.cap="Feature-specific tree.  The tree was inferred by maximum likelihood apprroach (PhyML) based on a progressive multiple alignment (clustalw). "}
+```{r feature_tree, fig.width=6, fig.height=6,  out.width="100%", fig.cap="Feature-specific tree.  The tree was inferred by maximum likelihood apprroach (PhyML) based on a progressive multiple alignment (clustalw). "}
 
 #### Load and plot feature-specific trees ####
 
@@ -232,7 +241,7 @@ treeFiles <- vector()
 treeData <- list()
 
 ## Define the path to the tre file
-feature <- "S1"
+feature <- "RBD"
 
 for (feature in features) {
   message("\n\tReading tree for feature ", feature)
@@ -250,11 +259,12 @@ for (feature in features) {
     treeFile = treeFiles[feature], 
     outgroup = outgroups[[collection]], 
     rootNode = NULL, 
+    tipColor = strainColor,
     nodesToRotate = NULL)
   
   plotMyTree(treeData[[feature]], 
              main  = paste0(feature, " tree"), 
-             scaleLength = 0.02,
+             scaleLength = 0.05, cex = 1, label.offset = 0.01,
              show.node.label = FALSE)
   
   # ## Identify some clades

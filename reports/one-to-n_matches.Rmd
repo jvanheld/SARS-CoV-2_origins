@@ -89,7 +89,7 @@ library(knitr)
 options(width = 300)
 knitr::opts_chunk$set(
   fig.width = 7, fig.height = 5, 
-  fig.path = 'figures/one-to-n-matches_',
+  fig.path = 'figures/one-to-n-matches/',
   fig.align = "center", 
   size = "tiny", 
   echo = TRUE, eval = TRUE, 
@@ -110,21 +110,35 @@ par.ori <- par(no.readonly = TRUE)
 
 #### General parameters for the analysis ####
 
-## Use (or not) GIDAID sequences
+
+#### Sequence collection ####
+
+## Supported: 
+collections <- c(
+  "around-CoV-2", 
+  "selected",
+  "around-CoV-2-plus-GISAID", 
+  "selected-plus-GISAID"
+  )
+
+
+
+# collection <- "around-CoV-2" # 14 genomes
+# collection <- "around-CoV-2-plus-GISAID" # 16 genomes
+# collection <- "selected" # ~60 genomes
+collection <- "selected-plus-GISAID" # ~60 genomes
+
+## Note about GIDAID sequences.
 ## 
 ## A few genomes were not available in NCBI Genbank at the time of 
 ## this analysis, and had to be downloaded from GISAID. These sequences
 ##  can however not be redistributed, they should thus be downloaded 
-##  manually to reproduce the full trees. Alternatively, useGISAID
-##  can be set to FALSE, whcih will reproduce the analysis with almost 
-##  all the sequences of the paper.
-useGISAID <- TRUE
+##  manually to reproduce the full trees. 
 
-## Sequence collection
-## Supported: 
-# collection <- "around-CoV-2" # ~20 genomes
-collection <- "selected" # ~60 genomes
-collections <- c("around-CoV-2", "selected")
+
+## Exclude incomplete genomes (i.e. those containing a lof of Ns) to avoid biases in the distance computations
+excludeIncomplete <- TRUE
+
 
 
 #### Define directories and files ####
@@ -140,16 +154,6 @@ outfiles <- vector()
 
 ## Input files
 infiles <- list()
-
-
-## Genome dir and files
-if (useGISAID) {
-  dir$genomes <- file.path(dir$main, "data", "GISAID_genomes")
-  collections <-  paste0(collections, "-plus-GISAID")
-  collection <-  paste0(collection, "-plus-GISAID")
-} else {
-  dir$genomes <- file.path(dir$main, "data", "genomes")
-}
 
 ## Output tables
 # di$output <- file.path(dir.main, "")
@@ -172,12 +176,13 @@ features <- list()
 
 ## Specific features 
 
+
 ## S1: pre-cleavage part of the spike protein 
 features[["S1"]] <- c(start = 21599, end =	23617)
 ## S2: post-cleavage part of the spike protein 
 features[["S2"]] <- c(start = 23618, end = 25381)
 ## Receptor Binding Domain (RBD)
-features[["RBD"]] <- c(start = 22517, end = 25381)
+features[["RBD"]] <- c(start = 22517, end = 23185)
 ## Potential Pangolin origin after Xiao (https://doi.org/10.1101/2020.02.17.951335)
 features[['Recomb-Xiao']] <- c(start = 22871, end = 23092)
 ## Recombinant region 1 seen on the PIP profiles
@@ -188,9 +193,7 @@ features[['Recomb-reg-2']] <- c(start = 22800, end = 24000)
 features[['Recomb-reg-3']] <- c(start = 27800, end = 28350)
 
 ## Annotated coding sequences
-## Spike gene  (coding for the spike protein)
-features[['CDS-ORF1ab']] <- c(start = 266, end = 21555)
-features[['CDS-S']] <- c(start = 21563, end = 25384)
+features[['CDS-S']] <- c(start = 21563, end = 25384) ## Spike gene
 features[['CDS-ORF3a']] <- c(start = 25393, end = 26220)
 features[['CDS-E']] <- c(start = 26245, end = 26472)
 features[['CDS-M']] <- c(start = 26523, end = 27191)
@@ -199,6 +202,10 @@ features[['CDS-ORF7a']] <- c(start = 27394, end = 27759)
 features[['CDS-ORF8']] <- c(start = 27894, end = 28259)
 features[['CDS-N']] <- c(start = 28274, end = 29533)
 features[['CDS-ORF10']] <- c(start = 29558, end = 29674)
+features[['CDS-ORF1ab']] <- c(start = 266, end = 21555)
+
+## All the sequences after the bif ORF coding for the polyproteinn 1ab
+features[['After-ORF1ab']] <- c(start = 21556, end = 29899)
 
 
 
@@ -210,6 +217,18 @@ message("\tReference genomes: ", refPattern)
 
 
 ```{r load_sequences}
+
+
+## Genome dir and files
+if (length(grep(pattern = "GISAID", x = collection)) > 0) {
+  useGISAID <- TRUE
+  dir$genomes <- file.path(dir$main, "data", "GISAID_genomes")
+  # collections <-  paste0(collections, "-plus-GISAID")
+  # collection <-  paste0(collection, "-plus-GISAID")
+} else {
+  dir$genomes <- file.path(dir$main, "data", "genomes")
+}
+
 
 ## Define the input genome
 infiles$genomes <- file.path(
@@ -228,15 +247,17 @@ genomes <- readDNAStringSet(filepath = infiles$genome, format = "fasta")
 names(genomes) <- sub(pattern = " .*", replacement = "", x = names(genomes), perl = TRUE)
 
 ## Exclude genomes
-excludePattern = paste0("(", paste(collapse = ")|(", excludePatterns), ")")
-excludedGenomeNames <- grep(pattern = excludePattern, x = names(genomes), 
-                            value = TRUE, invert = FALSE)
-filteredGenomeIndices <- grep(pattern = excludePattern, x = names(genomes), 
-                            value = FALSE, invert = TRUE)
-message("\tExcluded ", length(excludedGenomeNames)," genomes: ", paste(collapse = ", ", excludedGenomeNames)) 
-message("\tRemaining genomes: ", length(filteredGenomeIndices))
-genomes <- genomes[filteredGenomeIndices]
+if (excludeIncomplete) {
+  excludePattern = paste0("(", paste(collapse = ")|(", excludePatterns), ")")
+  excludedGenomeNames <- grep(pattern = excludePattern, x = names(genomes), 
+                              value = TRUE, invert = FALSE)
+  filteredGenomeIndices <- grep(pattern = excludePattern, x = names(genomes), 
+                                value = FALSE, invert = TRUE)
+  message("\tExcluded ", length(excludedGenomeNames)," genomes: ", paste(collapse = ", ", excludedGenomeNames)) 
+  message("\tRemaining genomes: ", length(filteredGenomeIndices))
+  genomes <- genomes[filteredGenomeIndices]
 # names(genomes)
+}
 
 ## Report the number of genoomes
 genomeNames <- names(genomes)
@@ -269,9 +290,31 @@ for (g in genomeNames) {
   genomeStat[g, "length"] <- length(genomes[[g]])
 }
 
+```
+
+## Parameters
+
+```{r print_parameters}
+
+## Define a list of parameters
+parameters <- list()
+parameters$collection <- collection
+parameters$refGenomeName <- refGenomeName
+parameters$nbGenomes <- nbGenomes
+kable(t(as.data.frame.list(parameters)), caption = "Parameters of the analysis", 
+      col.names = "Parameter")
+
+
+```
+
+
+## Genome statistics
+
+```{r print_genome_stats}
 kable(genomeStat, caption = "Reference and query genomes")
 
 ```
+
 
 The collection `r collection` contains `r length(genomes)` virus genome sequences.
 
@@ -281,11 +324,12 @@ The collection `r collection` contains `r length(genomes)` virus genome sequence
 
 We perform a global pairwise alignment (Needle-Waterman algorithm) between each feature of the reference (`r refGenomeName`) and each one of the query genomes.
 
-```{r match_features, fig.width=10, fig.height=5, out.width="100%", fig.cap="Feature-specific Percent Identical Positions (PIP) profiles. "}
+```{r one2N_feature_matches_PIP, fig.width=10, fig.height=5, out.width="100%", fig.cap="Feature-specific Percent Identical Positions (PIP) profiles. "}
 #### One-to-N alignmemnt of user-speficied genomic features ####
 featureName <- "CDS-S" # for the test
 featureName <- "S1" # for the test
 featureName <- "Recomb-reg-3" # for the test
+featureName <- "RBD" # for the test
 # for (collection in (collections)) {
 for (featureName in names(features)) {
   featureLimits <- features[[featureName]]
@@ -328,7 +372,7 @@ for (featureName in names(features)) {
   } else if (featureLength > 3000) {
     windowSize <- 200 
   } else {
-    windowSize <- max(50, 10 * round(featureLength / 100))
+    windowSize <- max(100, 10 * round(featureLength / 100))
   }
   
   ## PIP profile of one-to-N alignment
@@ -336,6 +380,7 @@ for (featureName in names(features)) {
     alignments = featureAlignmentsNto1$alignments[genomeOrder],
     windowSize = windowSize, 
     main = paste0(featureName, " - PIP profile", "\nRef: ", refGenomeName), 
+#    colors = NULL,
     colors = genomeColors,
     legendMargin = 0.4, 
     legendCorner = "topright", 
