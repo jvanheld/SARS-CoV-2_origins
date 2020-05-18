@@ -3,10 +3,13 @@
 #' @param myTree a tree data containing a tree + tip parameters, as returne by LoadTree()
 #' @param show.node.label=FALSE passed to ape::plot.phylo()
 #' @param scaleLength=0.2 length of the scale bar, passed to add.scale.bar()
+#' @param cex=0.7 font size for the labels
 #' @param ... additional parameters are passed to ape::plot.phylo
 plotMyTree <- function(myTree, 
                        show.node.label = FALSE, 
                        scaleLength = 0.05,
+                       cex = 0.7,
+                       label.offset = 0.01,
                        ...) {
   ## Plot the tree
   ape::plot.phylo(myTree$tree, 
@@ -15,12 +18,10 @@ plotMyTree <- function(myTree,
                   show.tip.label = TRUE,
                   edge.color = "grey",
                   tip.color = myTree$tipParam$color,
-                  #         ftype = "off",
                   edge.width = 2,
-                  label.offset = 0.1, 
+                  label.offset = label.offset, 
                   lwd = 2,
-                  # fsize = 0.7,
-                  cex = 0.7,
+                  cex = cex,
                   color = speciesPalette$Bat, 
                   nomargin = FALSE,
                   font = 1, 
@@ -31,6 +32,7 @@ plotMyTree <- function(myTree,
                 length = scaleLength, 
                 lwd = 2, 
                 lcol = "blue")
+
   # add.arrow(myTree$tree, tip = cov2Tips, 
   #           arrl = 0.3, 
   #           col = speciesPalette$Human)
