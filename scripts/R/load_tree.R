@@ -6,11 +6,14 @@
 #' @param outgroup=NULL out group used to define the root. Should be a vector of tip labels.
 #' @param rootNode=NULL alternative to outgroup: define the root based on an internal node number
 #' @param nodesToRotate=NULL a vector of internal node numbers to rotate for the plot
+#' @param tipColor=NULL a vector with a color assigned to tips (specified as names of the vector)
 #' @param ... additional parameters are passed to ape::read.tree
 loadTree <- function(treeFile, 
                      outgroup = NULL,
                      rootNode = NULL,
-                     nodesToRotate = NULL, ...
+                     nodesToRotate = NULL, 
+                     tipColor = NULL,
+                     ...
 ) {
   
   
@@ -77,6 +80,13 @@ loadTree <- function(treeFile,
   tipParam$color <- unlist(speciesPalette[tipParam$species])
   # table(tipParam$color, tipParam$species)
   # table(tipParam$color)
+  
+  ## Assign a specific color to tips (this overwrites the species color)
+  if (!is.null(tipColor)) {
+    tipPattern <- paste0("(", paste0(collapse = ")|(", names(tipColor)), ")")
+    tipsToColor <- grep(pattern = tipPattern, x = tree$tip.label)
+    tipParam[tipsToColor, "color"] <- tipColor[tipsToColor]
+  }
   
   # ## Identify CoV2 tips
   # cov2Tips <- grep(pattern = "CoV2", x = tree$tip.label, perl = TRUE, value = TRUE)
