@@ -132,12 +132,13 @@ plotPIPprofiles <-  function(alignments,
   ## Default legend
   if (is.null(legend)) {
     legend <- paste(names(alignments), "(", round(digits = 1, meanPIPs), "%)")
+    names(legend) <- names(alignments)
   }
   
   ## Draw the legend
   legend(legendCorner, 
          legend = legend, 
-         col = colors, 
+         col = colors[names(legend)], 
          cex = legendCex,
          lwd = 2)
 }
