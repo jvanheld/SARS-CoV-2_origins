@@ -2,6 +2,7 @@
 #' @title Plot profile of  Percent Identical Positions (PIP)
 #' @author Jacques.van-Helden@france-bioinformatique.fr
 #' @param alignments a list of pairwise alignments produced by Biostrings::pairwiseAlignment
+#' @param reversePlots=TRUE plot the profiles in reverse order, to avoid for the first profiles to be masked by the last ones. Note that the legend order is always from the first to the last element of provided set of alignments. 
 #' @param windowSize=100 size of the sliding window to compute the rolling average PIP
 #' @param leftLimit=NULL specify the starting position of the region to be displayed. If not specified use the beginning of the sequence
 #' @param rightLimit=NULL specify the ending position of the region to be displayed. If not specified use the end of the sequence
@@ -15,6 +16,7 @@
 #' @export
 plotPIPprofiles <-  function(alignments, 
                              windowSize = 100,
+                             reversePlot = TRUE,
                              leftLimit = NULL,
                              rightLimit = NULL,
                              legend = NULL,
@@ -35,12 +37,17 @@ plotPIPprofiles <-  function(alignments,
     names(colors) <- names(alignments)
   }
   
-
   
   ## Plot PIP profiles
   for (i in 1:length(alignments)) {
-    subject <- names(alignments)[i]
-    alignment <- alignments[[i]]
+    if (reversePlot) {
+      j <- length(alignments) - i + 1
+    } else {
+      j <- i
+    }
+    
+    subject <- names(alignments)[j]
+    alignment <- alignments[[j]]
     
     ## Get the aligned reference and query sequences 
     refSeq <- unlist(strsplit(as.character(pattern(alignment)), split = "")) 
@@ -95,7 +102,7 @@ plotPIPprofiles <-  function(alignments,
     
     ## Sequence color
     if (is.null(colors[subject])) {
-      seqColor <- colors[i]
+      seqColor <- colors[j]
     } else {
       seqColor <- colors[subject]
     }
@@ -122,7 +129,8 @@ plotPIPprofiles <-  function(alignments,
       lines(pipStart:pipEnd,
             pipProfile[pipStart:pipEnd], 
             type = "l",
-            col = seqColor
+            col = seqColor,
+            ...
       )
       
     }
@@ -131,7 +139,7 @@ plotPIPprofiles <-  function(alignments,
   
   ## Default legend
   if (is.null(legend)) {
-    legend <- paste(names(alignments), "(", round(digits = 1, meanPIPs), "%)")
+    legend <- paste0(names(alignments), " (", round(digits = 1, meanPIPs), "%)")
     names(legend) <- names(alignments)
   }
   
