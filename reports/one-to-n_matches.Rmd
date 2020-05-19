@@ -215,7 +215,6 @@ message("\tReference genomes: ", refPattern)
 ```
 
 
-
 ```{r load_sequences}
 
 
@@ -265,9 +264,6 @@ nbGenomes <- length(genomeNames)
 message("\tLoaded ", nbGenomes, " genomes from file ", infiles$genomes)
 # View(genomes)
 
-## Define a color for each genome
-genomeColors <- rainbow(n = nbGenomes)
-names(genomeColors) <- genomeNames
 
 #### Define reference and query genomes ####
 refGenomeName <- grep(pattern = refPattern, x = names(genomes), 
@@ -292,6 +288,64 @@ for (g in genomeNames) {
 
 ```
 
+
+
+```{r sequence_colors}
+#### Define the color associated to each sequence ####
+
+## Color palette per species
+speciesPalette <- list(
+  Human = "#880000",
+  Bat = "#888888",
+  Pangolin = "#448800",
+  Camel = "#BB8800",
+  Pig = "#FFBBBB",
+  Civet = "#0000BB"
+)
+
+## Species prefix in the tip labels
+speciesPrefix <- c("Hu" = "Human",
+                   "Bt" = "Bat",
+                   "Pn" = "Pangolin",
+                   "Cm" = "Camel",
+                   "Pi" = "Pig",
+                   "Cv" = "Civet")
+
+## Strain-specific colors
+strainColor <- c(
+  "HuCoV2_WH01_2019" = "red",
+  "PnGu1_2019" = "#00BB00",
+  "BtRaTG13_" = "#4466BB",
+  "BtYu-RmYN" = "#8844BB",
+  "BtZXC21" = "black", 
+  "BtZC45" = "black")
+
+## Identify species per tip
+for (prefix in names(speciesPrefix)) {
+  genomeStat[grep(pattern = paste0("^", prefix), x = row.names(genomeStat), perl = TRUE), "species"] <- speciesPrefix[prefix]
+  
+}
+
+## Assign acolor to each species
+genomeStat$color <- "grey" # default
+genomeStat$color <- speciesPalette[as.vector(genomeStat$species)]
+
+for (strain in names(strainColor)) {
+  genomeStat[grep(pattern = paste0("^", strain), 
+                  x = row.names(genomeStat), perl = TRUE), "color"] <- strainColor[strain]
+  
+}
+
+
+## Assign specific color to some nodes
+
+## Define a color for each genome
+genomeColors <- (unlist(genomeStat$color))
+names(genomeColors) <- row.names(genomeStat)
+
+
+```
+
 ## Parameters
 
 ```{r print_parameters}
@@ -301,6 +355,8 @@ parameters <- list()
 parameters$collection <- collection
 parameters$refGenomeName <- refGenomeName
 parameters$nbGenomes <- nbGenomes
+parameters$genomeDir <- dir$genomes
+parameters$genomeFile <- infiles$genomes
 kable(t(as.data.frame.list(parameters)), caption = "Parameters of the analysis", 
       col.names = "Parameter")
 
@@ -333,8 +389,10 @@ featureName <- "RBD" # for the test
 # for (collection in (collections)) {
 for (featureName in names(features)) {
   featureLimits <- features[[featureName]]
+  featureStart <- featureLimits[["start"]]
+  featureEnd <- featureLimits[["end"]]
   featureLength <- 
-    featureLimits[["end"]] - featureLimits[["start"]] + 1
+     featureEnd - featureStart  + 1
   
   message("Searching matches for feature ", featureName, 
           " (", featureLimits[1], "-", featureLimits[2], ")", 
@@ -379,12 +437,12 @@ for (featureName in names(features)) {
   plotPIPprofiles(
     alignments = featureAlignmentsNto1$alignments[genomeOrder],
     windowSize = windowSize, 
-    main = paste0(featureName, " - PIP profile", "\nRef: ", refGenomeName), 
+    main = paste0(featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"), 
 #    colors = NULL,
     colors = genomeColors,
-    legendMargin = 0.4, 
+    legendMargin = 0.3, 
     legendCorner = "topright", 
-    legendCex = 0.7, ylim = c(30, 100))
+    legendCex = 0.5, ylim = c(30, 100))
   
   
   kable(featureAlignmentsNto1$stats[genomeOrder,], 
