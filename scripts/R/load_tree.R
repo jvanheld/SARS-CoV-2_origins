@@ -12,6 +12,7 @@ loadTree <- function(treeFile,
                      outgroup = NULL,
                      rootNode = NULL,
                      nodesToRotate = NULL, 
+                     speciesPalette=NULL,
                      tipColor = NULL,
                      ...
 ) {
@@ -73,19 +74,24 @@ loadTree <- function(treeFile,
     tipParam[grep(pattern = paste0("^", prefix), x = row.names(tipParam), perl = TRUE), "species"] <- speciesPrefix[prefix]
     
   }
-  # table(tipParam$species)
-  # View(tipParam)
-  
+
   ## Assign tip color accoding to species
-  tipParam$color <- unlist(speciesPalette[tipParam$species])
-  # table(tipParam$color, tipParam$species)
-  # table(tipParam$color)
+  if (is.null(speciesPalette)) {
+    tipParam$color <- "black"
+  } else {
+    tipParam$color <- unlist(speciesPalette[tipParam$species])
+  }
   
   ## Assign a specific color to tips (this overwrites the species color)
   if (!is.null(tipColor)) {
-    tipPattern <- paste0("(", paste0(collapse = ")|(", names(tipColor)), ")")
-    tipsToColor <- grep(pattern = tipPattern, x = tree$tip.label)
-    tipParam[tipsToColor, "color"] <- tipColor[tipsToColor]
+    for (tipPattern in names(tipColor)) {
+      tipParam[grep(pattern = tipPattern, 
+                      x = tree$tip.label, perl = TRUE), "color"] <- tipColor[tipPattern]
+      
+    }
+    # tipPattern <- paste0("(", paste0(collapse = ")|(", names(tipColor)), ")")
+    # tipsToColor <- grep(pattern = tipPattern, x = tree$tip.label)
+    # tipParam[tipsToColor, "color"] <- tipColor[tipsToColor]
   }
   
   # ## Identify CoV2 tips

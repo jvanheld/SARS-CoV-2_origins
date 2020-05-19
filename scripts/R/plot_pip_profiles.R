@@ -139,7 +139,13 @@ plotPIPprofiles <-  function(alignments,
   
   ## Default legend
   if (is.null(legend)) {
-    legend <- paste0(names(alignments), " (", round(digits = 1, meanPIPs), "%)")
+    if (reversePlot) {
+      legend <- paste0(names(alignments), " (", round(digits = 1, rev(meanPIPs)), "%)")
+      
+    } else {
+      legend <- paste0(names(alignments), " (", round(digits = 1, meanPIPs), "%)")
+      
+    }
     names(legend) <- names(alignments)
   }
   
