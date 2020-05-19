@@ -22,7 +22,7 @@
 
 | Contents | Type | doc |
 |--------------------------------------|---------|---------------------|
-| Installation and usage  | manual | [INSTALL.md](INSTALL.md) |
+| Installation and usage  | manual | [INSTALL-and-USE.md](INSTALL-and-USE.md) |
 | N-to-one matches  | report | [[html](reports/one-to-n_matches.html)] [[Rmd source](https://raw.githubusercontent.com/jvanheld/coronavirus_insertions/master/reports/one-to-n_matches.Rmd)] |
 | PIP profiles  | report | [[html](reports/pip-profiles.html)] [[Rmd source](https://raw.githubusercontent.com/jvanheld/coronavirus_insertions/master/reports/pip-profiles.Rmd)] |
 | Phylogeny inference  | report | [[html](reports/phylogeny.html)] [[Rmd source](https://raw.githubusercontent.com/jvanheld/coronavirus_insertions/master/reports/phylogeny.Rmd)] |
