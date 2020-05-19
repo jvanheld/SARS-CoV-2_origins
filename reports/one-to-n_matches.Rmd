@@ -300,7 +300,7 @@ speciesPalette <- list(
   Pangolin = "#448800",
   Camel = "#BB8800",
   Pig = "#FFBBBB",
-  Civet = "#0000BB"
+  Civet = "#00BBFF"
 )
 
 ## Species prefix in the tip labels
@@ -314,9 +314,10 @@ speciesPrefix <- c("Hu" = "Human",
 ## Strain-specific colors
 strainColor <- c(
   "HuCoV2_WH01_2019" = "red",
+  "HuSARS-Frankfurt-1_2003" = "#0044BB",
   "PnGu1_2019" = "#00BB00",
-  "BtRaTG13_" = "#4466BB",
-  "BtYu-RmYN" = "#8844BB",
+  "BtRaTG13_" = "#FF6600",
+  "BtYu-RmYN" = "#FFBB22",
   "BtZXC21" = "black", 
   "BtZC45" = "black")
 
@@ -380,7 +381,7 @@ The collection `r collection` contains `r length(genomes)` virus genome sequence
 
 We perform a global pairwise alignment (Needle-Waterman algorithm) between each feature of the reference (`r refGenomeName`) and each one of the query genomes.
 
-```{r one2N_feature_matches_PIP, fig.width=10, fig.height=5, out.width="100%", fig.cap="Feature-specific Percent Identical Positions (PIP) profiles. "}
+```{r one2N_feature_matches_PIP, fig.width=10, fig.height=6, out.width="100%", fig.cap="Feature-specific Percent Identical Positions (PIP) profiles. "}
 #### One-to-N alignmemnt of user-speficied genomic features ####
 featureName <- "CDS-S" # for the test
 featureName <- "S1" # for the test
@@ -436,12 +437,13 @@ for (featureName in names(features)) {
   ## PIP profile of one-to-N alignment
   plotPIPprofiles(
     alignments = featureAlignmentsNto1$alignments[genomeOrder],
+    reversePlot = TRUE,
     windowSize = windowSize, 
     main = paste0(featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"), 
 #    colors = NULL,
     colors = genomeColors,
-    legendMargin = 0.3, 
-    legendCorner = "topright", 
+    legendMargin = 0.25, 
+    legendCorner = "topright", lwd = 2,
     legendCex = 0.5, ylim = c(30, 100))
   
   
