@@ -127,6 +127,7 @@ list_param:
 	@echo
 	@echo "PhyML parameters"
 	@echo "	PHYML_THREAD  		${PHYML_THREADS}"
+	@echo "	PHYML_MODEL		${PHYML_MODEL}"
 	@echo "	PHYML_OPT		${PHYML_OPT}"
 	@echo "	PHYML_TREE		${PHYML_TREE}"
 	@echo
