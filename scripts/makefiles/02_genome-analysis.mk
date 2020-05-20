@@ -128,6 +128,7 @@ list_param:
 	@echo "PhyML parameters"
 	@echo "	PHYML_THREAD  		${PHYML_THREADS}"
 	@echo "	PHYML_MODEL		${PHYML_MODEL}"
+	@echo "	PHYML_ADDOPT		${PHYML_ADDOPT}"
 	@echo "	PHYML_OPT		${PHYML_OPT}"
 	@echo "	PHYML_TREE		${PHYML_TREE}"
 	@echo
@@ -309,7 +310,8 @@ nj_tree:
 PHYML_THREADS=5
 PHYML_BOOTSTRAP=100
 PHYML_MODEL=GTR
-PHYML_OPT=--datatype nt --bootstrap ${PHYML_BOOTSTRAP} --model ${PHYML_MODEL}
+PHYML_ADDOPT=
+PHYML_OPT=--datatype nt --bootstrap ${PHYML_BOOTSTRAP} --model ${PHYML_MODEL} ${PHYML_ADDOPT}
 PHYML_PREFIX=${MALIGN_PREFIX}_gblocks.phy_phyml_tree
 PHYML_TREE=${PHYML_PREFIX}_${PHYML_MODEL}.phb
 run_phyml:
