@@ -110,6 +110,7 @@ par.ori <- par(no.readonly = TRUE)
 
 #### General parameters for the analysis ####
 
+reloadImage <- FALSE
 
 #### Sequence collection ####
 
@@ -125,8 +126,9 @@ collections <- c(
 
 # collection <- "around-CoV-2" # 14 genomes
 # collection <- "around-CoV-2-plus-GISAID" # 16 genomes
+collection <- "all-plus-GISAID" # 16 genomes
 # collection <- "selected" # ~60 genomes
-collection <- "selected-plus-GISAID" # ~60 genomes
+# collection <- "selected-plus-GISAID" # ~60 genomes
 
 ## Note about GIDAID sequences.
 ## 
@@ -151,6 +153,13 @@ dir.create(dir$seqdata, showWarnings = FALSE, recursive = TRUE)
 
 ## Instantiate a list for output files
 outfiles <- vector()
+
+## Memory image
+dir$images <- file.path(dir$main, "memory_images")
+dir.create(dir$images, recursive = TRUE, showWarnings = FALSE)
+outfiles["Memory image"] <- file.path(
+  dir$images, 
+  paste0(collection, "_one-to-n_matches.Rdata"))
 
 ## Input files
 infiles <- list()
@@ -381,19 +390,26 @@ The collection `r collection` contains `r length(genomes)` virus genome sequence
 
 We perform a global pairwise alignment (Needle-Waterman algorithm) between each feature of the reference (`r refGenomeName`) and each one of the query genomes.
 
-```{r one2N_feature_matches_PIP, fig.width=10, fig.height=6, out.width="100%", fig.cap="Feature-specific Percent Identical Positions (PIP) profiles. "}
+```{r one2N_feature_matches, fig.width=10, fig.height=6, out.width="100%", fig.cap="Feature-specific Percent Identical Positions (PIP) profiles. "}
 #### One-to-N alignmemnt of user-speficied genomic features ####
-featureName <- "CDS-S" # for the test
+# featureName <- "CDS-S" # for the test
 featureName <- "S1" # for the test
-featureName <- "Recomb-reg-3" # for the test
-featureName <- "RBD" # for the test
+# featureName <- "Recomb-reg-3" # for the test
+# featureName <- "RBD" # for the test
 # for (collection in (collections)) {
+if (reloadImage) {
+  load(outfiles["Memory image"])
+  reloadImage <- TRUE
+
+} else {
+  allFeatureAlignments <- list()
+}
 for (featureName in names(features)) {
   featureLimits <- features[[featureName]]
   featureStart <- featureLimits[["start"]]
   featureEnd <- featureLimits[["end"]]
   featureLength <- 
-     featureEnd - featureStart  + 1
+    featureEnd - featureStart  + 1
   
   message("Searching matches for feature ", featureName, 
           " (", featureLimits[1], "-", featureLimits[2], ")", 
@@ -403,7 +419,7 @@ for (featureName in names(features)) {
   featurePrefix <- paste0(
     featureName,
     "_", collection)
-
+  
   dir[[featureName]] <- file.path(dir$seqdata, featureName)
   dir.create(dir[[featureName]], showWarnings = FALSE, recursive = TRUE)
   outfiles[featureName]  <- file.path(
@@ -416,11 +432,17 @@ for (featureName in names(features)) {
                    end = featureLimits[2])
   
   ## Match the reference feature with all the genomes
-  featureAlignmentsNto1 <- alignNtoOne(
-    refSequence = refSeq, 
-    querySequences = genomes, 
-    type = "global-local",
-    outfile = outfiles[featureName])
+  if (reloadImage) {
+    featureAlignmentsNto1 <- allFeatureAlignments[[featureName]]
+  } else {  
+    featureAlignmentsNto1 <- alignNtoOne(
+      refSequence = refSeq, 
+      querySequences = genomes, 
+      type = "global-local",
+      outfile = outfiles[featureName])
+    
+    allFeatureAlignments[[featureName]] <- featureAlignmentsNto1
+  }
   
   genomeOrder <- order(featureAlignmentsNto1$stat$score, decreasing = TRUE)
   
@@ -440,10 +462,10 @@ for (featureName in names(features)) {
     reversePlot = TRUE,
     windowSize = windowSize, 
     main = paste0(featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"), 
-#    colors = NULL,
+    #    colors = NULL,
     colors = genomeColors,
     legendMargin = 0.25, 
-    legendCorner = "topright", lwd = 2,
+    legendCorner = "topright", lwd = 1,
     legendCex = 0.5, ylim = c(30, 100))
   
   
@@ -455,6 +477,78 @@ for (featureName in names(features)) {
 }
 # }
 ```
+
+
+<!-- ```{r one2N_feature_matches_PIP, fig.width=10, fig.height=6, out.width="100%", fig.cap="Feature-specific Percent Identical Positions (PIP) profiles. "} -->
+<!-- #### One-to-N alignmemnt of user-speficied genomic features #### -->
+<!-- allFeatureAlignments <- list() -->
+<!-- # featureName <- "CDS-S" # for the test -->
+<!-- featureName <- "S1" # for the test -->
+<!-- # featureName <- "Recomb-reg-3" # for the test -->
+<!-- # featureName <- "RBD" # for the test -->
+<!-- # for (collection in (collections)) { -->
+<!-- for (featureName in names(features)) { -->
+<!--   featureLimits <- features[[featureName]] -->
+<!--   featureStart <- featureLimits[["start"]] -->
+<!--   featureEnd <- featureLimits[["end"]] -->
+<!--   featureLength <-  -->
+<!--      featureEnd - featureStart  + 1 -->
+
+<!--   message("Searching matches for feature ", featureName,  -->
+<!--           " (", featureLimits[1], "-", featureLimits[2], ")",  -->
+<!--           " in collection ", collection) -->
+
+<!--   #### N-to-1 alignments of spike-coding sequences #### -->
+<!--   featurePrefix <- paste0( -->
+<!--     featureName, -->
+<!--     "_", collection) -->
+
+<!--   dir[[featureName]] <- file.path(dir$seqdata, featureName) -->
+<!--   dir.create(dir[[featureName]], showWarnings = FALSE, recursive = TRUE) -->
+<!--   outfiles[featureName]  <- file.path( -->
+<!--     dir[[featureName]], paste0(featurePrefix, ".fasta")) -->
+<!--   message("\tOutput directory: ", dir[[featureName]] ) -->
+
+<!--   ## Get sequence of the feature from the reference genome -->
+<!--   refSeq <- subseq(genomes[refGenomeName],  -->
+<!--                    start = featureLimits[1],  -->
+<!--                    end = featureLimits[2]) -->
+
+<!--   featureAlignmentsNto1 <- allFeatureAlignments[[featureName]] -->
+
+<!--   genomeOrder <- order(featureAlignmentsNto1$stat$score, decreasing = TRUE) -->
+
+<!--   if (featureLength > 20000) { -->
+<!--     windowSize <- 800  -->
+<!--   } else if (featureLength > 5000) { -->
+<!--     windowSize <- 500  -->
+<!--   } else if (featureLength > 3000) { -->
+<!--     windowSize <- 200  -->
+<!--   } else { -->
+<!--     windowSize <- max(100, 10 * round(featureLength / 100)) -->
+<!--   } -->
+
+<!--   ## PIP profile of one-to-N alignment -->
+<!--   plotPIPprofiles( -->
+<!--     alignments = featureAlignmentsNto1$alignments[genomeOrder], -->
+<!--     reversePlot = TRUE, -->
+<!--     windowSize = windowSize,  -->
+<!--     main = paste0(featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"),  -->
+<!-- #    colors = NULL, -->
+<!--     colors = genomeColors, -->
+<!--     legendMargin = 0.25,  -->
+<!--     legendCorner = "topright", lwd = 1, -->
+<!--     legendCex = 0.5, ylim = c(30, 100)) -->
+
+
+<!--   kable(featureAlignmentsNto1$stats[genomeOrder,],  -->
+<!--         caption = paste0( -->
+<!--           "One-to-N alignment of feature ",  -->
+<!--           featureName)) -->
+
+<!-- } -->
+<!-- # } -->
+<!-- ``` -->
 
 ## Output files
 
@@ -473,6 +567,16 @@ kable(outfileTable[, c("dir", "link")],
       caption = "Output files")
 
 ```
+
+## Memory image
+
+We store the result ina memory image, in oder to be able reloading it to plot PIP profiles with different parameters. 
+
+```{r}
+save.image(file = outfiles["Memory image"])
+
+```
+
 
 ## Session info
 
