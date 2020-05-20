@@ -3,7 +3,7 @@
 ## SARS-CoV-2 sequences and their comparison with HIV sequences.
 
 MAKEFILE=scripts/makefiles/03_protein-alignments.mk
-MAKE=make -f ${MAKEFILE}
+MAKE=make -s -f ${MAKEFILE}
 
 targets:
 	@echo "Targets:"
@@ -189,7 +189,7 @@ tree_from_muscle:
 
 align_selected:
 	@echo "Aligning selected spike sequences"
-	@${MAKE} align_muscle SPIKE_PREFIX=selected_coronavirus_spike_proteins
+	@${MAKE} align_muscle SPIKE_PREFIX=spike_proteins_selected
 
 align_uniprot_sars:
 	@echo "Aligning all Uniprot SARS spike sequences"
@@ -247,17 +247,17 @@ translate_matches:
 COLLECTION=selected
 merge_gisaid:
 	@for collection in all selected around-CoV-2; do \
-		${MAKE} _merge_gisaid_one_collection COLLECTION=$${collection} ; \
+		${MAKE}  _merge_gisaid_one_collection COLLECTION=$${collection} ; \
 	done
 
 GISAID_DIR=data/GISAID_genomes
-NCBI_SEQ=data/spike_proteins/${COLLECTION}_coronavirus_spike_proteins.fasta
+NCBI_SEQ=data/spike_proteins/spike_proteins_${COLLECTION}.fasta
 GISAID_SEQ=${GISAID_DIR}/coronavirus_S_proteins_from_GISAID.fasta
-MERGED_SEQ=${GISAID_DIR}/${COLLECTION}_coronavirus_spike_proteins-plus-GISAID.fasta
+MERGED_SEQ=${GISAID_DIR}/spike_proteins_${COLLECTION}-plus-GISAID.fasta
 _merge_gisaid_one_collection:
 	@echo
 	@echo "Merging collection ${COLLECTION}"
-	@cat ${NCBI_SEQ} ${GISAID_SEQ} > ${MERGED_SEQ}
+	cat ${NCBI_SEQ} ${GISAID_SEQ} > ${MERGED_SEQ}
 	@echo "	NCBI_SEQ	${NCBI_SEQ}"
 	@echo "	GISAID_SEQ	${GISAID_SEQ}"
 	@echo "	MERGED_SEQ	${MERGED_SEQ}"
@@ -269,8 +269,8 @@ align_ncbi-plus-gisaid:
 	@echo "Aligning NCBI selected + GISAID spike sequences"
 	@${MAKE} align_muscle \
 		MUSCLE_DIR=${GISAID_DIR}/muscle_alignments  \
-		MUSCLE_IN=${GISAID_DIR}/${COLLECTION}_coronavirus_spike_proteins-plus-GISAID \
-		MUSCLE_PREFIX=${GISAID_DIR}/muscle_alignments/${COLLECTION}_coronavirus_spike_proteins-plus-GISAID_aligned_muscle
+		MUSCLE_IN=${GISAID_DIR}/spike_proteins_${COLLECTION}-plus-GISAID \
+		MUSCLE_PREFIX=${GISAID_DIR}/muscle_alignments/spike_proteins_${COLLECTION}-plus-GISAID_aligned_muscle
 
 ################################################################
 ## Align spike sequences selected from NCBI + GISAID 
