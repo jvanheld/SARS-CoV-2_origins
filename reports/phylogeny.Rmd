@@ -84,9 +84,12 @@ knitr::opts_chunk$set(
   fig.path = 'figures/phylogeny/CoV_',
   fig.align = "center", 
   size = "tiny", 
-  echo = TRUE, eval = TRUE, 
-  warning = FALSE, message = FALSE, 
-  results = TRUE, comment = "")
+  echo = TRUE, 
+  eval = TRUE, 
+  warning = FALSE, 
+  message = FALSE, 
+  results = TRUE, 
+  comment = "")
 # knitr::asis_output("\\footnotesize")
 
 
@@ -102,11 +105,11 @@ par.ori <- par(no.readonly = TRUE)
 ## Color palette per species
 speciesPalette <- list(
   Human = "#880000",
-  Bat = "#666666",
-  Pangolin = "#008800",
+  Bat = "#888888",
+  Pangolin = "#448800",
   Camel = "#BB8800",
   Pig = "#FFBBBB",
-  Civet = "#0000BB"
+  Civet = "#00BBFF"
 )
 
 ## Species prefix in the tip labels
@@ -119,8 +122,11 @@ speciesPrefix <- c("Hu" = "Human",
 
 ## Strain-specific colors
 strainColor <- c(
-  "BtRaTG13_" = "black",
-  "BtYu-RmYN" = "black",
+  "HuCoV2" = "red",
+  "HuSARS-Fr" = "#0044BB",
+  "PnGu1" = "#00BB00",
+  "BtRaTG13" = "#FF6600",
+  "BtYu-RmYN" = "#FFBB22",
   "BtZXC21" = "black", 
   "BtZC45" = "black")
 
@@ -213,7 +219,8 @@ genomeTreeFile <- file.path(
 genomeTree <- loadTree(
   treeFile = genomeTreeFile, 
   outgroup = outgroups[['selected']], 
-  rootNode = NULL, 
+  rootNode = NULL,  
+  speciesPalette = speciesPalette,
   tipColor = strainColor,
   nodesToRotate = c(39, 75, 42))
 # genomeTree <- paintSubTree(tree = genomeTree, node = 49, state = "CoV2")
@@ -232,7 +239,7 @@ cladelabels(genomeTree$tree, "SARS", 69, cex = 0.7, orientation = "horizontal", 
 
 ## Tree per feature
 
-```{r feature_tree, fig.width=6, fig.height=6,  out.width="100%", fig.cap="Feature-specific tree.  The tree was inferred by maximum likelihood apprroach (PhyML) based on a progressive multiple alignment (clustalw). "}
+```{r feature_tree, fig.width=6, fig.height=6,  results="asis", out.width="100%", fig.cap="Feature-specific tree.  The tree was inferred by maximum likelihood apprroach (PhyML) based on a progressive multiple alignment (clustalw). "}
 
 #### Load and plot feature-specific trees ####
 
@@ -244,6 +251,8 @@ treeData <- list()
 feature <- "RBD"
 
 for (feature in features) {
+  cat("  \n### ",  feature, "\n")
+
   message("\n\tReading tree for feature ", feature)
   prefix <- paste0(feature, "_", collection)
   treeFile <- file.path(
@@ -259,6 +268,7 @@ for (feature in features) {
     treeFile = treeFiles[feature], 
     outgroup = outgroups[[collection]], 
     rootNode = NULL, 
+    speciesPalette = speciesPalette,
     tipColor = strainColor,
     nodesToRotate = NULL)
   
