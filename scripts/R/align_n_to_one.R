@@ -1,7 +1,8 @@
 #' @title Perform pairwise alignments between a set of query sequence and a single reference sequence
 #' @author Jacques.van-Helden@france-bioinformatique.fr
-#' @param refSequence reference sequence. Must be an object of class Biostrings::DNAStringSet
-#' @param querySequences query sequences. Must be an object of class Biostrings::DNAStringSet
+#' @param refSequence reference sequence. Must be an object of class Biostrings::XStringSet
+#' @param querySequences query sequences. Must be an object of class Biostrings::XStringSet
+#' @param seqType sequence type. Supported: "DNA", "AA"
 #' @param type="global-local" alignment type, passed to Biostrings::pairwiseAlignment()
 #' @param outfile=NULL if specified, the alignments are savec in the speficied file
 #' @param IDsuffix=NULL suffix to append to sequence names in the fasta file
@@ -9,6 +10,7 @@
 #' @export
 alignNtoOne <- function(refSequence, 
                         querySequences, 
+                        seqType = "DNA",
                         type = "global-local",
                         outfile = NULL, 
                         IDsuffix = NULL,
@@ -64,7 +66,7 @@ alignNtoOne <- function(refSequence,
       ## Suppress the dashes from the alignment to get the raw sequence
       sequence <- as.character(subject)
       sequenceDesaligned <- gsub(pattern = "-", replacement = "", x = sequence)
-      seqStringSet <- DNAStringSet(x = sequenceDesaligned) #, start = start(subject), end=end(subject))
+      seqStringSet <- BStringSet(x = sequenceDesaligned) #, start = start(subject), end=end(subject))
       
       
       ## Define a sequence ID for the fasta header
