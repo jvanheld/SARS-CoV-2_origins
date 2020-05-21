@@ -52,6 +52,7 @@ targets:
 ################################################################
 ## List parameters
 
+## Genomic features
 FEATURES= 		\
 	S1 		\
 	S2 		\
@@ -71,11 +72,11 @@ FEATURES= 		\
 	CDS-ORF7a	\
 	CDS-ORF8	\
 	genomes
-FEATURE=S-gene
+FEATURE=S1
 
 ## Collections of genomes
 COLLECTIONS=around-CoV-2-plus-GISAID selected-plus-GISAID around-CoV-2 selected
-COLLECTION=around-CoV-2
+COLLECTION=around-CoV-2-plus-GISAID
 
 
 ## Directories and input sequence file
@@ -312,8 +313,8 @@ PHYML_BOOTSTRAP=100
 PHYML_MODEL=GTR
 PHYML_ADDOPT=
 PHYML_OPT=--datatype nt --bootstrap ${PHYML_BOOTSTRAP} --model ${PHYML_MODEL} ${PHYML_ADDOPT}
-PHYML_PREFIX=${MALIGN_PREFIX}_gblocks.phy_phyml_tree
-PHYML_TREE=${PHYML_PREFIX}_${PHYML_MODEL}.phb
+PHYML_PREFIX=${MALIGN_PREFIX}_gblocks_${PHYML_MODEL}.phy_phyml_tree
+PHYML_TREE=${PHYML_PREFIX}.phb
 run_phyml:
 	@echo "Shortening sequence names"
 	@perl -pe 's|^>(.{12}).*|>$$1|' ${GBLOCKS_PREFIX} > ${GBLOCKS_PREFIX}_shortnames
@@ -325,11 +326,11 @@ run_phyml:
 		-sformat1 pir \
 		-snucleotide1 \
 		-osformat2 phylip \
-		>  ${MALIGN_PREFIX}_gblocks.phy
+		>  ${MALIGN_PREFIX}_gblocks_${PHYML_MODEL}.phy
 	@echo "	${MALIGN_PREFIX}_gblocks.phy"
 	@echo
 	@echo "Inferring phylogeny with phyml"
-	${TIME} mpirun -n ${PHYML_THREADS} phyml-mpi --input ${MALIGN_PREFIX}_gblocks.phy ${PHYML_OPT}
+	${TIME} mpirun -n ${PHYML_THREADS} phyml-mpi --input ${MALIGN_PREFIX}_gblocks_${PHYML_MODEL}.phy ${PHYML_OPT}
 	cp ${PHYML_PREFIX}.txt ${PHYML_TREE}
 	@echo "	"
 	@echo "	PHYLO_DIR		${PHYLO_DIR}"
