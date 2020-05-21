@@ -3,11 +3,16 @@ title: "Phylogenetic analysis of coronavirus sequences"
 author: "Jacques van Helden"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
+  html_document:
+    df_print: paged
+    code_folding: hide
     fig_caption: yes
     highlight: zenburn
+    self_contained: no
+    theme: cerulean
     toc: yes
     toc_depth: 3
+    toc_float: yes
   ioslides_presentation:
     colortheme: dolphin
     fig_caption: yes
@@ -44,16 +49,11 @@ output:
     theme: cerulean
     toc: yes
     widescreen: yes
-  html_document:
-    df_print: paged
-    code_folding: hide
+  pdf_document:
     fig_caption: yes
     highlight: zenburn
-    self_contained: no
-    theme: cerulean
     toc: yes
     toc_depth: 3
-    toc_float: yes
 font-import: http://fonts.googleapis.com/css?family=Risque
 font-family: Garamond
 transition: linear
