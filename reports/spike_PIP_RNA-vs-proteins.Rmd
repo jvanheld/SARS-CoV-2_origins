@@ -1,0 +1,608 @@
+---
+title: "PIP profiles of coronavirus spike proteins - DNA and protein sequences"
+author: "Jacques van Helden"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+    fig_caption: yes
+    highlight: zenburn
+    self_contained: no
+    theme: cerulean
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  ioslides_presentation:
+    colortheme: dolphin
+    fig_caption: yes
+    fig_height: 6
+    fig_width: 7
+    fonttheme: structurebold
+    highlight: tango
+    smaller: yes
+    toc: yes
+    widescreen: yes
+  beamer_presentation:
+    colortheme: dolphin
+    fig_caption: yes
+    fig_height: 6
+    fig_width: 7
+    fonttheme: structurebold
+    highlight: tango
+    incremental: no
+    keep_tex: no
+    slide_level: 2
+    theme: Montpellier
+    toc: yes
+  word_document:
+    toc: yes
+    toc_depth: '3'
+  slidy_presentation:
+    fig_caption: yes
+    fig_height: 6
+    fig_width: 7
+    highlight: tango
+    incremental: no
+    keep_md: yes
+    smaller: yes
+    theme: cerulean
+    toc: yes
+    widescreen: yes
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    toc: yes
+    toc_depth: 3
+font-import: http://fonts.googleapis.com/css?family=Risque
+font-family: Garamond
+transition: linear
+---
+
+```{r libraries, echo=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+#### Install required packages ####
+required.packages <- c("knitr")
+
+for (pkg in required.packages) {
+  if (!require(pkg, character.only = TRUE)) {
+    message("Installing package ", pkg)
+    install.packages(pkg, dependencies = TRUE)
+  }
+  require(pkg, character.only = TRUE)
+}
+
+#### Load libraries ####
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+  install.packages("BiocManager")
+}
+if (!require("Biostrings", quietly = TRUE)) {
+  BiocManager::install("Biostrings")
+  require("Biostrings")
+}
+
+
+```
+
+
+
+```{r knitr_settings, include=FALSE, echo=FALSE, eval=TRUE}
+library(knitr)
+options(width = 300)
+knitr::opts_chunk$set(
+  fig.width = 7, fig.height = 5, 
+  fig.path = 'figures/pip_profiles/prot_',
+  fig.align = "center", 
+  size = "tiny", 
+  echo = TRUE, eval = TRUE, 
+  warning = FALSE, message = FALSE, 
+  results = TRUE, comment = "")
+# knitr::asis_output("\\footnotesize")
+
+
+## Store original graphic parameters to restore them after chunks
+par.ori <- par(no.readonly = TRUE)
+
+
+
+```
+
+
+```{r parameters}
+
+#### General parameters for the analysis ####
+
+## Use (or not) GIDAID sequences
+## 
+## A few genoes were not available in NCBI Genbank at the time of 
+## this analysis, and had to be downloaded from GISAID. These sequences
+##  can however not be redistributed, they should thus be downloaded 
+##  manually to reproduce the full trees. Alternatively, useGISAID
+##  can be set to FALSE, whcih will reproduce the analysis with almost 
+##  all the sequences of the paper.
+useGISAID <- TRUE
+
+
+#### Define directories and files ####
+dir <- list(main = '..')
+dir$R <- file.path(dir$main, "scripts/R")
+
+#### Create output directory for sequences ####
+seqPrefix <- "spike_proteins"
+dir$outseq <- file.path(
+  dir$main, "results", seqPrefix, "PIP_profiles")
+dir.create(dir$outseq, showWarnings = FALSE, recursive = TRUE)
+list.files(dir$outseq)
+
+## Instantiate a list for output files
+outfiles <- vector()
+
+## Input files
+infiles <- list()
+
+## Sequence collection
+## Supported: 
+## collection <- "around-CoV-2" # ~20 sequences
+## collection <- "selected" # ~60 sequences
+## collection <- "all" # ~60 sequences
+collections <- c("around-CoV-2", "selected", "all")
+# collection <- "around-CoV-2" # ~20 sequences
+# collection <- "selected" # ~40 sequences
+collection <- "all" # ~60 sequences
+
+
+## Sequence dir and files
+if (useGISAID) {
+  dir$sequences <- file.path(dir$main, "data", "GISAID_genomes")
+  collection <- paste0(collection, "-plus-GISAID")
+} else {
+  dir$sequences <- file.path(dir$main, "data", "spike_proteins")
+}
+
+seqPrefix <- paste0("spike_proteins_", collection)
+
+infiles$sequences <- file.path(dir$sequences, paste0(seqPrefix,".fasta"))
+
+## Sequence sequences
+if (!file.exists(infiles$sequences)) {
+  stop("¨Protein sequence file is missing", "\n", infiles$sequences)
+}
+
+
+## Load custom functions
+source(file.path(dir$R, "align_n_to_one.R"))
+source(file.path(dir$R, "plot_pip_profiles.R"))
+
+
+## Query patterns for SARS-CoV-2
+queryPatterns <- list()
+queryPatterns[["HuCoV2_WH01_2019"]] <- c(
+  "PnGX-P1E_2017", 
+  "PnGu1_2019",
+  "BtRaTG13_2013_Yunnan", 
+  "BtZC45",
+  "BtZXC21",
+  "HuSARS-Frankfurt-1_2003",
+  "CmMERS",
+  "HuMERS_172-06_2015"
+)
+
+queryPatterns[["HuSARS-Frankfurt-1_2003"]] <- c(
+  "CvSZ3",
+  "BtRs4874",
+  "BtWIV16_2013",
+  "BtRs4231",
+  "BtRs7327",
+  "BtRsSHC014",
+  "Btrec-SARSp_2008",
+  "PnGX-P1E_2017",
+  "HuCoV2_WH01_2019",
+  "BtRaTG13_2013_Yunnan", 
+  "BtZC45",
+  "BtZXC21",
+  "CmMERS",
+  "HuMERS_172-06_2015"
+)
+
+#### Add GISAID IDs to the query pattern ####
+## Note that GISAID sequences are be submitted to the github repo because they cannot be redistributed
+if (useGISAID) {
+  for (ref in names(queryPatterns))
+  queryPatterns[[ref]] <- append(queryPatterns[[ref]], 
+                          c("BtYu-RmYN02_2019",
+                            "PnGu1_2019"
+                          ))
+}
+
+# message("\tReference strain: ", refPattern)
+message("\tQuery patterns")
+for (ref in names(queryPatterns)) {
+  queryPatterns[[ref]] <- unique(queryPatterns[[ref]])
+  message("\t", ref, "\t\t", length(queryPatterns[[ref]]),
+          "\t", paste(collapse = ", ", queryPatterns[[ref]]))
+}
+
+```
+
+
+
+```{r load_sequences}
+
+#### Load sequences ####
+sequences <- readAAStringSet(filepath = infiles$sequences, format = "fasta")
+
+## Shorten sequence names by suppressing the fasta comment (after the space)
+names(sequences) <- sub(pattern = " .*", replacement = "", x = names(sequences), perl = TRUE)
+
+sequencesNames <- names(sequences)
+nbsequences <- length(sequencesNames)
+message("Loaded ", nbsequences, " sequences from file ", infiles$sequences)
+# View(sequences)
+
+#### Define reference and query sequences ####
+refSequenceNames <- vector()
+for (ref in names(queryPatterns)) {
+  refSequenceNames[ref] <- unique(
+    grep(pattern = ref, x = names(sequences), 
+         ignore.case = TRUE, value = TRUE))
+    if (is.null(refSequenceNames[ref])) {
+    stop("Could not identify reference sequences with pattern ", ref)
+  }
+}
+
+## Query sequences
+querySequenceNames <- list()
+for (ref in names(queryPatterns)) {
+#  message("Identifying query sequences for reference: ", ref)
+  queryRegExp <- paste0("(", paste(collapse = ")|(", queryPatterns[[ref]]), ")")
+  querySequenceNames[[ref]] <- grep(pattern = queryRegExp, 
+                             x = sequencesNames, 
+                             ignore.case = TRUE, value = TRUE)
+  nbquerySeq <- length(querySequenceNames[[ref]])
+  
+  if (nbquerySeq == 0) {
+    stop("Could not identify any query sequences with query pattern\n", queryRegExp)
+  }
+  
+  if (length(unlist(queryPatterns[ref[]])) != length(querySequenceNames[[ref]])) {
+    foundPatterns <- grep(pattern = queryRegExp, x = querySequenceNames[[ref]], value = TRUE)
+    missingPatterns <- setdiff(foundPatterns, queryPatterns[[ref]])
+    message("\t", 
+            length(missingPatterns), " Missing sequences: ", 
+            paste(collapse = ", ", missingPatterns))
+  }
+  
+  message("\tFound ", 
+          "\t", length(querySequenceNames[[ref]]), 
+          " queries for\t", ref)
+
+  ## Compute some statistics about sequences sizes
+  sequencestat <- data.frame(
+    row.names = c(ref, querySequenceNames[[ref]]),
+    status = c("Reference", 
+               rep("Query", length.out = length(querySequenceNames[[ref]])))
+  )
+  
+  g <- 1
+  for (g in c(ref, querySequenceNames[[ref]])) {
+    sequencestat[g, "length"] <- length(sequences[[g]])
+  }
+  kable(sequencestat, caption = paste0("Query sequences for reference ", ref))
+}
+
+
+```
+
+The collection `r collection` contains `r length(sequences)` virus sequences sequences.
+
+
+
+## N-to-1 full sequence alignments
+
+We perform a pairwise lignment between each sequences query and the reference sequences (`r refSequenceNames[[1]]`).
+
+```{r full-sequences_align}
+sequencesNto1 <- list()
+refSequenceName <- "HuCoV2_WH01_2019"
+for (refSequenceName in refSequenceNames) {
+  ## Define output file for sequences alignments
+  outfile <- file.path(
+    dir$outseq, paste0("one-to-n_alignments_ref_", refSequenceName))
+  outfiles[paste0(refSequenceName, " alignments")] <- outfile
+  
+  ## Get sequences for reference and query sequences
+  refSequence <- sequences[refSequenceName]
+  querySeq <- sequences[querySequenceNames[[refSequenceName]]]
+  
+  message("\tAligning ", length(querySeq), " query sequences",
+          " to reference\t", refSequenceName)
+
+  sequencesNto1[[refSequenceName]] <- alignNtoOne(
+    refSequence = refSequence,  
+    querySequences = querySeq, 
+    sortByPIP = TRUE,
+    #  querySequences = sequences, 
+    outfile = outfile)
+  
+}
+
+```
+
+
+## Alignment with SARS-CoV-2(ref strain HuCoV2_WH01_2019)
+
+
+```{r PIP_SARS-CoV-2, fig.width=12, fig.height=8, out.width="100%", fig.cap="Percent Identical Positions profile over the whole sequences of SARS-CoV-2. "}
+refSequenceName <- "HuCoV2_WH01_2019"
+kable(sequencesNto1[[refSequenceName]]$stats[order(sequencesNto1[[refSequenceName]]$stats$score, decreasing = TRUE), ], 
+        caption = "N-to-one alignment of full sequences")
+
+
+## PIP profile of full sequences N-to-1 alignments
+plotPIPprofiles(
+  alignments = sequencesNto1[[refSequenceName]]$alignments, 
+  windowSize = 100, 
+  main = paste0("Full sequences PIP profile", "\nRef: ", refSequenceName),
+  legendMargin = 0, 
+  legendCorner = "bottomright", legendCex = 0.6, ylim = c(0,100))
+
+```
+
+
+
+## Alignment with SARS-CoV (ref strain: HuSARS-Frankfurt-1_2003)
+
+
+
+```{r PIP_SARS-CoV, fig.width=12, fig.height=8, out.width="100%", fig.cap="Percent Identical Positions profile over the whole sequences of SARS-CoV. "}
+refSequenceName <- "HuSARS-Frankfurt-1_2003"
+kable(sequencesNto1[[refSequenceName]]$stats[order(sequencesNto1[[refSequenceName]]$stats$score, decreasing = TRUE), ], 
+        caption = "N-to-one alignment of full sequences")
+
+
+## PIP profile of full sequences N-to-1 alignments
+plotPIPprofiles(alignments = sequencesNto1[[refSequenceName]]$alignments, 
+                windowSize = 100, 
+                #                legend = paste0(names(sequencesNto1[[refSequenceName]]$alignments), " (", round(digits = 2, sequencesNto1[[refSequenceName]]$stats$pid), "%)"),
+                main = paste0("Full sequences PIP profile", "\nRef: ", refSequenceName),
+                legendMargin = 0, 
+                legendCorner = "bottomright", legendCex = 0.6, ylim = c(0,100))
+
+```
+
+
+## Aligning all sequences
+
+```{r SARS_vs_all}
+
+## Define output file for sequences alignments
+outfiles["Sequence alignments - SARS"] <- file.path(
+  dir$outseq, paste0("spike-protein_alignments_ref_",
+                     "HuSARS-Frankfurt-1_2003"))
+
+#### Compare SARS (2002) wih the related Civet sequences ####
+SARSvsAll <- alignNtoOne(
+  refSequence = sequences["HuSARS-Frankfurt-1_2003"], 
+  querySeq = sequences, sortByPIP = TRUE,
+  outfile = outfiles["Sequence alignments - SARS"] )
+
+kable(SARSvsAll$stats, 
+      caption = "SARS (2003). N-to-one alignment of full sequences of the closest animal virus (Civet) and of Human SARS-CoV-2. ")
+
+```
+
+```{r PIP_SARS_vs_all, fig.width=10, fig.height=5, out.width="100%", fig.cap="Percent Identical Positions profile over the whole sequences of SARS (2002-2003). "}
+
+## PIP profile of full sequences N-to-1 alignments
+plotPIPprofiles(alignments = SARSvsAll$alignments, 
+                windowSize = 500, 
+                legend = paste0(names(SARSvsAll$alignments), " (", round(digits = 2, SARSvsAll$stats$pid), "%)"),
+                main = paste0("Spike protein PIP", "\nRef: ", "Human_SARS-CoV_Frankfurt_1"),
+                legendMargin = 0.3, 
+                legendCorner = "bottomright", 
+                legendCex = 0.5, 
+                ylim = c(0,100))
+
+
+```
+
+
+
+
+<!-- ## Spike protein against 2003 SARS-CoV (Frankfurt strain) -->
+
+<!-- ```{r S-gene_align_queries} -->
+
+<!-- featureName <- "Spike-protein_SARS-CoV" -->
+<!-- featureLimits <- features[[featureName]] -->
+
+
+<!-- #### N-to-1 alignments of spike-coding sequences #### -->
+<!-- dir[[featureName]] <- file.path(dir$main, "results", featureName) -->
+<!-- dir.create(featureName, showWarnings = FALSE, recursive = TRUE) -->
+<!-- outfiles[featureName]  <- file.path( -->
+<!--   dir[[featureName]], paste0(featureName, "_", collection, "_alignments")) -->
+
+<!-- ## Get sequences for reference and query sequences -->
+<!-- refSeq <- subseq(sequences[refSequenceName], start = featureLimits[1], end = featureLimits[2]) -->
+
+<!-- featureAlignmentsNto1 <- alignNtoOne( -->
+<!--   refSequence = refSeq,  -->
+<!--   querySeq = querySeq,  -->
+<!--   type = "global-local", sortByPIP = TRUE, -->
+<!--   outfile = outfiles[featureName]) -->
+
+<!-- kable(featureAlignmentsNto1$stats[order(featureAlignmentsNto1$stat$score, decreasing = TRUE),],  -->
+<!--       caption = "N-to-one alignment of S genes") -->
+
+<!-- ``` -->
+
+
+<!-- ### Spike gene PIP plot -->
+
+<!-- ```{r Sgene_pip, fig.width=10, fig.height=5, out.width="100%", fig.cap="Percent Identical Positions profile over the whole sequences of SARS-CoV-2. "} -->
+
+<!-- ## PIP profile of spike N-to-1 alignments -->
+<!-- plotPIPprofiles(alignments = featureAlignmentsNto1$alignments,  -->
+<!--                 windowSize = 200,  -->
+<!-- #                legend = paste0(names(featureAlignmentsNto1$alignments), " (", round(digits = 2, featureAlignmentsNto1$stats$pid), "%)"), -->
+<!--                 main = paste0(featureName, " - PIP profile", "\nRef: ", refSequenceName), -->
+<!--                 legendMargin = 0, legendCorner = "bottomright", legendCex = 0.8, ylim = c(30, 100)) -->
+
+<!-- ``` -->
+
+
+
+
+<!-- ### Getting sequences of spike gene in all the selected coronavirus sequences -->
+
+
+<!-- ```{r  match sequence fragment against all sequences and export the matches to a fasta file} -->
+
+
+<!-- #' @title Export sequencesquery + subject sequences from N-to-1 alignments -->
+<!-- #' @author Jacques.van-Helden@france)bioinformatique.fr -->
+<!-- #' @param refsequence  sequence used as reference (DB) for the N-to-1 alignment -->
+<!-- #' @param sequences sequences sequences -->
+<!-- #' @param IDsuffix=NULL if not null, append the suffix to the sequence name for the fasta header -->
+<!-- #' @param outfile=NULL output file. If specified, the matches will be exported as fasta-formatted sequences. -->
+<!-- #' @export -->
+<!-- ExportSegmentMatches <- function(refsequence, -->
+<!--                                  sequences, -->
+<!--                                  IDsuffix = NULL, -->
+<!--                                  outfile=NULL) { -->
+
+<!--   #### N-to-1 alignments of all spike-coding sequences #### -->
+
+<!--   ## Get sequences for reference and query sequences -->
+<!--   alignmentsNto1 <- alignNtoOne( -->
+<!--     refSequence = refsequence,  -->
+<!--     querySeq = sequences,  -->
+<!--     type = "global-local") -->
+
+<!--   if (!is.null(outfile)) { -->
+
+<!--     ## Write the reference sequence in the output fle -->
+<!--     writeXStringSet(refsequence, filepath = outfile, format = "fasta") -->
+
+<!--     i <- 1 -->
+<!--     nbAlignments <- length(alignmentsNto1$alignments) -->
+<!--     for (i in 1:nbAlignments) { -->
+<!--       sequencesName <- names(sequences[i]) -->
+<!--       alignment <- alignmentsNto1$alignments[[i]] -->
+<!--       subject <- subject(alignment) -->
+
+<!--       ## Suppress the dashes from the alignment to get the raw sequence -->
+<!--       sequence <- as.character(subject) -->
+<!--       sequenceDesaligned <- gsub(pattern = "-", replacement = "", x = sequence) -->
+<!--       seqStringSet <- DNAStringSet(x = sequenceDesaligned) #, start = start(subject), end=end(subject)) -->
+
+
+<!--       ## Define a sequence ID for the fasta header -->
+<!--       sequenceID <- sequencesName -->
+<!--       if (!is.null(IDsuffix)) { -->
+<!--         sequenceID <- paste0(sequenceID, IDsuffix) -->
+<!--       }  -->
+<!--       sequenceID <- paste0(sequenceID, "_", start(subject), "-", end(subject)) -->
+<!--       names(seqStringSet) <- sequenceID -->
+<!--       #  -->
+<!--       ## Write pairwise alignment (temporarily disaactivated) -->
+<!--       # alignmentFile <- paste0("pairwise-alignment_",  -->
+<!--       #                         # gsub(pattern = "/", replacement = "-", x = sequencesName),  -->
+<!--       #                         ".txt") -->
+<!--       # writePairwiseAlignments(x = alignment, file = outfile) -->
+
+<!--       ## Append the sequence to the file -->
+<!--       message("\tAppending sequence ", i, "/", nbAlignments, "\t", sequenceID) -->
+<!--       writeXStringSet(seqStringSet, -->
+<!--                       filepath = outfile, format = "fasta", append = TRUE) -->
+
+<!--     } -->
+<!--     message("\tExported alignments to\t", outfile) -->
+
+<!--   }  -->
+<!--   return(alignmentsNto1) -->
+
+<!-- } -->
+<!-- ``` -->
+
+<!-- ```{r Sgene_exportseq} -->
+
+
+<!-- #### Export S gene sequences found in the reference sequences #### -->
+<!-- # toString(refSeq) -->
+<!-- writeXStringSet( -->
+<!--   refSeq,  -->
+<!--   filepath = file.path( -->
+<!--     dir$outseq,  -->
+<!--     paste0("S-gene_", refSequenceName, ".fasta")),  -->
+<!--   format = "fasta") -->
+
+
+<!-- ## Export matches to S-gene -->
+<!-- outfiles["S gene matches"] <- file.path( -->
+<!--   dir$outseq,  -->
+<!--   paste0("S-gene_", refSequenceName, "_matches.fasta")) -->
+
+<!-- featureAlignmentsNto1All <- ExportSegmentMatches( -->
+<!--   refsequence = refSeq, -->
+<!--   sequences = sequences,  -->
+<!--   IDsuffix = "_S-gene", -->
+<!--   outfile = outfiles["S gene matches"]) -->
+
+
+<!-- kable(featureAlignmentsNto1All$stats[order(featureAlignmentsNto1All$stat$score, decreasing = TRUE),],  -->
+<!--         caption = "N-to-one alignment of S genes") -->
+
+<!-- ``` -->
+
+<!-- ## Export matches to the coding sequence of the S1 cleavage produc -->
+
+
+<!-- ## N-to-1 alignemnts of S1 coding sequences -->
+
+<!-- ```{r S1_align_queries} -->
+
+<!-- refS1Limits <- refSpikeLimits[1] + 3*c(13,	685) -->
+
+<!-- #### N-to-1 alignments of S1-coding sequences #### -->
+
+<!-- ## Get sequences for reference and query sequences -->
+<!-- refS1 <- subseq(sequences[refSequenceName], start = refS1Limits[1], end = refS1Limits[2]) -->
+
+<!-- S1Nto1 <- alignNtoOne(refSequence = refS1, querySeq = querySeq, type = "global-local") -->
+
+<!-- kable(S1Nto1$stats[order(S1Nto1$stat$score, decreasing = TRUE),],  -->
+<!--       caption = "N-to-one alignment of S1 coding sequence") -->
+
+<!-- ``` -->
+
+<!-- ### S1 gene PIP plot -->
+
+<!-- ```{r S1_pip, fig.width=10, fig.height=5, out.width="100%", fig.cap="Percent Identical Positions profile over the whole sequences of SARS-CoV-2. "} -->
+
+<!-- ## PIP profile of S1 N-to-1 alignments -->
+<!-- plotPIPprofiles(alignments = S1Nto1$alignments,  -->
+<!--                 windowSize = 200,  -->
+<!--                 legend = paste0(names(S1Nto1$alignments), " (", round(digits = 2, S1Nto1$stats$pid), "%)"), -->
+<!--                 main = paste0("S1 coding sequence - PIP profile", "\nRef: ", refSequenceName), -->
+<!--                 legendMargin = 0, legendCorner = "bottomleft", legendCex = 0.8, ylim = c(30, 100)) -->
+
+<!-- ``` -->
+
+
+## Output files
+
+```{r output_files}
+kable(t(as.data.frame(dir)), col.names = "Dir", caption = "Directories")
+
+kable(outfiles, col.names = "File", caption = "Output files")
+```
+
+## Session info
+
+```{r session_info}
+sessionInfo()
+```
+
+
+
