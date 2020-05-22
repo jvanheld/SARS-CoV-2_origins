@@ -90,7 +90,7 @@ library(knitr)
 options(width = 300)
 knitr::opts_chunk$set(
   fig.width = 7, fig.height = 5, 
-  fig.path = 'figures/cov-seq_',
+  fig.path = 'figures/pip_profiles/RNA_',
   fig.align = "center", 
   size = "tiny", 
   echo = TRUE, eval = TRUE, 
