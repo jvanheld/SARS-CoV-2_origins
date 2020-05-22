@@ -4,6 +4,7 @@
 #' @param querySequences query sequences. Must be an object of class Biostrings::XStringSet
 #' @param seqType sequence type. Supported: "DNA", "AA"
 #' @param type="global-local" alignment type, passed to Biostrings::pairwiseAlignment()
+#' @param sortByPIP=TRUE sort resulting alignments by decreasing mean PIP
 #' @param outfile=NULL if specified, the alignments are savec in the speficied file
 #' @param IDsuffix=NULL suffix to append to sequence names in the fasta file
 #' @param ... other arguments are passed to  Biostrings::pairwiseAlignment()
@@ -12,6 +13,7 @@ alignNtoOne <- function(refSequence,
                         querySequences, 
                         seqType = "DNA",
                         type = "global-local",
+                        sortByPIP = TRUE,
                         outfile = NULL, 
                         IDsuffix = NULL,
                         ...) {
@@ -44,6 +46,14 @@ alignNtoOne <- function(refSequence,
     alignmentStats[subjectName, "score"] <- score(alignment)
     alignments[[subjectName]] <- alignment
   }
+  
+  if (sortByPIP) {
+    PIPorder <- order(alignmentStats$pid, decreasing = TRUE)
+    alignmentStats <- alignmentStats[PIPorder, ]
+    alignments <- alignments[PIPorder]
+    # names(alignments)
+  }
+  
   result <- list(alignments = alignments,
                  stats = alignmentStats)
 
