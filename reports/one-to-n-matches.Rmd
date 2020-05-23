@@ -1,5 +1,5 @@
 ---
-knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file ='one-to-n-matches_around-CoV-2-plus-GISAID.html') })
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file ='one-to-n-matches_selected-plus-GISAID.html') })
 title: "One-to-N sequence matches in coronavirus genomes"
 author: "Jacques van Helden"
 date: "`r Sys.Date()`"
@@ -89,8 +89,8 @@ if (!require("Biostrings", quietly = TRUE)) {
 library(knitr)
 options(width = 300)
 knitr::opts_chunk$set(
-  fig.width = 7, fig.height = 5, 
   fig.path = 'figures/one-to-n-matches/',
+  fig.width = 7, fig.height = 5, 
   fig.align = "center", 
   size = "tiny", 
   echo = TRUE, 
@@ -131,9 +131,12 @@ collections <- c(
 # collection <- "around-CoV-2" # 14 strains
 # collection <- "all" # 16 strains
 # collection <- "selected" # ~60 strains
-collection <- "around-CoV-2-plus-GISAID" # 16 strains
-# collection <- "selected-plus-GISAID" # ~40 strains
+# collection <- "around-CoV-2-plus-GISAID" # 16 strains
+collection <- "selected-plus-GISAID" # ~40 strains
 # collection <- "all-plus-GISAID" # ~60 strains
+
+## Choose a collection-specific path for the figures
+knitr::opts_chunk$set(fig.path = paste0('figures/one-to-n-matches_', collection, '/'))
 
 ## Note about GIDAID sequences.
 ## 
@@ -225,6 +228,8 @@ features[['After-ORF1ab']] <- c(start = 21556, end = 29899)
 message("\tReference strain: ", refPattern)
 
 ```
+
+## Strain collection: `r collection`
 
 
 ```{r load_sequences}
@@ -412,6 +417,7 @@ if (reloadImage) {
   allFeatureAlignments <- list()
 }
 for (featureName in names(features)) {
+  ## Compute feature length
   featureLimits <- features[[featureName]]
   featureStart <- featureLimits[["start"]]
   featureEnd <- featureLimits[["end"]]
@@ -422,10 +428,18 @@ for (featureName in names(features)) {
           " (", featureLimits[1], "-", featureLimits[2], ")", 
           " in collection ", collection)
   
+  ## Print a seciton title with the feature name and limits
   cat(sep = "", "\n### ",  featureName, 
       " (", featureLimits[1], "-", featureLimits[2], 
       "; ", featureLength,"bp)", "\n")
 
+
+  ## Choose a collection- and feature-specific path for the figures
+  knitr::opts_chunk$set(fig.path = paste0(
+    'figures/one-to-n-matches_', collection, '/',
+    collection, '_vs_', featureName))
+
+  
   #### N-to-1 alignments of spike-coding sequences ####
   featurePrefix <- paste0(
     featureName,
