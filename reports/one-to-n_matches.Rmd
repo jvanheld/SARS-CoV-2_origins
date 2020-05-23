@@ -1,4 +1,5 @@
 ---
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file ='one-to-n-matches_around-CoV-2-plus-GISAID.html') })
 title: "One-to-N sequence matches in coronavirus genomes"
 author: "Jacques van Helden"
 date: "`r Sys.Date()`"
@@ -92,9 +93,12 @@ knitr::opts_chunk$set(
   fig.path = 'figures/one-to-n-matches/',
   fig.align = "center", 
   size = "tiny", 
-  echo = TRUE, eval = TRUE, 
-  warning = FALSE, message = FALSE, 
-  results = TRUE, comment = "")
+  echo = TRUE, 
+  eval = TRUE, 
+  warning = FALSE, 
+  message = FALSE, 
+  results = TRUE, 
+  comment = "")
 # knitr::asis_output("\\footnotesize")
 
 
@@ -124,11 +128,12 @@ collections <- c(
 
 
 
-# collection <- "around-CoV-2" # 14 genomes
-# collection <- "around-CoV-2-plus-GISAID" # 16 genomes
-collection <- "all-plus-GISAID" # 16 genomes
-# collection <- "selected" # ~60 genomes
-# collection <- "selected-plus-GISAID" # ~60 genomes
+# collection <- "around-CoV-2" # 14 strains
+# collection <- "all" # 16 strains
+# collection <- "selected" # ~60 strains
+collection <- "around-CoV-2-plus-GISAID" # 16 strains
+# collection <- "selected-plus-GISAID" # ~40 strains
+# collection <- "all-plus-GISAID" # ~60 strains
 
 ## Note about GIDAID sequences.
 ## 
@@ -183,15 +188,15 @@ excludePatterns <- c("PnMP789", "PnGu-P2S_2019")
 features <- list()
 
 
-## Specific features 
+#### Specific features  ####
 
+## Regions around the insertions
+features[['Ins1-pm120']] <- c(start = 21647, end = 21907)
+features[['Ins2-pm120']] <- c(start = 21899, end = 22156)
+features[['Ins3-pm120']] <- c(start = 21899, end = 23152)
+features[['Ins4-pm120']] <- c(start = 23483, end = 23734)
+features[['Ins4-m240']] <- c(start = 23363, end = 23614)
 
-## S1: pre-cleavage part of the spike protein 
-features[["S1"]] <- c(start = 21599, end =	23617)
-## S2: post-cleavage part of the spike protein 
-features[["S2"]] <- c(start = 23618, end = 25381)
-## Receptor Binding Domain (RBD)
-features[["RBD"]] <- c(start = 22517, end = 23185)
 ## Potential Pangolin origin after Xiao (https://doi.org/10.1101/2020.02.17.951335)
 features[['Recomb-Xiao']] <- c(start = 22871, end = 23092)
 ## Recombinant region 1 seen on the PIP profiles
@@ -216,10 +221,8 @@ features[['CDS-ORF1ab']] <- c(start = 266, end = 21555)
 ## All the sequences after the bif ORF coding for the polyproteinn 1ab
 features[['After-ORF1ab']] <- c(start = 21556, end = 29899)
 
-
-
 ## Report the parameters
-message("\tReference genomes: ", refPattern)
+message("\tReference strain: ", refPattern)
 
 ```
 
@@ -230,26 +233,28 @@ message("\tReference genomes: ", refPattern)
 ## Genome dir and files
 if (length(grep(pattern = "GISAID", x = collection)) > 0) {
   useGISAID <- TRUE
-  dir$genomes <- file.path(dir$main, "data", "GISAID_genomes")
+  dir$sequences <- file.path(dir$main, "data", "GISAID_genomes")
   # collections <-  paste0(collections, "-plus-GISAID")
   # collection <-  paste0(collection, "-plus-GISAID")
 } else {
-  dir$genomes <- file.path(dir$main, "data", "genomes")
+  dir$sequences <- file.path(dir$main, "data", "genomes")
 }
 
 
-## Define the input genome
-infiles$genomes <- file.path(
-  dir$genomes, 
+## Define the input sequences
+infiles$sequences <- file.path(
+  dir$sequences, 
   paste0("genomes_", collection, ".fasta"))
 
-## Genome sequences
-if (!file.exists(infiles$genomes)) {
-  stop("Genome sequence file is missing", "\n", infiles$genomes)
+## Check if the input  sequence file exists
+if (!file.exists(infiles$sequences)) {
+  stop("Genome sequence file is missing", "\n", infiles$sequences)
+} else {
+  message("Genome sequence file", "\n", infiles$sequences)
 }
 
 #### Load genome sequences ####
-genomes <- readDNAStringSet(filepath = infiles$genome, format = "fasta")
+genomes <- readDNAStringSet(filepath = infiles$sequences, format = "fasta")
 
 ## Shorten sequence names by suppressing the fasta comment (after the space)
 names(genomes) <- sub(pattern = " .*", replacement = "", x = names(genomes), perl = TRUE)
@@ -257,49 +262,49 @@ names(genomes) <- sub(pattern = " .*", replacement = "", x = names(genomes), per
 ## Exclude genomes
 if (excludeIncomplete) {
   excludePattern = paste0("(", paste(collapse = ")|(", excludePatterns), ")")
-  excludedGenomeNames <- grep(pattern = excludePattern, x = names(genomes), 
+  excludedstrainNames <- grep(pattern = excludePattern, x = names(genomes), 
                               value = TRUE, invert = FALSE)
   filteredGenomeIndices <- grep(pattern = excludePattern, x = names(genomes), 
                                 value = FALSE, invert = TRUE)
-  message("\tExcluded ", length(excludedGenomeNames)," genomes: ", paste(collapse = ", ", excludedGenomeNames)) 
+  message("\tExcluded ", length(excludedstrainNames)," genomes: ", paste(collapse = ", ", excludedstrainNames)) 
   message("\tRemaining genomes: ", length(filteredGenomeIndices))
   genomes <- genomes[filteredGenomeIndices]
 # names(genomes)
 }
 
 ## Report the number of genoomes
-genomeNames <- names(genomes)
-nbGenomes <- length(genomeNames)
-message("\tLoaded ", nbGenomes, " genomes from file ", infiles$genomes)
+strainNames <- names(genomes)
+nbStrains <- length(strainNames)
+message("\tLoaded ", nbStrains, " genomes from file ", infiles$sequences)
 # View(genomes)
 
 
 #### Define reference and query genomes ####
-refGenomeName <- grep(pattern = refPattern, x = names(genomes), 
+refStrainName <- grep(pattern = refPattern, x = names(genomes), 
                       ignore.case = TRUE, value = TRUE)
-if (is.null(refGenomeName)) {
+if (is.null(refStrainName)) {
   stop("Could not identify reference genome with pattern ", refPattern)
 }
-message("\tReference genome name: ", refGenomeName)
+message("\tReference genome name: ", refStrainName)
 
-## Compute some statistics about genome sizes
-genomeStat <- data.frame(
+## Compute some statistics about sequence sizes
+strainStats <- data.frame(
   n = 1:length(genomes),
   row.names = names(genomes),
-  status = rep("Query", length.out = length(genomeNames))
+  status = rep("Query", length.out = length(strainNames))
 )
-genomeStat[,"status"] <- as.vector(genomeStat[,"status"])
-genomeStat[refGenomeName,"status"] <- "Reference"
+strainStats[,"status"] <- as.vector(strainStats[,"status"])
+strainStats[refStrainName,"status"] <- "Reference"
 g <- 1
-for (g in genomeNames) {
-  genomeStat[g, "length"] <- length(genomes[[g]])
+for (g in strainNames) {
+  strainStats[g, "length"] <- length(genomes[[g]])
 }
 
 ```
 
 
 
-```{r sequence_colors}
+```{r strain_colors}
 #### Define the color associated to each sequence ####
 
 ## Color palette per species
@@ -332,26 +337,26 @@ strainColor <- c(
 
 ## Identify species per tip
 for (prefix in names(speciesPrefix)) {
-  genomeStat[grep(pattern = paste0("^", prefix), x = row.names(genomeStat), perl = TRUE), "species"] <- speciesPrefix[prefix]
+  strainStats[grep(pattern = paste0("^", prefix), x = row.names(strainStats), perl = TRUE), "species"] <- speciesPrefix[prefix]
   
 }
 
 ## Assign acolor to each species
-genomeStat$color <- "grey" # default
-genomeStat$color <- speciesPalette[as.vector(genomeStat$species)]
+strainStats$color <- "grey" # default
+strainStats$color <- speciesPalette[as.vector(strainStats$species)]
 
 for (strain in names(strainColor)) {
-  genomeStat[grep(pattern = paste0("^", strain), 
-                  x = row.names(genomeStat), perl = TRUE), "color"] <- strainColor[strain]
+  strainStats[grep(pattern = paste0("^", strain), 
+                  x = row.names(strainStats), perl = TRUE), "color"] <- strainColor[strain]
   
 }
 
 
 ## Assign specific color to some nodes
 
-## Define a color for each genome
-genomeColors <- (unlist(genomeStat$color))
-names(genomeColors) <- row.names(genomeStat)
+## Define a color for each strain
+strainColors <- (unlist(strainStats$color))
+names(strainColors) <- row.names(strainStats)
 
 
 ```
@@ -363,10 +368,12 @@ names(genomeColors) <- row.names(genomeStat)
 ## Define a list of parameters
 parameters <- list()
 parameters$collection <- collection
-parameters$refGenomeName <- refGenomeName
-parameters$nbGenomes <- nbGenomes
-parameters$genomeDir <- dir$genomes
-parameters$genomeFile <- infiles$genomes
+parameters$refStrainName <- refStrainName
+parameters$nbStrains <- nbStrains
+parameters$sequenceDir <- dir$sequences
+parameters$sequenceFile <- infiles$sequences
+parameters$memoryImage <- outfiles["Memory image"]
+
 kable(t(as.data.frame.list(parameters)), caption = "Parameters of the analysis", 
       col.names = "Parameter")
 
@@ -377,7 +384,7 @@ kable(t(as.data.frame.list(parameters)), caption = "Parameters of the analysis",
 ## Genome statistics
 
 ```{r print_genome_stats}
-kable(genomeStat, caption = "Reference and query genomes")
+kable(strainStats, caption = "Reference and query genomes")
 
 ```
 
@@ -388,12 +395,12 @@ The collection `r collection` contains `r length(genomes)` virus genome sequence
 
 ## One-to-N alignemnts of selected features
 
-We perform a global pairwise alignment (Needle-Waterman algorithm) between each feature of the reference (`r refGenomeName`) and each one of the query genomes.
+We perform a global pairwise alignment (Needle-Waterman algorithm) between each feature of the reference (`r refStrainName`) and each one of the query genomes.
 
-```{r one2N_feature_matches, fig.width=10, fig.height=6, out.width="100%", fig.cap="Feature-specific Percent Identical Positions (PIP) profiles. "}
+```{r one2N_feature_matches, results="asis", fig.width=10, fig.height=6, out.width="100%", fig.cap="Feature-specific Percent Identical Positions (PIP) profiles. "}
 #### One-to-N alignmemnt of user-speficied genomic features ####
-# featureName <- "CDS-S" # for the test
-featureName <- "S1" # for the test
+featureName <- "CDS-S" # for the test
+# featureName <- "S1" # for the test
 # featureName <- "Recomb-reg-3" # for the test
 # featureName <- "RBD" # for the test
 # for (collection in (collections)) {
@@ -415,6 +422,10 @@ for (featureName in names(features)) {
           " (", featureLimits[1], "-", featureLimits[2], ")", 
           " in collection ", collection)
   
+  cat(sep = "", "\n### ",  featureName, 
+      " (", featureLimits[1], "-", featureLimits[2], 
+      "; ", featureLength,"bp)", "\n")
+
   #### N-to-1 alignments of spike-coding sequences ####
   featurePrefix <- paste0(
     featureName,
@@ -427,7 +438,7 @@ for (featureName in names(features)) {
   message("\tOutput directory: ", dir[[featureName]] )
   
   ## Get sequence of the feature from the reference genome
-  refSeq <- subseq(genomes[refGenomeName], 
+  refSeq <- subseq(genomes[refStrainName], 
                    start = featureLimits[1], 
                    end = featureLimits[2])
   
@@ -444,8 +455,7 @@ for (featureName in names(features)) {
     allFeatureAlignments[[featureName]] <- featureAlignmentsNto1
   }
   
-  genomeOrder <- order(featureAlignmentsNto1$stat$score, decreasing = TRUE)
-  
+  ## Choose window size  
   if (featureLength > 20000) {
     windowSize <- 800 
   } else if (featureLength > 5000) {
@@ -453,23 +463,28 @@ for (featureName in names(features)) {
   } else if (featureLength > 3000) {
     windowSize <- 200 
   } else {
-    windowSize <- max(100, 10 * round(featureLength / 100))
+    windowSize <- max(50, 10 * round(featureLength / 100))
   }
-  
+
+  ## Compute sequence order by decreasing PIP score
+  seqOrder <- order(featureAlignmentsNto1$stat$score, decreasing = TRUE)
+
   ## PIP profile of one-to-N alignment
   plotPIPprofiles(
-    alignments = featureAlignmentsNto1$alignments[genomeOrder],
+#    alignments = featureAlignmentsNto1$alignments[seqOrder],
+    alignments = featureAlignmentsNto1$alignments,
     reversePlot = TRUE,
     windowSize = windowSize, 
-    main = paste0(featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"), 
+    main = paste0("PIP profiles: collection ", collection, 
+                  "Genomic feature ", featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"), 
     #    colors = NULL,
-    colors = genomeColors,
+    colors = strainColors,
     legendMargin = 0.25, 
     legendCorner = "topright", lwd = 1,
     legendCex = 0.5, ylim = c(30, 100))
   
   
-  kable(featureAlignmentsNto1$stats[genomeOrder,], 
+  kable(featureAlignmentsNto1$stats[seqOrder,], 
         caption = paste0(
           "One-to-N alignment of feature ", 
           featureName))
@@ -510,13 +525,13 @@ for (featureName in names(features)) {
 <!--   message("\tOutput directory: ", dir[[featureName]] ) -->
 
 <!--   ## Get sequence of the feature from the reference genome -->
-<!--   refSeq <- subseq(genomes[refGenomeName],  -->
+<!--   refSeq <- subseq(genomes[refStrainName],  -->
 <!--                    start = featureLimits[1],  -->
 <!--                    end = featureLimits[2]) -->
 
 <!--   featureAlignmentsNto1 <- allFeatureAlignments[[featureName]] -->
 
-<!--   genomeOrder <- order(featureAlignmentsNto1$stat$score, decreasing = TRUE) -->
+<!--   seqOrder <- order(featureAlignmentsNto1$stat$score, decreasing = TRUE) -->
 
 <!--   if (featureLength > 20000) { -->
 <!--     windowSize <- 800  -->
@@ -530,18 +545,18 @@ for (featureName in names(features)) {
 
 <!--   ## PIP profile of one-to-N alignment -->
 <!--   plotPIPprofiles( -->
-<!--     alignments = featureAlignmentsNto1$alignments[genomeOrder], -->
+<!--     alignments = featureAlignmentsNto1$alignments[seqOrder], -->
 <!--     reversePlot = TRUE, -->
 <!--     windowSize = windowSize,  -->
 <!--     main = paste0(featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"),  -->
 <!-- #    colors = NULL, -->
-<!--     colors = genomeColors, -->
+<!--     colors = strainColors, -->
 <!--     legendMargin = 0.25,  -->
 <!--     legendCorner = "topright", lwd = 1, -->
 <!--     legendCex = 0.5, ylim = c(30, 100)) -->
 
 
-<!--   kable(featureAlignmentsNto1$stats[genomeOrder,],  -->
+<!--   kable(featureAlignmentsNto1$stats[seqOrder,],  -->
 <!--         caption = paste0( -->
 <!--           "One-to-N alignment of feature ",  -->
 <!--           featureName)) -->
