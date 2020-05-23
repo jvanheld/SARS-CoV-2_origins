@@ -11,7 +11,7 @@
 
 <meta name="author" content="Jacques van Helden" />
 
-<meta name="date" content="2020-05-19" />
+<meta name="date" content="2020-05-22" />
 
 <title>One-to-N sequence matches in coronavirus genomes</title>
 
@@ -352,7 +352,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">One-to-N sequence matches in coronavirus genomes</h1>
 <h4 class="author">Jacques van Helden</h4>
-<h4 class="date">2020-05-19</h4>
+<h4 class="date">2020-05-22</h4>
 
 </div>
 
@@ -432,43 +432,51 @@ div.tocify {
 <a class="sourceLine" id="cb1-73" data-line-number="73">features &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
 <a class="sourceLine" id="cb1-74" data-line-number="74"></a>
 <a class="sourceLine" id="cb1-75" data-line-number="75"></a>
-<a class="sourceLine" id="cb1-76" data-line-number="76"><span class="co">## Specific features </span></a>
+<a class="sourceLine" id="cb1-76" data-line-number="76"><span class="co">#### Specific features  ####</span></a>
 <a class="sourceLine" id="cb1-77" data-line-number="77"></a>
-<a class="sourceLine" id="cb1-78" data-line-number="78"></a>
-<a class="sourceLine" id="cb1-79" data-line-number="79"><span class="co">## S1: pre-cleavage part of the spike protein </span></a>
-<a class="sourceLine" id="cb1-80" data-line-number="80">features[[<span class="st">&quot;S1&quot;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21599</span>, <span class="dt">end =</span>  <span class="dv">23617</span>)</a>
-<a class="sourceLine" id="cb1-81" data-line-number="81"><span class="co">## S2: post-cleavage part of the spike protein </span></a>
-<a class="sourceLine" id="cb1-82" data-line-number="82">features[[<span class="st">&quot;S2&quot;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">23618</span>, <span class="dt">end =</span> <span class="dv">25381</span>)</a>
-<a class="sourceLine" id="cb1-83" data-line-number="83"><span class="co">## Receptor Binding Domain (RBD)</span></a>
-<a class="sourceLine" id="cb1-84" data-line-number="84">features[[<span class="st">&quot;RBD&quot;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">22517</span>, <span class="dt">end =</span> <span class="dv">23185</span>)</a>
-<a class="sourceLine" id="cb1-85" data-line-number="85"><span class="co">## Potential Pangolin origin after Xiao (https://doi.org/10.1101/2020.02.17.951335)</span></a>
-<a class="sourceLine" id="cb1-86" data-line-number="86">features[[<span class="st">&#39;Recomb-Xiao&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">22871</span>, <span class="dt">end =</span> <span class="dv">23092</span>)</a>
-<a class="sourceLine" id="cb1-87" data-line-number="87"><span class="co">## Recombinant region 1 seen on the PIP profiles</span></a>
-<a class="sourceLine" id="cb1-88" data-line-number="88">features[[<span class="st">&#39;Recomb-reg-1&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21500</span>, <span class="dt">end =</span> <span class="dv">22800</span>)</a>
-<a class="sourceLine" id="cb1-89" data-line-number="89"><span class="co">## Recombinant region 2 seen on the PIP profiles</span></a>
-<a class="sourceLine" id="cb1-90" data-line-number="90">features[[<span class="st">&#39;Recomb-reg-2&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">22800</span>, <span class="dt">end =</span> <span class="dv">24000</span>)</a>
-<a class="sourceLine" id="cb1-91" data-line-number="91"><span class="co">## Recombinant region 3 seen on the PIP profiles</span></a>
-<a class="sourceLine" id="cb1-92" data-line-number="92">features[[<span class="st">&#39;Recomb-reg-3&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27800</span>, <span class="dt">end =</span> <span class="dv">28350</span>)</a>
-<a class="sourceLine" id="cb1-93" data-line-number="93"></a>
-<a class="sourceLine" id="cb1-94" data-line-number="94"><span class="co">## Annotated coding sequences</span></a>
-<a class="sourceLine" id="cb1-95" data-line-number="95">features[[<span class="st">&#39;CDS-S&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21563</span>, <span class="dt">end =</span> <span class="dv">25384</span>) <span class="co">## Spike gene</span></a>
-<a class="sourceLine" id="cb1-96" data-line-number="96">features[[<span class="st">&#39;CDS-ORF3a&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">25393</span>, <span class="dt">end =</span> <span class="dv">26220</span>)</a>
-<a class="sourceLine" id="cb1-97" data-line-number="97">features[[<span class="st">&#39;CDS-E&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">26245</span>, <span class="dt">end =</span> <span class="dv">26472</span>)</a>
-<a class="sourceLine" id="cb1-98" data-line-number="98">features[[<span class="st">&#39;CDS-M&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">26523</span>, <span class="dt">end =</span> <span class="dv">27191</span>)</a>
-<a class="sourceLine" id="cb1-99" data-line-number="99">features[[<span class="st">&#39;CDS-ORF6&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27202</span>, <span class="dt">end =</span> <span class="dv">27387</span>)</a>
-<a class="sourceLine" id="cb1-100" data-line-number="100">features[[<span class="st">&#39;CDS-ORF7a&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27394</span>, <span class="dt">end =</span> <span class="dv">27759</span>)</a>
-<a class="sourceLine" id="cb1-101" data-line-number="101">features[[<span class="st">&#39;CDS-ORF8&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27894</span>, <span class="dt">end =</span> <span class="dv">28259</span>)</a>
-<a class="sourceLine" id="cb1-102" data-line-number="102">features[[<span class="st">&#39;CDS-N&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">28274</span>, <span class="dt">end =</span> <span class="dv">29533</span>)</a>
-<a class="sourceLine" id="cb1-103" data-line-number="103">features[[<span class="st">&#39;CDS-ORF10&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">29558</span>, <span class="dt">end =</span> <span class="dv">29674</span>)</a>
-<a class="sourceLine" id="cb1-104" data-line-number="104">features[[<span class="st">&#39;CDS-ORF1ab&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">266</span>, <span class="dt">end =</span> <span class="dv">21555</span>)</a>
-<a class="sourceLine" id="cb1-105" data-line-number="105"></a>
-<a class="sourceLine" id="cb1-106" data-line-number="106"><span class="co">## All the sequences after the bif ORF coding for the polyproteinn 1ab</span></a>
-<a class="sourceLine" id="cb1-107" data-line-number="107">features[[<span class="st">&#39;After-ORF1ab&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21556</span>, <span class="dt">end =</span> <span class="dv">29899</span>)</a>
-<a class="sourceLine" id="cb1-108" data-line-number="108"></a>
-<a class="sourceLine" id="cb1-109" data-line-number="109"></a>
-<a class="sourceLine" id="cb1-110" data-line-number="110"></a>
-<a class="sourceLine" id="cb1-111" data-line-number="111"><span class="co">## Report the parameters</span></a>
-<a class="sourceLine" id="cb1-112" data-line-number="112"><span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Reference genomes: &quot;</span>, refPattern)</a></code></pre></div>
+<a class="sourceLine" id="cb1-78" data-line-number="78"><span class="co">## Regions around the insertions</span></a>
+<a class="sourceLine" id="cb1-79" data-line-number="79">features[[<span class="st">&#39;Ins1-pm120&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21647</span>, <span class="dt">end =</span> <span class="dv">21907</span>)</a>
+<a class="sourceLine" id="cb1-80" data-line-number="80">features[[<span class="st">&#39;Ins2-pm120&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21899</span>, <span class="dt">end =</span> <span class="dv">22156</span>)</a>
+<a class="sourceLine" id="cb1-81" data-line-number="81">features[[<span class="st">&#39;Ins3-pm120&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21899</span>, <span class="dt">end =</span> <span class="dv">23152</span>)</a>
+<a class="sourceLine" id="cb1-82" data-line-number="82">features[[<span class="st">&#39;Ins4-pm120&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">23483</span>, <span class="dt">end =</span> <span class="dv">23734</span>)</a>
+<a class="sourceLine" id="cb1-83" data-line-number="83">features[[<span class="st">&#39;Ins4-m240&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">23363</span>, <span class="dt">end =</span> <span class="dv">23614</span>)</a>
+<a class="sourceLine" id="cb1-84" data-line-number="84"></a>
+<a class="sourceLine" id="cb1-85" data-line-number="85"></a>
+<a class="sourceLine" id="cb1-86" data-line-number="86"></a>
+<a class="sourceLine" id="cb1-87" data-line-number="87"><span class="co">## S1: pre-cleavage part of the spike protein </span></a>
+<a class="sourceLine" id="cb1-88" data-line-number="88">features[[<span class="st">&quot;S1&quot;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21599</span>, <span class="dt">end =</span>  <span class="dv">23617</span>)</a>
+<a class="sourceLine" id="cb1-89" data-line-number="89"><span class="co">## S2: post-cleavage part of the spike protein </span></a>
+<a class="sourceLine" id="cb1-90" data-line-number="90">features[[<span class="st">&quot;S2&quot;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">23618</span>, <span class="dt">end =</span> <span class="dv">25381</span>)</a>
+<a class="sourceLine" id="cb1-91" data-line-number="91"><span class="co">## Receptor Binding Domain (RBD)</span></a>
+<a class="sourceLine" id="cb1-92" data-line-number="92">features[[<span class="st">&quot;RBD&quot;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">22517</span>, <span class="dt">end =</span> <span class="dv">23185</span>)</a>
+<a class="sourceLine" id="cb1-93" data-line-number="93"><span class="co">## Potential Pangolin origin after Xiao (https://doi.org/10.1101/2020.02.17.951335)</span></a>
+<a class="sourceLine" id="cb1-94" data-line-number="94">features[[<span class="st">&#39;Recomb-Xiao&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">22871</span>, <span class="dt">end =</span> <span class="dv">23092</span>)</a>
+<a class="sourceLine" id="cb1-95" data-line-number="95"><span class="co">## Recombinant region 1 seen on the PIP profiles</span></a>
+<a class="sourceLine" id="cb1-96" data-line-number="96">features[[<span class="st">&#39;Recomb-reg-1&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21500</span>, <span class="dt">end =</span> <span class="dv">22800</span>)</a>
+<a class="sourceLine" id="cb1-97" data-line-number="97"><span class="co">## Recombinant region 2 seen on the PIP profiles</span></a>
+<a class="sourceLine" id="cb1-98" data-line-number="98">features[[<span class="st">&#39;Recomb-reg-2&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">22800</span>, <span class="dt">end =</span> <span class="dv">24000</span>)</a>
+<a class="sourceLine" id="cb1-99" data-line-number="99"><span class="co">## Recombinant region 3 seen on the PIP profiles</span></a>
+<a class="sourceLine" id="cb1-100" data-line-number="100">features[[<span class="st">&#39;Recomb-reg-3&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27800</span>, <span class="dt">end =</span> <span class="dv">28350</span>)</a>
+<a class="sourceLine" id="cb1-101" data-line-number="101"></a>
+<a class="sourceLine" id="cb1-102" data-line-number="102"><span class="co">## Annotated coding sequences</span></a>
+<a class="sourceLine" id="cb1-103" data-line-number="103">features[[<span class="st">&#39;CDS-S&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21563</span>, <span class="dt">end =</span> <span class="dv">25384</span>) <span class="co">## Spike gene</span></a>
+<a class="sourceLine" id="cb1-104" data-line-number="104">features[[<span class="st">&#39;CDS-ORF3a&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">25393</span>, <span class="dt">end =</span> <span class="dv">26220</span>)</a>
+<a class="sourceLine" id="cb1-105" data-line-number="105">features[[<span class="st">&#39;CDS-E&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">26245</span>, <span class="dt">end =</span> <span class="dv">26472</span>)</a>
+<a class="sourceLine" id="cb1-106" data-line-number="106">features[[<span class="st">&#39;CDS-M&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">26523</span>, <span class="dt">end =</span> <span class="dv">27191</span>)</a>
+<a class="sourceLine" id="cb1-107" data-line-number="107">features[[<span class="st">&#39;CDS-ORF6&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27202</span>, <span class="dt">end =</span> <span class="dv">27387</span>)</a>
+<a class="sourceLine" id="cb1-108" data-line-number="108">features[[<span class="st">&#39;CDS-ORF7a&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27394</span>, <span class="dt">end =</span> <span class="dv">27759</span>)</a>
+<a class="sourceLine" id="cb1-109" data-line-number="109">features[[<span class="st">&#39;CDS-ORF8&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27894</span>, <span class="dt">end =</span> <span class="dv">28259</span>)</a>
+<a class="sourceLine" id="cb1-110" data-line-number="110">features[[<span class="st">&#39;CDS-N&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">28274</span>, <span class="dt">end =</span> <span class="dv">29533</span>)</a>
+<a class="sourceLine" id="cb1-111" data-line-number="111">features[[<span class="st">&#39;CDS-ORF10&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">29558</span>, <span class="dt">end =</span> <span class="dv">29674</span>)</a>
+<a class="sourceLine" id="cb1-112" data-line-number="112">features[[<span class="st">&#39;CDS-ORF1ab&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">266</span>, <span class="dt">end =</span> <span class="dv">21555</span>)</a>
+<a class="sourceLine" id="cb1-113" data-line-number="113"></a>
+<a class="sourceLine" id="cb1-114" data-line-number="114"><span class="co">## All the sequences after the bif ORF coding for the polyproteinn 1ab</span></a>
+<a class="sourceLine" id="cb1-115" data-line-number="115">features[[<span class="st">&#39;After-ORF1ab&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21556</span>, <span class="dt">end =</span> <span class="dv">29899</span>)</a>
+<a class="sourceLine" id="cb1-116" data-line-number="116"></a>
+<a class="sourceLine" id="cb1-117" data-line-number="117"></a>
+<a class="sourceLine" id="cb1-118" data-line-number="118"></a>
+<a class="sourceLine" id="cb1-119" data-line-number="119"><span class="co">## Report the parameters</span></a>
+<a class="sourceLine" id="cb1-120" data-line-number="120"><span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Reference genomes: &quot;</span>, refPattern)</a></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co">## Genome dir and files</span></a>
 <a class="sourceLine" id="cb2-2" data-line-number="2"><span class="cf">if</span> (<span class="kw">length</span>(<span class="kw">grep</span>(<span class="dt">pattern =</span> <span class="st">&quot;GISAID&quot;</span>, <span class="dt">x =</span> collection)) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) {</a>
 <a class="sourceLine" id="cb2-3" data-line-number="3">  useGISAID &lt;-<span class="st"> </span><span class="ot">TRUE</span></a>
@@ -1358,6 +1366,36 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
 </div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches/one2N_feature_matches-19.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches/one2N_feature_matches-20.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches/one2N_feature_matches-21.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches/one2N_feature_matches-22.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches/one2N_feature_matches-23.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="co"># }</span></a></code></pre></div>
 <!-- ```{r one2N_feature_matches_PIP, fig.width=10, fig.height=6, out.width="100%", fig.cap="Feature-specific Percent Identical Positions (PIP) profiles. "} -->
 <!-- #### One-to-N alignmemnt of user-speficied genomic features #### -->
@@ -1452,74 +1490,94 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <td align="left">../data/GISAID_genomes</td>
 </tr>
 <tr class="even">
+<td>Ins1.pm120</td>
+<td align="left">../data/Ins1-pm120</td>
+</tr>
+<tr class="odd">
+<td>Ins2.pm120</td>
+<td align="left">../data/Ins2-pm120</td>
+</tr>
+<tr class="even">
+<td>Ins3.pm120</td>
+<td align="left">../data/Ins3-pm120</td>
+</tr>
+<tr class="odd">
+<td>Ins4.pm120</td>
+<td align="left">../data/Ins4-pm120</td>
+</tr>
+<tr class="even">
+<td>Ins4.m240</td>
+<td align="left">../data/Ins4-m240</td>
+</tr>
+<tr class="odd">
 <td>S1</td>
 <td align="left">../data/S1</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>S2</td>
 <td align="left">../data/S2</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>RBD</td>
 <td align="left">../data/RBD</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Recomb.Xiao</td>
 <td align="left">../data/Recomb-Xiao</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Recomb.reg.1</td>
 <td align="left">../data/Recomb-reg-1</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Recomb.reg.2</td>
 <td align="left">../data/Recomb-reg-2</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Recomb.reg.3</td>
 <td align="left">../data/Recomb-reg-3</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>CDS.S</td>
 <td align="left">../data/CDS-S</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>CDS.ORF3a</td>
 <td align="left">../data/CDS-ORF3a</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>CDS.E</td>
 <td align="left">../data/CDS-E</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>CDS.M</td>
 <td align="left">../data/CDS-M</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>CDS.ORF6</td>
 <td align="left">../data/CDS-ORF6</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>CDS.ORF7a</td>
 <td align="left">../data/CDS-ORF7a</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>CDS.ORF8</td>
 <td align="left">../data/CDS-ORF8</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>CDS.N</td>
 <td align="left">../data/CDS-N</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>CDS.ORF10</td>
 <td align="left">../data/CDS-ORF10</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>CDS.ORF1ab</td>
 <td align="left">../data/CDS-ORF1ab</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>After.ORF1ab</td>
 <td align="left">../data/After-ORF1ab</td>
 </tr>
@@ -1549,74 +1607,94 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <td align="left"><a href="../memory_images/all-plus-GISAID_one-to-n_matches.Rdata">all-plus-GISAID_one-to-n_matches.Rdata</a></td>
 </tr>
 <tr class="even">
+<td align="left">../data/Ins1-pm120</td>
+<td align="left"><a href="../data/Ins1-pm120/Ins1-pm120_all-plus-GISAID.fasta">Ins1-pm120_all-plus-GISAID.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../data/Ins2-pm120</td>
+<td align="left"><a href="../data/Ins2-pm120/Ins2-pm120_all-plus-GISAID.fasta">Ins2-pm120_all-plus-GISAID.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../data/Ins3-pm120</td>
+<td align="left"><a href="../data/Ins3-pm120/Ins3-pm120_all-plus-GISAID.fasta">Ins3-pm120_all-plus-GISAID.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../data/Ins4-pm120</td>
+<td align="left"><a href="../data/Ins4-pm120/Ins4-pm120_all-plus-GISAID.fasta">Ins4-pm120_all-plus-GISAID.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../data/Ins4-m240</td>
+<td align="left"><a href="../data/Ins4-m240/Ins4-m240_all-plus-GISAID.fasta">Ins4-m240_all-plus-GISAID.fasta</a></td>
+</tr>
+<tr class="odd">
 <td align="left">../data/S1</td>
 <td align="left"><a href="../data/S1/S1_all-plus-GISAID.fasta">S1_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">../data/S2</td>
 <td align="left"><a href="../data/S2/S2_all-plus-GISAID.fasta">S2_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">../data/RBD</td>
 <td align="left"><a href="../data/RBD/RBD_all-plus-GISAID.fasta">RBD_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">../data/Recomb-Xiao</td>
 <td align="left"><a href="../data/Recomb-Xiao/Recomb-Xiao_all-plus-GISAID.fasta">Recomb-Xiao_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">../data/Recomb-reg-1</td>
 <td align="left"><a href="../data/Recomb-reg-1/Recomb-reg-1_all-plus-GISAID.fasta">Recomb-reg-1_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">../data/Recomb-reg-2</td>
 <td align="left"><a href="../data/Recomb-reg-2/Recomb-reg-2_all-plus-GISAID.fasta">Recomb-reg-2_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">../data/Recomb-reg-3</td>
 <td align="left"><a href="../data/Recomb-reg-3/Recomb-reg-3_all-plus-GISAID.fasta">Recomb-reg-3_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">../data/CDS-S</td>
 <td align="left"><a href="../data/CDS-S/CDS-S_all-plus-GISAID.fasta">CDS-S_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">../data/CDS-ORF3a</td>
 <td align="left"><a href="../data/CDS-ORF3a/CDS-ORF3a_all-plus-GISAID.fasta">CDS-ORF3a_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">../data/CDS-E</td>
 <td align="left"><a href="../data/CDS-E/CDS-E_all-plus-GISAID.fasta">CDS-E_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">../data/CDS-M</td>
 <td align="left"><a href="../data/CDS-M/CDS-M_all-plus-GISAID.fasta">CDS-M_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">../data/CDS-ORF6</td>
 <td align="left"><a href="../data/CDS-ORF6/CDS-ORF6_all-plus-GISAID.fasta">CDS-ORF6_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">../data/CDS-ORF7a</td>
 <td align="left"><a href="../data/CDS-ORF7a/CDS-ORF7a_all-plus-GISAID.fasta">CDS-ORF7a_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">../data/CDS-ORF8</td>
 <td align="left"><a href="../data/CDS-ORF8/CDS-ORF8_all-plus-GISAID.fasta">CDS-ORF8_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">../data/CDS-N</td>
 <td align="left"><a href="../data/CDS-N/CDS-N_all-plus-GISAID.fasta">CDS-N_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">../data/CDS-ORF10</td>
 <td align="left"><a href="../data/CDS-ORF10/CDS-ORF10_all-plus-GISAID.fasta">CDS-ORF10_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">../data/CDS-ORF1ab</td>
 <td align="left"><a href="../data/CDS-ORF1ab/CDS-ORF1ab_all-plus-GISAID.fasta">CDS-ORF1ab_all-plus-GISAID.fasta</a></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">../data/After-ORF1ab</td>
 <td align="left"><a href="../data/After-ORF1ab/After-ORF1ab_all-plus-GISAID.fasta">After-ORF1ab_all-plus-GISAID.fasta</a></td>
 </tr>
