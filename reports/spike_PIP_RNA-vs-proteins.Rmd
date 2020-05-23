@@ -1,5 +1,5 @@
 ---
-knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file ='PIP_spike-proteins_selected-plus-GISAID.html') })
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file ='PIP_spike-proteins_all-plus-GISAID.html') })
 title: "PIP profiles of coronavirus spike proteins - protein and RNA sequences"
 author: "Jacques van Helden"
 date: "`r Sys.Date()`"
@@ -90,8 +90,8 @@ if (!require("Biostrings", quietly = TRUE)) {
 library(knitr)
 options(width = 300)
 knitr::opts_chunk$set(
-  fig.width = 7, fig.height = 5, 
   fig.path = 'figures/spike-protein_PIP/',
+  fig.width = 7, fig.height = 5, 
   fig.align = "center", 
   size = "tiny", 
   echo = TRUE, eval = TRUE, 
@@ -157,8 +157,13 @@ collections <- c(
 # collection <- "all" # 16 strains
 # collection <- "selected" # ~60 strains
 # collection <- "around-CoV-2-plus-GISAID" # 16 strains
-collection <- "selected-plus-GISAID" # ~40 strains
-# collection <- "all-plus-GISAID" # ~60 strains
+# collection <- "selected-plus-GISAID" # ~40 strains
+collection <- "all-plus-GISAID" # ~60 strains
+
+## Use a collection-specific path for the figures
+knitr::opts_chunk$set(
+  fig.path = paste0('figures/spike-protein_PIP/', collection, '_'))
+
 
 ## Genome dir and files
 if (length(grep(pattern = "GISAID", x = collection)) > 0) {
@@ -436,6 +441,9 @@ refSequenceName <- "HuCoV2_WH01_2019"
 for (refSequenceName in refSequenceNames) {
   cat(sep = "", "\n## Spike proteins: ", collection, " vs reference ", refSequenceName)
   
+  knitr::opts_chunk$set(
+    fig.path = paste0('figures/spike-protein_PIP/', collection, '_vs_', refSequenceName))
+
   kable(sequencesNto1[[refSequenceName]]$stats[order(sequencesNto1[[refSequenceName]]$stats$score, decreasing = TRUE), ], 
         caption = "N-to-one alignment of full sequences")
   
@@ -456,7 +464,7 @@ for (refSequenceName in refSequenceNames) {
   plotPIPprofiles(
     alignments = sequencesNto1[[refSequenceName]]$alignments, 
     windowSize = 100, 
-    main = paste0("PIP profiles: collection ", collection, "\nvs strain ", refSequenceName),
+    main = paste0("Spike protein: collection ", collection, "\nvs strain ", refSequenceName),
     colors = strainColors,
     legendMargin = legendMargin, 
     legendCorner = legendCorner, 
@@ -467,7 +475,9 @@ for (refSequenceName in refSequenceNames) {
   # legendCorner = "topright", lwd = 1,
   # legendCex = 0.5, ylim = c(30, 100))
 }
-  
+
+
+
 ```
 
 
