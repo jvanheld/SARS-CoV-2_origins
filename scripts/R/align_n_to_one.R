@@ -32,7 +32,7 @@ alignNtoOne <- function(refSequence,
   # for (i in 1:3) {
   for (i in 1:seqNb) {
     subjectName <- seqNames[i]
-    message("\tAligning sequence ", i, "/", seqNb,  "\t", subjectName)
+    message("\t\tAligning sequence ", i, "/", seqNb,  "\t", subjectName)
     alignment <- pairwiseAlignment(pattern = refSequence, 
                                    subject = querySequences[i],
                                    type = type) #, ...)
