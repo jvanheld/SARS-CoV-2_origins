@@ -1,5 +1,5 @@
 ---
-knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file ='PIP_spike-proteins_all-plus-GISAID.html') })
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file ='PIP_spike-proteins_selected-plus-GISAID.html') })
 title: "PIP profiles of coronavirus spike proteins - protein and RNA sequences"
 author: "Jacques van Helden"
 date: "`r Sys.Date()`"
@@ -157,12 +157,12 @@ collections <- c(
 # collection <- "all" # 16 strains
 # collection <- "selected" # ~60 strains
 # collection <- "around-CoV-2-plus-GISAID" # 16 strains
-# collection <- "selected-plus-GISAID" # ~40 strains
-collection <- "all-plus-GISAID" # ~60 strains
+collection <- "selected-plus-GISAID" # ~40 strains
+# collection <- "all-plus-GISAID" # ~60 strains
 
 ## Use a collection-specific path for the figures
 knitr::opts_chunk$set(
-  fig.path = paste0('figures/spike-protein_PIP/', collection, '_'))
+  fig.path = paste0('figures/spike-protein_PIP_', collection, '/', collection, "_"))
 
 
 ## Genome dir and files
@@ -318,6 +318,8 @@ for (ref in names(queryPatterns)) {
 
 
 ```
+
+## Strain collection: `r collection`
 
 The collection `r collection` contains `r length(sequences)` virus sequences sequences.
 
