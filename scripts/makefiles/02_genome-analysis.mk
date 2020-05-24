@@ -30,7 +30,7 @@ targets:
 	@echo "Phylogeny inference methods"
 	@echo "	gblocks_clean			clear the multiple alignments (suppress gap-containing columns) with gblocks"
 	@echo "	nj_tree				generate a species tree from the aligned genomes with clustalw NJ"
-	@echo "	run_phyml			generate species tree from aligned genomes with PhyML"
+	@echo "	run_phyml			generate phylogenetic tree from aligned sequences with PhyML"
 	@echo
 	@echo "Genome phylogeny"
 	@echo "	all_genomes			Phylogeny inference for all genomes from Genbank"
@@ -46,7 +46,9 @@ targets:
 	@echo "	Sgenes_selected_gisaid		S-gene phylogeny inference for selected strains from Genbank + GISAID"
 	@echo
 	@echo "Genomic features"
-	@echo "	all_features			phylogeny of genomic features extracted by one-to-N alignment with h-CoV-2"
+	@echo "	one_feature			phylogeny of a given genomic feature in a given collection"
+	@echo "	all_features_one_collection	phylogeny of all genomic features in a given collection"
+	@echo "	all_features_all_collections	phylogeny of all genomic features in all collections"
 
 
 ################################################################
@@ -54,6 +56,11 @@ targets:
 
 ## Genomic features
 FEATURES= 		\
+	Ins1-pm120	\
+	Ins2-pm120	\
+	Ins3-pm120	\
+	Ins4-pm120	\
+	Ins4-m240	\
 	S1 		\
 	S2 		\
 	RBD 		\
@@ -286,7 +293,7 @@ nj_tree:
 	${TIME} clustalw -tree \
 		-infile=${MALIGN_PREFIX}.aln -type=dna \
 		-clustering=NJ
-	${TIME} clustalw -bootstrap=100 \
+	${TIME} clustalw -bootstrap=1000 \
 		-infile=${MALIGN_PREFIX}.aln -type=dna \
 		-clustering=NJ 
 	@echo "	${MALIGN_PREFIX}.ph"
@@ -439,17 +446,25 @@ Sgenes_around-cov-2_gisaid:
 ## alignment with selected h-CoV-2 features
 one_feature:
 	@echo
-	@echo "	FEATURE		 ${FEATURE}"
-	@echo "	COLLECTION	 ${COLLECTION}"
+	@echo "Running phylogenetic analysis for feature ${FEATURE} in collection ${COLLECTION}"
+#	@echo "	FEATURE		 ${FEATURE}"
+#	@echo "	COLLECTION	 ${COLLECTION}"
 	@${MAKE} ${PHYLO_TASKS}
 
-all_features:
+all_features_one_collection:
 	@echo
-	@echo "Running phylogenetic analysis for genomic features"
+	@echo "Running phylogenetic analysis for all genomic features"
 	@echo "	FEATURES	${FEATURES}"
-	@echo "	COLLECTIONS	${COLLECTIONS}"
+	@echo "	COLLECTION	${COLLECTION}"
 	@for feature in ${FEATURES} ; do \
-		for collection in ${COLLECTIONS} ; do \
-			${MAKE} FEATURE=$${feature} COLLECTION=$${collection} ${PHYLO_TASKS} ; \
-		done ; \
+		${MAKE} FEATURE=$${feature} ${PHYLO_TASKS} ; \
 	done
+
+all_features_all_collections:
+	@echo
+	@echo "Running phylogenetic analysis for all genomic features"
+	@echo "	COLLECTIONS	${COLLECTIONS}"
+	@echo "	FEATURES	${FEATURES}"
+	@for collection in ${COLLECTIONS} ; do \
+		${MAKE} COLLECTION=$${collection} all_features_one_collection; \
+	done;
