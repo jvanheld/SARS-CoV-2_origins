@@ -1,5 +1,5 @@
 ---
-knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file ='one-to-n-matches_selected-plus-GISAID.html') })
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file ='one-to-n-matches_around-CoV-2-plus-GISAID.html') })
 title: "One-to-N sequence matches in coronavirus genomes"
 author: "Jacques van Helden"
 date: "`r Sys.Date()`"
@@ -131,12 +131,12 @@ collections <- c(
 # collection <- "around-CoV-2" # 14 strains
 # collection <- "all" # 16 strains
 # collection <- "selected" # ~60 strains
-# collection <- "around-CoV-2-plus-GISAID" # 16 strains
-collection <- "selected-plus-GISAID" # ~40 strains
+collection <- "around-CoV-2-plus-GISAID" # 16 strains
+# collection <- "selected-plus-GISAID" # ~40 strains
 # collection <- "all-plus-GISAID" # ~60 strains
 
 ## Choose a collection-specific path for the figures
-knitr::opts_chunk$set(fig.path = paste0('figures/one-to-n-matches_', collection, '/'))
+knitr::opts_chunk$set(fig.path = paste0('figures/one-to-n-matches_', collection, '/', collection, "_"))
 
 ## Note about GIDAID sequences.
 ## 
@@ -193,12 +193,16 @@ features <- list()
 
 #### Specific features  ####
 
+
 ## Regions around the insertions
 features[['Ins1-pm120']] <- c(start = 21647, end = 21907)
 features[['Ins2-pm120']] <- c(start = 21899, end = 22156)
 features[['Ins3-pm120']] <- c(start = 21899, end = 23152)
 features[['Ins4-pm120']] <- c(start = 23483, end = 23734)
 features[['Ins4-m240']] <- c(start = 23363, end = 23614)
+
+## Recombinant region inside the RBD
+features[['RBD-rec']] <- c(start = 22760, end = 23160)
 
 ## Potential Pangolin origin after Xiao (https://doi.org/10.1101/2020.02.17.951335)
 features[['Recomb-Xiao']] <- c(start = 22871, end = 23092)
@@ -208,6 +212,7 @@ features[['Recomb-reg-1']] <- c(start = 21500, end = 22800)
 features[['Recomb-reg-2']] <- c(start = 22800, end = 24000)
 ## Recombinant region 3 seen on the PIP profiles
 features[['Recomb-reg-3']] <- c(start = 27800, end = 28350)
+
 
 ## Annotated coding sequences
 features[['CDS-S']] <- c(start = 21563, end = 25384) ## Spike gene
@@ -408,6 +413,7 @@ featureName <- "CDS-S" # for the test
 # featureName <- "S1" # for the test
 # featureName <- "Recomb-reg-3" # for the test
 # featureName <- "RBD" # for the test
+featureName <- "RBD-rec" # for the test
 # for (collection in (collections)) {
 if (reloadImage) {
   load(outfiles["Memory image"])
@@ -476,6 +482,8 @@ for (featureName in names(features)) {
     windowSize <- 500 
   } else if (featureLength > 3000) {
     windowSize <- 200 
+  } else if (featureLength > 400) {
+    windowSize <- 100 
   } else {
     windowSize <- max(50, 10 * round(featureLength / 100))
   }
@@ -490,7 +498,7 @@ for (featureName in names(features)) {
     reversePlot = TRUE,
     windowSize = windowSize, 
     main = paste0("PIP profiles: collection ", collection, 
-                  "Genomic feature ", featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"), 
+                  "\nGenomic feature ", featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"), 
     #    colors = NULL,
     colors = strainColors,
     legendMargin = 0.25, 
