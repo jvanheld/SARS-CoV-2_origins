@@ -22,6 +22,8 @@ alignNtoOne <- function(refSequence,
   alignmentStats <- data.frame(matrix(nrow = length(querySequences), ncol = length(stats)))
   rownames(alignmentStats) <- names(querySequences)
   colnames(alignmentStats) <- stats
+  
+  ## Prepare a list for the pairwise alignments
   alignments <- list()
   
   ## Get parameters of the analysis
@@ -54,6 +56,12 @@ alignNtoOne <- function(refSequence,
     # names(alignments)
   }
   
+  ## Check it the sorting was correct
+  # names(alignments)
+  # names(sortedAlignments)
+  # names(alignments)[PIPorder] == names(sortedAlignments)
+  
+  ## Prepare the result object
   result <- list(alignments = alignments,
                  stats = alignmentStats)
 
@@ -69,8 +77,8 @@ alignNtoOne <- function(refSequence,
     i <- 1
     nbAlignments <- length(alignments)
     for (i in 1:nbAlignments) {
-      sequenceName <- names(querySequences[i])
       alignment <- alignments[[i]]
+      sequenceName <- names(alignments)[i]
       subject <- subject(alignment)
       
       ## Suppress the dashes from the alignment to get the raw sequence
