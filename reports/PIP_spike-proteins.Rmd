@@ -453,12 +453,12 @@ for (refSequenceName in refSequenceNames) {
   ## PIP profile of full sequences N-to-1 alignments
    if (length(grep(pattern = "around-CoV-2", x = collection))) {
      minPIP <- 30
-     legendCex <- 1
+     legendCex <- 0.7
      legendCorner <- "bottomright"
      legendMargin <- 0
    } else {
      minPIP <- 0
-     legendCex <- 0.65
+     legendCex <- 0.5
      legendCorner <- "topright"
      legendMargin <- 0.25
    }

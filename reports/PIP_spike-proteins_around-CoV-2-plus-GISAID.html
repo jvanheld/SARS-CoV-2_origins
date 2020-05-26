@@ -11,7 +11,7 @@
 
 <meta name="author" content="Jacques van Helden" />
 
-<meta name="date" content="2020-05-23" />
+<meta name="date" content="2020-05-25" />
 
 <title>PIP profiles of coronavirus spike proteins - protein and RNA sequences</title>
 
@@ -352,7 +352,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">PIP profiles of coronavirus spike proteins - protein and RNA sequences</h1>
 <h4 class="author">Jacques van Helden</h4>
-<h4 class="date">2020-05-23</h4>
+<h4 class="date">2020-05-25</h4>
 
 </div>
 
@@ -407,7 +407,7 @@ div.tocify {
 <a class="sourceLine" id="cb1-48" data-line-number="48"></a>
 <a class="sourceLine" id="cb1-49" data-line-number="49"><span class="co">## Use a collection-specific path for the figures</span></a>
 <a class="sourceLine" id="cb1-50" data-line-number="50">knitr<span class="op">::</span>opts_chunk<span class="op">$</span><span class="kw">set</span>(</a>
-<a class="sourceLine" id="cb1-51" data-line-number="51">  <span class="dt">fig.path =</span> <span class="kw">paste0</span>(<span class="st">&#39;figures/spike-protein_PIP/&#39;</span>, collection, <span class="st">&#39;_&#39;</span>))</a>
+<a class="sourceLine" id="cb1-51" data-line-number="51">  <span class="dt">fig.path =</span> <span class="kw">paste0</span>(<span class="st">&#39;figures/spike-protein_PIP_&#39;</span>, collection, <span class="st">&#39;/&#39;</span>, collection, <span class="st">&quot;_&quot;</span>))</a>
 <a class="sourceLine" id="cb1-52" data-line-number="52"></a>
 <a class="sourceLine" id="cb1-53" data-line-number="53"></a>
 <a class="sourceLine" id="cb1-54" data-line-number="54"><span class="co">## Genome dir and files</span></a>
@@ -553,7 +553,9 @@ div.tocify {
 <a class="sourceLine" id="cb2-59" data-line-number="59"><span class="co">#   }</span></a>
 <a class="sourceLine" id="cb2-60" data-line-number="60"><span class="co">#   kable(sequencestat, caption = paste0(&quot;Query sequences for reference &quot;, ref))</span></a>
 <a class="sourceLine" id="cb2-61" data-line-number="61"><span class="co"># }</span></a></code></pre></div>
-<p>The collection around-CoV-2-plus-GISAID contains 15 virus sequences sequences.</p>
+<div id="strain-collection-around-cov-2-plus-gisaid" class="section level2">
+<h2>Strain collection: around-CoV-2-plus-GISAID</h2>
+<p>The collection around-CoV-2-plus-GISAID contains 16 virus sequences sequences.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co">## Report the number of strains</span></a>
 <a class="sourceLine" id="cb3-2" data-line-number="2">strainNames &lt;-<span class="st"> </span><span class="kw">names</span>(sequences)</a>
 <a class="sourceLine" id="cb3-3" data-line-number="3">nbStrains &lt;-<span class="st"> </span><span class="kw">length</span>(strainNames)</a>
@@ -626,6 +628,7 @@ div.tocify {
 <a class="sourceLine" id="cb3-70" data-line-number="70"><span class="co">## Define a color for each strain</span></a>
 <a class="sourceLine" id="cb3-71" data-line-number="71">strainColors &lt;-<span class="st"> </span>(<span class="kw">unlist</span>(strainStats<span class="op">$</span>color))</a>
 <a class="sourceLine" id="cb3-72" data-line-number="72"><span class="kw">names</span>(strainColors) &lt;-<span class="st"> </span><span class="kw">row.names</span>(strainStats)</a></code></pre></div>
+</div>
 <div id="n-to-1-full-sequence-alignments" class="section level2">
 <h2>N-to-1 full sequence alignments</h2>
 <p>We perform a pairwise lignment between each sequences query and the reference sequences (HuCoV2_WH01_2019).</p>
@@ -668,12 +671,12 @@ div.tocify {
 <a class="sourceLine" id="cb5-13" data-line-number="13">  <span class="co">## PIP profile of full sequences N-to-1 alignments</span></a>
 <a class="sourceLine" id="cb5-14" data-line-number="14">   <span class="cf">if</span> (<span class="kw">length</span>(<span class="kw">grep</span>(<span class="dt">pattern =</span> <span class="st">&quot;around-CoV-2&quot;</span>, <span class="dt">x =</span> collection))) {</a>
 <a class="sourceLine" id="cb5-15" data-line-number="15">     minPIP &lt;-<span class="st"> </span><span class="dv">30</span></a>
-<a class="sourceLine" id="cb5-16" data-line-number="16">     legendCex &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb5-16" data-line-number="16">     legendCex &lt;-<span class="st"> </span><span class="fl">0.7</span></a>
 <a class="sourceLine" id="cb5-17" data-line-number="17">     legendCorner &lt;-<span class="st"> &quot;bottomright&quot;</span></a>
 <a class="sourceLine" id="cb5-18" data-line-number="18">     legendMargin &lt;-<span class="st"> </span><span class="dv">0</span></a>
 <a class="sourceLine" id="cb5-19" data-line-number="19">   } <span class="cf">else</span> {</a>
 <a class="sourceLine" id="cb5-20" data-line-number="20">     minPIP &lt;-<span class="st"> </span><span class="dv">0</span></a>
-<a class="sourceLine" id="cb5-21" data-line-number="21">     legendCex &lt;-<span class="st"> </span><span class="fl">0.65</span></a>
+<a class="sourceLine" id="cb5-21" data-line-number="21">     legendCex &lt;-<span class="st"> </span><span class="fl">0.5</span></a>
 <a class="sourceLine" id="cb5-22" data-line-number="22">     legendCorner &lt;-<span class="st"> &quot;topright&quot;</span></a>
 <a class="sourceLine" id="cb5-23" data-line-number="23">     legendMargin &lt;-<span class="st"> </span><span class="fl">0.25</span></a>
 <a class="sourceLine" id="cb5-24" data-line-number="24">   }</a>
@@ -694,28 +697,28 @@ div.tocify {
 <a class="sourceLine" id="cb5-39" data-line-number="39">}</a></code></pre></div>
 ## Spike proteins: around-CoV-2-plus-GISAID vs reference HuCoV2_WH01_2019
 <div class="figure" style="text-align: center">
-<img src="figures/spike-protein_PIP/around-CoV-2-plus-GISAID_spike-protein_PIP-1.png" alt="Percent Identical Positions (PIP) profiles of spike protein sequences. " width="100%" />
+<img src="figures/spike-protein_PIP_around-CoV-2-plus-GISAID/around-CoV-2-plus-GISAID_spike-protein_PIP-1.png" alt="Percent Identical Positions (PIP) profiles of spike protein sequences. " width="100%" />
 <p class="caption">
 Percent Identical Positions (PIP) profiles of spike protein sequences.
 </p>
 </div>
 ## Spike proteins: around-CoV-2-plus-GISAID vs reference PnGu1_2019
 <div class="figure" style="text-align: center">
-<img src="figures/spike-protein_PIP/around-CoV-2-plus-GISAID_spike-protein_PIP-2.png" alt="Percent Identical Positions (PIP) profiles of spike protein sequences. " width="100%" />
+<img src="figures/spike-protein_PIP_around-CoV-2-plus-GISAID/around-CoV-2-plus-GISAID_spike-protein_PIP-2.png" alt="Percent Identical Positions (PIP) profiles of spike protein sequences. " width="100%" />
 <p class="caption">
 Percent Identical Positions (PIP) profiles of spike protein sequences.
 </p>
 </div>
 ## Spike proteins: around-CoV-2-plus-GISAID vs reference BtRaTG13_2013_Yunnan
 <div class="figure" style="text-align: center">
-<img src="figures/spike-protein_PIP/around-CoV-2-plus-GISAID_spike-protein_PIP-3.png" alt="Percent Identical Positions (PIP) profiles of spike protein sequences. " width="100%" />
+<img src="figures/spike-protein_PIP_around-CoV-2-plus-GISAID/around-CoV-2-plus-GISAID_spike-protein_PIP-3.png" alt="Percent Identical Positions (PIP) profiles of spike protein sequences. " width="100%" />
 <p class="caption">
 Percent Identical Positions (PIP) profiles of spike protein sequences.
 </p>
 </div>
 ## Spike proteins: around-CoV-2-plus-GISAID vs reference HuSARS-Frankfurt-1_2003
 <div class="figure" style="text-align: center">
-<img src="figures/spike-protein_PIP/around-CoV-2-plus-GISAID_spike-protein_PIP-4.png" alt="Percent Identical Positions (PIP) profiles of spike protein sequences. " width="100%" />
+<img src="figures/spike-protein_PIP_around-CoV-2-plus-GISAID/around-CoV-2-plus-GISAID_spike-protein_PIP-4.png" alt="Percent Identical Positions (PIP) profiles of spike protein sequences. " width="100%" />
 <p class="caption">
 Percent Identical Positions (PIP) profiles of spike protein sequences.
 </p>
@@ -932,13 +935,12 @@ Percent Identical Positions (PIP) profiles of spike protein sequences.
 <div id="session-info" class="section level2">
 <h2>Session info</h2>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw">sessionInfo</span>()</a></code></pre></div>
-<pre><code>R version 3.6.1 (2019-07-05)
-Platform: x86_64-apple-darwin15.6.0 (64-bit)
-Running under: macOS Mojave 10.14.6
+<pre><code>R version 3.5.1 (2018-07-02)
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+Running under: macOS  10.14.6
 
 Matrix products: default
-BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
-LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+BLAS/LAPACK: /Users/jvanheld/miniconda3/envs/covid-19/lib/R/lib/libRlapack.dylib
 
 locale:
 [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
@@ -947,10 +949,10 @@ attached base packages:
 [1] stats4    parallel  stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] Biostrings_2.52.0   XVector_0.24.0      IRanges_2.18.3      S4Vectors_0.22.1    BiocGenerics_0.30.0 knitr_1.28         
+[1] Biostrings_2.50.2   XVector_0.22.0      IRanges_2.16.0      S4Vectors_0.20.1    BiocGenerics_0.28.0 knitr_1.28         
 
 loaded via a namespace (and not attached):
- [1] Rcpp_1.0.4          digest_0.6.25       magrittr_1.5        evaluate_0.14       highr_0.8           zlibbioc_1.30.0     rlang_0.4.5         stringi_1.4.6       rmarkdown_2.1       tools_3.6.1         stringr_1.4.0       xfun_0.12           yaml_2.2.1          compiler_3.6.1     
+ [1] Rcpp_1.0.4.6        digest_0.6.25       magrittr_1.5        evaluate_0.14       highr_0.8           zlibbioc_1.28.0     rlang_0.4.6         stringi_1.4.6       rmarkdown_2.1       tools_3.5.1         stringr_1.4.0       xfun_0.13           yaml_2.2.1          compiler_3.5.1     
 [15] BiocManager_1.30.10 htmltools_0.4.0    </code></pre>
 </div>
 

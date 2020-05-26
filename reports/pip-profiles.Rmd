@@ -192,10 +192,11 @@ features[['CDS-ORF10']] <- c(start = 29558, end = 29674)
 
 ## Query genomes
 queryPatterns <- c(
-  "PnGX-P1E_2017", 
   "BtRaTG13_2013_Yunnan", 
   "BtZC45",
   "BtZXC21",
+  "PnMP789",
+  "PnGX-P1E_2017", 
   "HuSARS-Frankfurt-1_2003"
 )
 
@@ -330,15 +331,17 @@ kable(genomesNto1$stats[order(genomesNto1$stats$score, decreasing = TRUE), ],
 ## Full genome PIP plot
 
 
-```{r genome_pip, fig.width=10, fig.height=5, out.width="100%", fig.cap="Percent Identical Positions profile over the whole genome of SARS-CoV-2. "}
+```{r genome_pip, fig.width=10, fig.height=4.5, out.width="100%", fig.cap="Percent Identical Positions profile over the whole genome of SARS-CoV-2. "}
 
 ## PIP profile of full genome N-to-1 alignments
 plotPIPprofiles(alignments = genomesNto1$alignments, 
-                windowSize = 800, 
+                windowSize = 800, vgrid1 = 5000, vgrid2  =1000,
                 #                legend = paste0(names(genomesNto1$alignments), " (", round(digits = 2, genomesNto1$stats$pid), "%)"),
                 main = paste0("Full genome PIP profile", "\nRef: ", refGenomeName),
                 legendMargin = 0, 
-                legendCorner = "bottom", legendCex = 0.7, ylim = c(40,100))
+                legendCorner = "bottom", 
+                legendCex = 0.8, 
+                ylim = c(40,100))
 
 
 
@@ -393,9 +396,9 @@ featureLimits <- features[[featureName]]
 
 #### N-to-1 alignments of spike-coding sequences ####
 dir[[featureName]] <- file.path(dir$main, "results", featureName)
-dir.create(featureName, showWarnings = FALSE, recursive = TRUE)
+dir.create(dir[[featureName]], showWarnings = FALSE, recursive = TRUE)
 outfiles[featureName]  <- file.path(
-  dir[[featureName]], paste0(featureName, "_", collection, "_alignments"))
+  dir[[featureName]], paste0(featureName, "_", collection, "_matches.fasta"))
   
 ## Get sequences for reference and query genomes
 refSeq <- subseq(genomes[refGenomeName], start = featureLimits[1], end = featureLimits[2])
@@ -414,7 +417,7 @@ kable(featureAlignmentsNto1$stats[order(featureAlignmentsNto1$stat$score, decrea
 
 ### Spike gene PIP plot
 
-```{r Sgene_pip, fig.width=10, fig.height=5, out.width="100%", fig.cap="Percent Identical Positions profile over the whole genome of SARS-CoV-2. "}
+```{r Sgene_pip, fig.width=10, fig.height=4.5, out.width="100%", fig.cap="Percent Identical Positions profile over the whole genome of SARS-CoV-2. "}
 
 ## PIP profile of spike N-to-1 alignments
 plotPIPprofiles(alignments = featureAlignmentsNto1$alignments, 
