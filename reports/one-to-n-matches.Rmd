@@ -60,6 +60,7 @@ transition: linear
 ---
 
 ```{r libraries, echo=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+
 #### Install required packages ####
 required.packages <- c("knitr")
 
@@ -75,9 +76,14 @@ for (pkg in required.packages) {
 if (!requireNamespace("BiocManager", quietly = TRUE)) {
   install.packages("BiocManager")
 }
-if (!require("Biostrings", quietly = TRUE)) {
-  BiocManager::install("Biostrings")
-  require("Biostrings")
+requiredBioconductor <- c("Biostrings", "DECIPHER")
+for (lib in requiredBioconductor) {
+  if (!require(lib, character.only = TRUE, quietly = TRUE)) {
+    message("Installing bioconductor package ", lib)
+    BiocManager::install(lib)
+    require(lib, character.only = TRUE)
+  }
+  
 }
 
 
@@ -113,8 +119,8 @@ par.ori <- par(no.readonly = TRUE)
 ```{r parameters}
 
 #### General parameters for the analysis ####
-
 reloadImage <- FALSE
+quickTest <- FALSE # if True, only analyse the 2 first features
 
 #### Sequence collection ####
 
@@ -191,43 +197,81 @@ excludePatterns <- c("PnMP789", "PnGu-P2S_2019")
 features <- list()
 
 
+
 #### Specific features  ####
 
 
-## Regions around the insertions
-features[['Ins1-pm120']] <- c(start = 21647, end = 21907)
-features[['Ins2-pm120']] <- c(start = 21899, end = 22156)
-features[['Ins3-pm120']] <- c(start = 21899, end = 23152)
-features[['Ins4-pm120']] <- c(start = 23483, end = 23734)
-features[['Ins4-m240']] <- c(start = 23363, end = 23614)
+## S1, first cleavage product of the spike protein
+features[['S1']] <- c(start = 21599, end = 23617, isCDS = TRUE)
+
+## S2, second cleavage product of the spike protein
+features[['S2']] <- c(start = 23618, end = 25381, isCDS = TRUE)
+
+## Receptor binding domain
+features[['RBD']] <- c(start = 22517, end = 23185, isCDS = FALSE)
 
 ## Recombinant region inside the RBD
-features[['RBD-rec']] <- c(start = 22760, end = 23160)
+features[['RBD-rec']] <- c(start = 22760, end = 23160, isCDS = FALSE)
+
+
+
+## Regions around the insertions
+features[['Ins1-pm120']] <- c(start = 21647, end = 21907, isCDS = FALSE)
+features[['Ins2-pm120']] <- c(start = 21899, end = 22156, isCDS = FALSE)
+features[['Ins3-pm120']] <- c(start = 21899, end = 23152, isCDS = FALSE)
+features[['Ins4-pm120']] <- c(start = 23483, end = 23734, isCDS = FALSE)
+features[['Ins4-m240']] <- c(start = 23363, end = 23614, isCDS = FALSE)
+
+## Receptor-binding domain
 
 ## Potential Pangolin origin after Xiao (https://doi.org/10.1101/2020.02.17.951335)
-features[['Recomb-Xiao']] <- c(start = 22871, end = 23092)
+features[['Recomb-Xiao']] <- c(start = 22871, end = 23092, isCDS = FALSE)
 ## Recombinant region 1 seen on the PIP profiles
-features[['Recomb-reg-1']] <- c(start = 21500, end = 22800)
+features[['Recomb-reg-1']] <- c(start = 21500, end = 22800, isCDS = FALSE)
 ## Recombinant region 2 seen on the PIP profiles
-features[['Recomb-reg-2']] <- c(start = 22800, end = 24000)
+features[['Recomb-reg-2']] <- c(start = 22800, end = 24000, isCDS = FALSE)
 ## Recombinant region 3 seen on the PIP profiles
-features[['Recomb-reg-3']] <- c(start = 27800, end = 28350)
-
+features[['Recomb-reg-3']] <- c(start = 27800, end = 28350, isCDS = FALSE)
 
 ## Annotated coding sequences
-features[['CDS-S']] <- c(start = 21563, end = 25384) ## Spike gene
-features[['CDS-ORF3a']] <- c(start = 25393, end = 26220)
-features[['CDS-E']] <- c(start = 26245, end = 26472)
-features[['CDS-M']] <- c(start = 26523, end = 27191)
-features[['CDS-ORF6']] <- c(start = 27202, end = 27387)
-features[['CDS-ORF7a']] <- c(start = 27394, end = 27759)
-features[['CDS-ORF8']] <- c(start = 27894, end = 28259)
-features[['CDS-N']] <- c(start = 28274, end = 29533)
-features[['CDS-ORF10']] <- c(start = 29558, end = 29674)
-features[['CDS-ORF1ab']] <- c(start = 266, end = 21555)
+features[['CDS-S']] <- c(start = 21563, end = 25384, isCDS = TRUE) ## Spike gene
+features[['CDS-ORF3a']] <- c(start = 25393, end = 26220, isCDS = TRUE)
+features[['CDS-E']] <- c(start = 26245, end = 26472, isCDS = TRUE)
+features[['CDS-M']] <- c(start = 26523, end = 27191, isCDS = TRUE)
+features[['CDS-ORF6']] <- c(start = 27202, end = 27387, isCDS = TRUE)
+features[['CDS-ORF7a']] <- c(start = 27394, end = 27759, isCDS = TRUE)
+features[['CDS-ORF8']] <- c(start = 27894, end = 28259, isCDS = TRUE)
+features[['CDS-N']] <- c(start = 28274, end = 29533, isCDS = TRUE)
+features[['CDS-ORF10']] <- c(start = 29558, end = 29674, isCDS = TRUE)
 
-## All the sequences after the bif ORF coding for the polyproteinn 1ab
-features[['After-ORF1ab']] <- c(start = 21556, end = 29899)
+## Large ORF covering 2 thirds of the genome, coding for polyprotein
+features[['CDS-ORF1ab']] <- c(start = 266, end = 21555, isCDS = TRUE)
+
+## All the sequences after the big polyprotein-coding ORF1ab
+features[['After-ORF1ab']] <- c(start = 21556, end = 29899, isCDS = FALSE)
+
+## Only keep the two first features if quick test has been specified
+if (quickTest) {
+  features <- features[1:2]
+}
+
+## Convert feature list into a feature tbale
+featureTable <- as.data.frame(t(as.data.frame.list(
+  features, stringsAsFactors = FALSE)),
+  row.names = names(features)  # to avoid replacement of "-" by "."
+  )
+
+# class(featureTable)
+featureTable$length <- featureTable$end - featureTable$start + 1
+# row.names(featureTable)
+# featureTable["CDS.S", ]
+
+featureTable <- featureTable[order(featureTable$start), ]
+
+kable(featureTable, caption = "Feature coordinates. ")
+
+message("Analysing ", length(features), " features")
+message("\t", paste(collapse = ", ", names(features)))
 
 ## Report the parameters
 message("\tReference strain: ", refPattern)
@@ -413,7 +457,7 @@ featureName <- "CDS-S" # for the test
 # featureName <- "S1" # for the test
 # featureName <- "Recomb-reg-3" # for the test
 # featureName <- "RBD" # for the test
-featureName <- "RBD-rec" # for the test
+# featureName <- "RBD-rec" # for the test
 # for (collection in (collections)) {
 if (reloadImage) {
   load(outfiles["Memory image"])
@@ -451,11 +495,16 @@ for (featureName in names(features)) {
     featureName,
     "_", collection)
   
+  ## Define feature-specific output directory
   dir[[featureName]] <- file.path(dir$seqdata, featureName)
-  dir.create(dir[[featureName]], showWarnings = FALSE, recursive = TRUE)
-  outfiles[featureName]  <- file.path(
-    dir[[featureName]], paste0(featurePrefix, ".fasta"))
   message("\tOutput directory: ", dir[[featureName]] )
+  dir.create(dir[[featureName]], showWarnings = FALSE, recursive = TRUE)
+  
+  ## Define output file for unaligned matching sequences
+  outfiles[paste0(featurePrefix, "_matches")]  <- file.path(
+    dir[[featureName]], paste0(featurePrefix, "_matches.fasta"))
+  message("\tMatching sequences: ", 
+          outfiles[paste0(featurePrefix, "_matches")])
   
   ## Get sequence of the feature from the reference genome
   refSeq <- subseq(genomes[refStrainName], 
@@ -470,7 +519,7 @@ for (featureName in names(features)) {
       refSequence = refSeq, 
       querySequences = genomes, 
       type = "global-local",
-      outfile = outfiles[featureName])
+      outfile = outfiles[paste0(featurePrefix, "_matches")])
     
     allFeatureAlignments[[featureName]] <- featureAlignmentsNto1
   }
@@ -586,6 +635,55 @@ for (featureName in names(features)) {
 <!-- } -->
 <!-- # } -->
 <!-- ``` -->
+
+## Translation-based multiple alignments
+
+For the features corresponding to coding sequences (and in frame), it is more accurate to run aminoacid-based alignment, and to align in a second time the RNA codons onto the aligned aminoacids. 
+
+```{r align_translation}
+# featureName <- "CDS-S"
+featureName <- "S1"
+for (featureName in row.names(featureTable)) {
+  if (featureTable[featureName, "isCDS"]) {
+    message("Translation-based multiple alignment of feature ", featureName)
+    featureResult <- allFeatureAlignments[[featureName]]
+    rawSequences <- DNAStringSet(featureResult$sequences)
+    class(rawSequences)
+    
+    traligned <- AlignTranslation(
+      rawSequences, 
+      type = "DNAStringSet",
+      verbose = FALSE)
+    
+    ## Save alignment
+    featurePrefix <- paste0(
+      featureName,
+      "_", collection)
+  
+    # ## Define feature-specific output directory
+    # dir[[featureName]] <- file.path(dir$seqdata, featureName)
+    # message("\tOutput directory: ", dir[[featureName]] )
+    # dir.create(dir[[featureName]], showWarnings = FALSE, recursive = TRUE)
+  
+  ## Define output file for unaligned matching sequences
+    outfiles[paste0(featurePrefix, "_traligned")]  <- file.path(
+      dir[[featureName]], paste0(featurePrefix, "_traligned.fasta"))
+    message("\tTranslation-based alignment saved in file ", 
+            outfiles[paste0(featurePrefix, "_traligned")])
+    
+    ## Save aligned sequences in fasta format
+    writeXStringSet(
+      x = traligned, 
+      filepath = outfiles[paste0(featurePrefix, "_traligned")])
+  }
+  
+}
+
+
+```
+
+
+
 
 ## Output files
 
