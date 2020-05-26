@@ -31,6 +31,7 @@ dependencies:
   - r::r-ape # Functions for reading, writing, plotting, and manipulating phylogenetic trees ...
   - bioconda::r-phytools # Phylogenetic tools for comparative biology
   - bioconda::bioconductor-biostrings # Efficient manipulation of biological strings
+  - bioconda::bioconductor-decipher  # for translation-based alignments of nucleic sequences
   
   ## Python
   - python

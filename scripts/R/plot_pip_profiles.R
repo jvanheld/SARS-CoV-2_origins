@@ -4,6 +4,10 @@
 #' @param alignments a list of pairwise alignments produced by Biostrings::pairwiseAlignment
 #' @param reversePlots=TRUE plot the profiles in reverse order, to avoid for the first profiles to be masked by the last ones. Note that the legend order is always from the first to the last element of provided set of alignments. 
 #' @param windowSize=100 size of the sliding window to compute the rolling average PIP
+#' @param vgrid1=windowSize*5 Interval between main vertical grid bars (sequence positions)
+#' @param vgrid2=windowSize Interval between secondary vertical grid bars (sequence positions)
+#' @param hgrid1=10 Interval between main horizontal grid bars (percents)
+#' @param hgrid2=5 Interval between secondary horizontal grid bars (percents)
 #' @param leftLimit=NULL specify the starting position of the region to be displayed. If not specified use the beginning of the sequence
 #' @param rightLimit=NULL specify the ending position of the region to be displayed. If not specified use the end of the sequence
 #' @param legend=names(alignments) legend labels
@@ -16,6 +20,10 @@
 #' @export
 plotPIPprofiles <-  function(alignments, 
                              windowSize = 100,
+                             vgrid1 = windowSize * 5,
+                             vgrid2 = windowSize,
+                             hgrid1 = 10,
+                             hgrid2 = 5,
                              reversePlot = TRUE,
                              leftLimit = NULL,
                              rightLimit = NULL,
@@ -39,6 +47,7 @@ plotPIPprofiles <-  function(alignments,
   
   
   ## Plot PIP profiles
+  i <- 1
   for (i in 1:length(alignments)) {
     if (reversePlot) {
       j <- length(alignments) - i + 1
@@ -118,9 +127,11 @@ plotPIPprofiles <-  function(alignments,
            ylim = ylim,
            xlim = c(0, length(refPositions) * (1 + legendMargin)),
            panel.first = c(
-             abline(h = seq(0, 100, 10), col = "#DDDDDD"),
+             abline(h = seq(0, 100, hgrid2), col = "#DDDDDD"),
+             abline(h = seq(0, 100, hgrid1), col = "#BBBBBB"),
              abline(h = c(0,100), col = "black"),
-             abline(v = seq(0, length(refPositions), windowSize * 5), col = "#DDDDDD")),
+             abline(v = seq(0, length(refPositions), vgrid2), col = "#DDDDDD"),
+             abline(v = seq(0, length(refPositions), vgrid1), col = "#888888")),
            col = seqColor,
            ...
       ) 
