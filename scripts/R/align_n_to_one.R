@@ -69,46 +69,51 @@ alignNtoOne <- function(refSequence,
   if (!is.null(outfile)) {
     message("\talignNtoOne()",
             "\tExporting multiple alignments to file\n\t\t", outfile)
+  }
     
-    ## Write the reference sequence in the output fle
-    # writeXStringSet(refsequence, filepath = outfile, format = "fasta")
+  ## Write the reference sequence in the output fle
+  # writeXStringSet(refsequence, filepath = outfile, format = "fasta")
+  
+  ## Extract the matching sequences
+  i <- 1
+  nbAlignments <- length(alignments)
+  result$sequences <- BStringSet() ## Empty list to store the desalined sequences
+  for (i in 1:nbAlignments) {
+    alignment <- alignments[[i]]
+    sequenceName <- names(alignments)[i]
+    subject <- subject(alignment)
     
-    ## Extract the matching sequences
-    i <- 1
-    nbAlignments <- length(alignments)
-    for (i in 1:nbAlignments) {
-      alignment <- alignments[[i]]
-      sequenceName <- names(alignments)[i]
-      subject <- subject(alignment)
-      
-      ## Suppress the dashes from the alignment to get the raw sequence
-      sequence <- as.character(subject)
-      sequenceDesaligned <- gsub(pattern = "-", replacement = "", x = sequence)
-      seqStringSet <- BStringSet(x = sequenceDesaligned) #, start = start(subject), end=end(subject))
-      
-      
-      ## Define a sequence ID for the fasta header
-      sequenceID <- sequenceName
-      if (!is.null(IDsuffix)) {
-        sequenceID <- paste0(sequenceID, IDsuffix)
-      } 
-      sequenceID <- paste0(sequenceID, "_", start(subject), "-", end(subject))
-      names(seqStringSet) <- sequenceID
-
-      ## Write pairwise alignment (temporarily disaactivated)
-      # alignmentFile <- paste0("pairwise-alignment_", 
-      #                         # gsub(pattern = "/", replacement = "-", x = sequenceName), 
-      #                         ".txt")
-      # writePairwiseAlignments(x = alignment, file = outfile)
-      
-      ## Append the sequence to the file
+    ## Suppress the dashes from the alignment to get the raw sequence
+    sequence <- as.character(subject)
+    sequenceDesaligned <- gsub(pattern = "-", replacement = "", x = sequence)
+    seqStringSet <- BStringSet(x = sequenceDesaligned) #, start = start(subject), end=end(subject))
+    
+    
+    ## Define a sequence ID for the fasta header
+    sequenceID <- sequenceName
+    if (!is.null(IDsuffix)) {
+      sequenceID <- paste0(sequenceID, IDsuffix)
+    } 
+    sequenceID <- paste0(sequenceID, "_", start(subject), "-", end(subject))
+    names(seqStringSet) <- sequenceID
+    
+    result$sequences <- append(result$sequences, seqStringSet)
+    
+    ## Write pairwise alignment (temporarily disaactivated)
+    # alignmentFile <- paste0("pairwise-alignment_", 
+    #                         # gsub(pattern = "/", replacement = "-", x = sequenceName), 
+    #                         ".txt")
+    # writePairwiseAlignments(x = alignment, file = outfile)
+    
+    ## Append the sequence to the file
+    if (!is.null(outfile)) {
       message("\tAppending sequence ", i, "/", nbAlignments, "\t", sequenceID)
       writeXStringSet(seqStringSet,
                       filepath = outfile, format = "fasta", append = i > 1)
-      
-    }
-    message("\tExported alignments to\t", outfile)
-  } 
+    }    
+  }
+  message("\tExported alignments to\t", outfile)
+
   return(result)
 }
 # View(alignmentStats)
