@@ -6,11 +6,11 @@
 
 ## Collaborators
 
-- Etienne Decroly
-- Jacques van Helden (<https://orcid.org/0000-0002-8799-8584>)
+- Jacques van Helden (ORCID [0000-0002-8799-8584](https://orcid.org/0000-0002-8799-8584))
+- Etienne Decroly (ORCID [0000-0002-6046-024X](https://orcid.org/0000-0002-6046-024X))
 - Erwan Sallard	(<erwan.sallard@ens.psl.eu>)
-- José Halloy
-- Didier Casane
+- Didier Casane (<http://www.egce.cnrs-gif.fr/?p=1289>)
+- José Halloy (ORCID [0000-0003-1555-2484](https://orcid.org/0000-0003-1555-2484))
 
 ## Access
 
