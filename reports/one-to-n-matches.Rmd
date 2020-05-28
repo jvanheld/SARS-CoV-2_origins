@@ -190,7 +190,7 @@ source(file.path(dir$R, "plot_pip_profiles.R"))
 refPattern <- "HuCoV2_WH01_2019"
 
 ## Exclude some genomes with a lot of Ns, because they bias the PIP profiles and alignments and trees
-excludePatterns <- c("PnMP789", "PnGu-P2S_2019")
+excludePatterns <- c("PnGu-P2S_2019")
 
 #### Features of interest in the reference genome ####
 
@@ -199,7 +199,6 @@ features <- list()
 
 
 #### Specific features  ####
-
 
 ## S1, first cleavage product of the spike protein
 features[['S1']] <- c(start = 21599, end = 23617, isCDS = TRUE)
@@ -341,7 +340,36 @@ if (is.null(refStrainName)) {
 }
 message("\tReference genome name: ", refStrainName)
 
-## Compute some statistics about sequence sizes
+
+```
+
+
+## Parameters
+
+```{r print_parameters}
+
+## Define a list of parameters
+parameters <- list()
+parameters$collection <- collection
+parameters$refStrainName <- refStrainName
+parameters$nbStrains <- nbStrains
+parameters$sequenceDir <- dir$sequences
+parameters$sequenceFile <- infiles$sequences
+parameters$memoryImage <- outfiles["Memory image"]
+
+kable(t(as.data.frame.list(parameters)), caption = "Parameters of the analysis", 
+      col.names = "Parameter")
+
+
+```
+
+
+## Strain statistics
+
+
+
+```{r strain_stat}
+#### Compute statistics about sequence sizes ###
 strainStats <- data.frame(
   n = 1:length(genomes),
   row.names = names(genomes),
@@ -357,9 +385,9 @@ for (g in strainNames) {
 ```
 
 
-
 ```{r strain_colors}
 #### Define the color associated to each sequence ####
+
 
 ## Color palette per species
 speciesPalette <- list(
@@ -384,6 +412,7 @@ strainColor <- c(
   "HuCoV2_WH01_2019" = "red",
   "HuSARS-Frankfurt-1_2003" = "#0044BB",
   "PnGu1_2019" = "#00BB00",
+  "PnMP789" = "#00FF88",
   "BtRaTG13_" = "#FF6600",
   "BtYu-RmYN" = "#FFBB22",
   "BtZXC21" = "black", 
@@ -412,32 +441,11 @@ for (strain in names(strainColor)) {
 strainColors <- (unlist(strainStats$color))
 names(strainColors) <- row.names(strainStats)
 
-
-```
-
-## Parameters
-
-```{r print_parameters}
-
-## Define a list of parameters
-parameters <- list()
-parameters$collection <- collection
-parameters$refStrainName <- refStrainName
-parameters$nbStrains <- nbStrains
-parameters$sequenceDir <- dir$sequences
-parameters$sequenceFile <- infiles$sequences
-parameters$memoryImage <- outfiles["Memory image"]
-
-kable(t(as.data.frame.list(parameters)), caption = "Parameters of the analysis", 
-      col.names = "Parameter")
-
-
 ```
 
 
-## Genome statistics
 
-```{r print_genome_stats}
+```{r print_strain_stats}
 kable(strainStats, caption = "Reference and query genomes")
 
 ```
@@ -447,18 +455,18 @@ The collection `r collection` contains `r length(genomes)` virus genome sequence
 
 
 
-## One-to-N alignemnts of selected features
+## Feature matches and alignments
 
-We perform a global pairwise alignment (Needle-Waterman algorithm) between each feature of the reference (`r refStrainName`) and each one of the query genomes.
+1. We perform a global pairwise alignment (Needle-Waterman algorithm) between each feature of the reference strain (`r refStrainName`) and each one of the query genomes.
+
+2. The collected nucleic sequences are then aligned based on their translated sequences. This ensures a more relevant placing of the gaps. These translation-based alignments are exported in aminoacids and DNA formats (the DNA sequences are obtained by reverse-mapping the aligned aminoacid sequences onto the input DNA sequences).
+
+3. For each alignment (AA and DNA) wee compute a consensus matrix, indicating the frequency of each residue (row of the consensus matrix) in each position of the alignment (column of the matrix). 
 
 ```{r one2N_feature_matches, results="asis", fig.width=10, fig.height=6, out.width="100%", fig.cap="Feature-specific Percent Identical Positions (PIP) profiles. "}
 #### One-to-N alignmemnt of user-speficied genomic features ####
-featureName <- "CDS-S" # for the test
-# featureName <- "S1" # for the test
-# featureName <- "Recomb-reg-3" # for the test
-# featureName <- "RBD" # for the test
-# featureName <- "RBD-rec" # for the test
-# for (collection in (collections)) {
+
+## Reload memory image if specified in parameters
 if (reloadImage) {
   load(outfiles["Memory image"])
   reloadImage <- TRUE
@@ -466,7 +474,13 @@ if (reloadImage) {
 } else {
   allFeatureAlignments <- list()
 }
-for (featureName in names(features)) {
+
+i <- 1
+
+## Rune one-ton matches and translation-based mumti^ple alignment + PIP profiles
+for (i in 1:length(features)) {
+  featureName <- names(features)[i]
+  
   ## Compute feature length
   featureLimits <- features[[featureName]]
   featureStart <- featureLimits[["start"]]
@@ -474,11 +488,13 @@ for (featureName in names(features)) {
   featureLength <- 
     featureEnd - featureStart  + 1
   
-  message("Searching matches for feature ", featureName, 
+  message("Searching matches for feature ", 
+          i, "/", length(features), "\t",
+          featureName, 
           " (", featureLimits[1], "-", featureLimits[2], ")", 
           " in collection ", collection)
   
-  ## Print a seciton title with the feature name and limits
+  ## Print a section title with the feature name and limits
   cat(sep = "", "\n### ",  featureName, 
       " (", featureLimits[1], "-", featureLimits[2], 
       "; ", featureLength,"bp)", "\n")
@@ -490,16 +506,17 @@ for (featureName in names(features)) {
     collection, '_vs_', featureName))
 
   
-  #### N-to-1 alignments of spike-coding sequences ####
+  #### Define feature-specific output directory ####
   featurePrefix <- paste0(
     featureName,
     "_", collection)
   
-  ## Define feature-specific output directory
   dir[[featureName]] <- file.path(dir$seqdata, featureName)
   message("\tOutput directory: ", dir[[featureName]] )
   dir.create(dir[[featureName]], showWarnings = FALSE, recursive = TRUE)
   
+  #### Find feature matches by 1-to-1 alignment with each genome ####
+
   ## Define output file for unaligned matching sequences
   outfiles[paste0(featurePrefix, "_matches")]  <- file.path(
     dir[[featureName]], paste0(featurePrefix, "_matches.fasta"))
@@ -521,9 +538,56 @@ for (featureName in names(features)) {
       type = "global-local",
       outfile = outfiles[paste0(featurePrefix, "_matches")])
     
-    allFeatureAlignments[[featureName]] <- featureAlignmentsNto1
   }
   
+  
+  #### Translation-based alignments ####
+  if (featureTable[featureName, "isCDS"]) {
+    message("\tTranslation-based multiple alignment of feature ", featureName, "; DNA output")
+    
+    ## Align translated sequenecs and return correponding nucleic sequences
+    featureAlignmentsNto1$tralignedDNA <- AlignTranslation(
+      DNAStringSet(featureAlignmentsNto1$sequences), 
+      type = "DNAStringSet",
+      verbose = FALSE)
+    
+    ## Save multiple-aligned DNA sequences
+    outfiles[paste0(featurePrefix, "_tralignedDNA")]  <- file.path(
+      dir[[featureName]], paste0(featurePrefix, "_tralignedDNA.fasta"))
+    message("\tTranslation-based alignment saved in file ", 
+            outfiles[paste0(featurePrefix, "_tralignedDNA")])
+    writeXStringSet(
+      x = featureAlignmentsNto1$tralignedDNA, 
+      filepath = outfiles[paste0(featurePrefix, "_tralignedDNA")] )
+
+    ## Convert alignment to position-weight matrix
+    featureAlignmentsNto1$tralignedDNAConsensus <- consensusMatrix(
+      x = featureAlignmentsNto1$tralignedDNA)
+    
+    ## Align translated sequenecs and return correponding AA sequences
+    message("\tTranslation-based multiple alignment of feature ", featureName, "; AA output")
+    featureAlignmentsNto1$tralignedAA <- AlignTranslation(
+      DNAStringSet(featureAlignmentsNto1$sequences), 
+      type = "AAStringSet",
+      verbose = FALSE)
+
+    ## Convert alignment to position-weight matrix
+    featureAlignmentsNto1$tralignedAAConsensus <- consensusMatrix(
+      x = featureAlignmentsNto1$tralignedAA)
+  
+    ## Save multiple-aligned AA sequences
+    outfiles[paste0(featurePrefix, "_tralignedAA")]  <- file.path(
+      dir[[featureName]], paste0(featurePrefix, "_tralignedAA.fasta"))
+    message("\tTranslation-based alignment saved in file ", 
+            outfiles[paste0(featurePrefix, "_tralignedAA")])
+    writeXStringSet(
+      x = featureAlignmentsNto1$tralignedAA, 
+      filepath = outfiles[paste0(featurePrefix, "_tralignedAA")] )
+  }
+  
+
+  
+  #### PIP profiles ####
   ## Choose window size  
   if (featureLength > 20000) {
     windowSize <- 800 
@@ -540,7 +604,8 @@ for (featureName in names(features)) {
   ## Compute sequence order by decreasing PIP score
   seqOrder <- order(featureAlignmentsNto1$stat$score, decreasing = TRUE)
 
-  ## PIP profile of one-to-N alignment
+  
+  ## DNA PIP profile of one-to-N alignment
   plotPIPprofiles(
 #    alignments = featureAlignmentsNto1$alignments[seqOrder],
     alignments = featureAlignmentsNto1$alignments,
@@ -553,7 +618,23 @@ for (featureName in names(features)) {
     legendMargin = 0.25, 
     legendCorner = "topright", lwd = 1,
     legendCex = 0.5, ylim = c(30, 100))
+
   
+    ## AA PIP profile of translation-based multiple alignment
+  plotPIPprofiles(
+#    alignments = featureAlignmentsNto1$alignments[seqOrder],
+    alignments = featureAlignmentsNto1$tralignedAA,
+    reversePlot = TRUE,
+    windowSize = windowSize,
+    main = paste0("AA PIP profiles: collection ", collection,
+                  "\nGenomic feature ", featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"),
+    #    colors = NULL,
+    colors = strainColors,
+    legendMargin = 0.25,
+    legendCorner = "topright", 
+    lwd = 1,
+    legendCex = 0.5, 
+    ylim = c(30, 100))
   
   kable(featureAlignmentsNto1$stats[seqOrder,], 
         caption = paste0(
@@ -563,6 +644,58 @@ for (featureName in names(features)) {
 }
 # }
 ```
+
+
+<!-- ## Translation-based multiple alignments -->
+
+<!-- For the features corresponding to coding sequences (and in frame), it is more accurate to run aminoacid-based alignment, and to align in a second time the RNA codons onto the aligned aminoacids.  -->
+
+<!-- ```{r align_translation} -->
+<!-- # featureName <- "CDS-S" -->
+<!-- featureName <- "S1" -->
+<!-- for (featureName in row.names(featureTable)) { -->
+<!--   if (featureTable[featureName, "isCDS"]) { -->
+<!--     message("Translation-based multiple alignment of feature ", featureName) -->
+<!--     featureAlignmentsNto1 <- allFeatureAlignments[[featureName]] -->
+<!--     rawSequences <- DNAStringSet(featureAlignmentsNto1$sequences) -->
+<!--     class(rawSequences) -->
+
+<!--     traligned <- AlignTranslation( -->
+<!--       rawSequences,  -->
+<!--       type = "DNAStringSet", -->
+<!--       verbose = FALSE) -->
+
+<!--     allFeatureAlignments[[featureName]]$trAlignment <- traligned -->
+<!--     # names(allFeatureAlignments[[featureName]]) -->
+
+
+<!--     ## Save alignment -->
+<!--     featurePrefix <- paste0( -->
+<!--       featureName, -->
+<!--       "_", collection) -->
+
+<!--     ## Define output file for unaligned matching sequences -->
+<!--     outfiles[paste0(featurePrefix, "_traligned")]  <- file.path( -->
+<!--       dir[[featureName]], paste0(featurePrefix, "_traligned.fasta")) -->
+<!--     message("\tTranslation-based alignment saved in file ",  -->
+<!--             outfiles[paste0(featurePrefix, "_traligned")]) -->
+
+<!--     ## Save aligned sequences in fasta format -->
+<!--     writeXStringSet( -->
+<!--       x = traligned,  -->
+<!--       filepath = outfiles[paste0(featurePrefix, "_traligned")]) -->
+<!--   } -->
+
+<!--   ## Convert alignment to position-weight matrix -->
+<!--   consensusM <- consensusMatrix(x = traligned) -->
+
+<!--   allFeatureAlignments[[featureName]]$consensusM <- consensusM -->
+<!-- } -->
+
+
+<!-- ``` -->
+
+
 
 
 <!-- ```{r one2N_feature_matches_PIP, fig.width=10, fig.height=6, out.width="100%", fig.cap="Feature-specific Percent Identical Positions (PIP) profiles. "} -->
@@ -635,53 +768,6 @@ for (featureName in names(features)) {
 <!-- } -->
 <!-- # } -->
 <!-- ``` -->
-
-## Translation-based multiple alignments
-
-For the features corresponding to coding sequences (and in frame), it is more accurate to run aminoacid-based alignment, and to align in a second time the RNA codons onto the aligned aminoacids. 
-
-```{r align_translation}
-# featureName <- "CDS-S"
-featureName <- "S1"
-for (featureName in row.names(featureTable)) {
-  if (featureTable[featureName, "isCDS"]) {
-    message("Translation-based multiple alignment of feature ", featureName)
-    featureResult <- allFeatureAlignments[[featureName]]
-    rawSequences <- DNAStringSet(featureResult$sequences)
-    class(rawSequences)
-    
-    traligned <- AlignTranslation(
-      rawSequences, 
-      type = "DNAStringSet",
-      verbose = FALSE)
-    
-    ## Save alignment
-    featurePrefix <- paste0(
-      featureName,
-      "_", collection)
-  
-    # ## Define feature-specific output directory
-    # dir[[featureName]] <- file.path(dir$seqdata, featureName)
-    # message("\tOutput directory: ", dir[[featureName]] )
-    # dir.create(dir[[featureName]], showWarnings = FALSE, recursive = TRUE)
-  
-  ## Define output file for unaligned matching sequences
-    outfiles[paste0(featurePrefix, "_traligned")]  <- file.path(
-      dir[[featureName]], paste0(featurePrefix, "_traligned.fasta"))
-    message("\tTranslation-based alignment saved in file ", 
-            outfiles[paste0(featurePrefix, "_traligned")])
-    
-    ## Save aligned sequences in fasta format
-    writeXStringSet(
-      x = traligned, 
-      filepath = outfiles[paste0(featurePrefix, "_traligned")])
-  }
-  
-}
-
-
-```
-
 
 
 

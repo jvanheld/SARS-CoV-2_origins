@@ -275,33 +275,110 @@ kable(genomeStat, caption = "Reference and query genomes")
 
 The collection `r collection` contains `r length(genomes)` virus genome sequences.
 
-<!-- ## Multiple alignment -->
-
-<!-- ```{r read_multaling} -->
-
-<!-- #### Read multiple alignment #### -->
-<!-- dir$alignments <- file.path(dir$main, "results",  -->
-<!--                             paste0("genomes_", collection)) -->
-<!-- # list.files(dir$alignments, pattern = ".aln") -->
-<!-- infiles$genomeAlignment <- file.path( -->
-<!--   dir$alignments, -->
-<!--   paste0("genomes_", collection, "_clustalw.aln")) -->
-
-<!-- if (!file.exists(infiles$genomeAlignment)) { -->
-<!--   stop("Multiple alignment file not found: ", infiles$genomeAlignment) -->
-<!-- } -->
-
-<!-- msa <- readDNAMultipleAlignment(filepath = infiles$genomeAlignment, format = "clustal") -->
-
-<!-- msaNames <- rownames(msa) -->
-<!-- msaRefName <- grep(pattern = refPattern, x = msaNames, value = TRUE) -->
-<!-- # detail(msa) -->
-<!-- # View(msa) -->
-
-<!-- msaRefSeq <-  -->
 
 
-<!-- ``` -->
+## Strain statistics
+
+
+
+```{r strain_stat}
+
+## Report the number of genoomes
+strainNames <- names(genomes)
+nbStrains <- length(strainNames)
+message("\tLoaded ", nbStrains, " genomes from file ", infiles$sequences)
+# View(genomes)
+
+
+#### Define reference and query genomes ####
+refStrainName <- grep(pattern = refPattern, x = names(genomes), 
+                      ignore.case = TRUE, value = TRUE)
+if (is.null(refStrainName)) {
+  stop("Could not identify reference genome with pattern ", refPattern)
+}
+message("\tReference genome name: ", refStrainName)
+
+#### Compute statistics about sequence sizes ###
+strainStats <- data.frame(
+  n = 1:length(genomes),
+  row.names = names(genomes),
+  status = rep("Query", length.out = length(strainNames))
+)
+strainStats[,"status"] <- as.vector(strainStats[,"status"])
+strainStats[refStrainName,"status"] <- "Reference"
+g <- 1
+for (g in strainNames) {
+  strainStats[g, "length"] <- length(genomes[[g]])
+}
+
+```
+
+
+```{r strain_colors}
+#### Define the color associated to each sequence ####
+
+
+## Color palette per species
+speciesPalette <- list(
+  Human = "#880000",
+  Bat = "#888888",
+  Pangolin = "#448800",
+  Camel = "#BB8800",
+  Pig = "#FFBBBB",
+  Civet = "#00BBFF"
+)
+
+## Species prefix in the tip labels
+speciesPrefix <- c("Hu" = "Human",
+                   "Bt" = "Bat",
+                   "Pn" = "Pangolin",
+                   "Cm" = "Camel",
+                   "Pi" = "Pig",
+                   "Cv" = "Civet")
+
+## Strain-specific colors
+strainColor <- c(
+  "HuCoV2_WH01_2019" = "red",
+  "HuSARS-Frankfurt-1_2003" = "#0044BB",
+  "PnGu1_2019" = "#00BB00",
+  "PnMP789" = "#00FF88",
+  "BtRaTG13_" = "#FF6600",
+  "BtYu-RmYN" = "#FFBB22",
+  "BtZXC21" = "black", 
+  "BtZC45" = "black")
+
+## Identify species per tip
+for (prefix in names(speciesPrefix)) {
+  strainStats[grep(pattern = paste0("^", prefix), x = row.names(strainStats), perl = TRUE), "species"] <- speciesPrefix[prefix]
+  
+}
+
+## Assign acolor to each species
+strainStats$color <- "grey" # default
+strainStats$color <- speciesPalette[as.vector(strainStats$species)]
+
+for (strain in names(strainColor)) {
+  strainStats[grep(pattern = paste0("^", strain), 
+                  x = row.names(strainStats), perl = TRUE), "color"] <- strainColor[strain]
+  
+}
+
+
+## Assign specific color to some nodes
+
+## Define a color for each strain
+strainColors <- (unlist(strainStats$color))
+names(strainColors) <- row.names(strainStats)
+
+```
+
+
+
+```{r print_strain_stats}
+kable(strainStats, caption = "Reference and query genomes")
+
+```
+
 
 
 ## N-to-1 full genome alignments
@@ -335,16 +412,14 @@ kable(genomesNto1$stats[order(genomesNto1$stats$score, decreasing = TRUE), ],
 
 ## PIP profile of full genome N-to-1 alignments
 plotPIPprofiles(alignments = genomesNto1$alignments, 
-                windowSize = 800, vgrid1 = 5000, vgrid2  =1000,
-                #                legend = paste0(names(genomesNto1$alignments), " (", round(digits = 2, genomesNto1$stats$pid), "%)"),
+                windowSize = 800, 
+                vgrid1 = 5000, 
+                vgrid2 = 1000, colors = strainColors,
                 main = paste0("Full genome PIP profile", "\nRef: ", refGenomeName),
                 legendMargin = 0, 
                 legendCorner = "bottom", 
                 legendCex = 0.8, 
                 ylim = c(40,100))
-
-
-
 
 ```
 
@@ -375,7 +450,7 @@ kable(SARSvsCivetGenome$stats[order(SARSvsCivetGenome$stats$score, decreasing = 
 
 ## PIP profile of full genome N-to-1 alignments
 plotPIPprofiles(alignments = SARSvsCivetGenome$alignments, 
-                windowSize = 500, 
+                windowSize = 500, colors = strainColors, 
                 legend = paste0(names(SARSvsCivetGenome$alignments), " (", round(digits = 2, SARSvsCivetGenome$stats$pid), "%)"),
                 main = paste0("Percent Identical Positions - Full genome", "\nRef: ", "Human_SARS-CoV_Frankfurt_1"),
                 legendMargin = 0, legendCorner = "bottom", legendCex = 0.7, ylim = c(40,100))
@@ -421,7 +496,7 @@ kable(featureAlignmentsNto1$stats[order(featureAlignmentsNto1$stat$score, decrea
 
 ## PIP profile of spike N-to-1 alignments
 plotPIPprofiles(alignments = featureAlignmentsNto1$alignments, 
-                windowSize = 200, 
+                windowSize = 200,  colors = strainColors,
 #                legend = paste0(names(featureAlignmentsNto1$alignments), " (", round(digits = 2, featureAlignmentsNto1$stats$pid), "%)"),
                 main = paste0(featureName, " - PIP profile", "\nRef: ", refGenomeName),
                 legendMargin = 0, legendCorner = "bottomright", legendCex = 0.8, ylim = c(30, 100))
@@ -431,141 +506,141 @@ plotPIPprofiles(alignments = featureAlignmentsNto1$alignments,
 
 
 
-### Getting sequences of spike gene in all the selected coronavirus genomes
+<!-- ### Getting sequences of spike gene in all the selected coronavirus genomes -->
 
 
-```{r  match sequence fragment against all genomes and export the matches to a fasta file}
+<!-- ```{r  match sequence fragment against all genomes and export the matches to a fasta file} -->
 
 
-#' @title Export sequencesquery + subject sequences from N-to-1 alignments
-#' @author Jacques.van-Helden@france)bioinformatique.fr
-#' @param refsequence  sequence used as reference (DB) for the N-to-1 alignment
-#' @param genomes genome sequences
-#' @param IDsuffix=NULL if not null, append the suffix to the sequence name for the fasta header
-#' @param outfile=NULL output file. If specified, the matches will be exported as fasta-formatted sequences.
-#' @export
-ExportSegmentMatches <- function(refsequence,
-                                 genomes,
-                                 IDsuffix = NULL,
-                                 outfile=NULL) {
-  
-  #### N-to-1 alignments of all spike-coding sequences ####
-  
-  ## Get sequences for reference and query genomes
-  alignmentsNto1 <- alignNtoOne(
-    refSequence = refsequence, 
-    querySequences = genomes, 
-    type = "global-local")
-  
-  if (!is.null(outfile)) {
-    
-    ## Write the reference sequence in the output fle
-    writeXStringSet(refsequence, filepath = outfile, format = "fasta")
-    
-    i <- 1
-    nbAlignments <- length(alignmentsNto1$alignments)
-    for (i in 1:nbAlignments) {
-      genomeName <- names(genomes[i])
-      alignment <- alignmentsNto1$alignments[[i]]
-      subject <- subject(alignment)
-      
-      ## Suppress the dashes from the alignment to get the raw sequence
-      sequence <- as.character(subject)
-      sequenceDesaligned <- gsub(pattern = "-", replacement = "", x = sequence)
-      seqStringSet <- DNAStringSet(x = sequenceDesaligned) #, start = start(subject), end=end(subject))
+<!-- #' @title Export sequencesquery + subject sequences from N-to-1 alignments -->
+<!-- #' @author Jacques.van-Helden@france)bioinformatique.fr -->
+<!-- #' @param refsequence  sequence used as reference (DB) for the N-to-1 alignment -->
+<!-- #' @param genomes genome sequences -->
+<!-- #' @param IDsuffix=NULL if not null, append the suffix to the sequence name for the fasta header -->
+<!-- #' @param outfile=NULL output file. If specified, the matches will be exported as fasta-formatted sequences. -->
+<!-- #' @export -->
+<!-- ExportSegmentMatches <- function(refsequence, -->
+<!--                                  genomes, -->
+<!--                                  IDsuffix = NULL, -->
+<!--                                  outfile=NULL) { -->
 
-            
-      ## Define a sequence ID for the fasta header
-      sequenceID <- genomeName
-      if (!is.null(IDsuffix)) {
-        sequenceID <- paste0(sequenceID, IDsuffix)
-      } 
-      sequenceID <- paste0(sequenceID, "_", start(subject), "-", end(subject))
-      names(seqStringSet) <- sequenceID
-      # 
-      ## Write pairwise alignment (temporarily disaactivated)
-      # alignmentFile <- paste0("pairwise-alignment_", 
-      #                         # gsub(pattern = "/", replacement = "-", x = genomeName), 
-      #                         ".txt")
-      # writePairwiseAlignments(x = alignment, file = outfile)
+<!--   #### N-to-1 alignments of all spike-coding sequences #### -->
 
-      ## Append the sequence to the file
-      message("\tAppending sequence ", i, "/", nbAlignments, "\t", sequenceID)
-      writeXStringSet(seqStringSet,
-                      filepath = outfile, format = "fasta", append = TRUE)
-      
-    }
-    message("\tExported alignments to\t", outfile)
-    
-  } 
-  return(alignmentsNto1)
-  
-}
-```
+<!--   ## Get sequences for reference and query genomes -->
+<!--   alignmentsNto1 <- alignNtoOne( -->
+<!--     refSequence = refsequence,  -->
+<!--     querySequences = genomes,  -->
+<!--     type = "global-local") -->
 
-```{r Sgene_exportseq}
+<!--   if (!is.null(outfile)) { -->
+
+<!--     ## Write the reference sequence in the output fle -->
+<!--     writeXStringSet(refsequence, filepath = outfile, format = "fasta") -->
+
+<!--     i <- 1 -->
+<!--     nbAlignments <- length(alignmentsNto1$alignments) -->
+<!--     for (i in 1:nbAlignments) { -->
+<!--       genomeName <- names(genomes[i]) -->
+<!--       alignment <- alignmentsNto1$alignments[[i]] -->
+<!--       subject <- subject(alignment) -->
+
+<!--       ## Suppress the dashes from the alignment to get the raw sequence -->
+<!--       sequence <- as.character(subject) -->
+<!--       sequenceDesaligned <- gsub(pattern = "-", replacement = "", x = sequence) -->
+<!--       seqStringSet <- DNAStringSet(x = sequenceDesaligned) #, start = start(subject), end=end(subject)) -->
 
 
-#### Export S gene sequences found in the reference genomes ####
-# toString(refSeq)
-writeXStringSet(
-  refSeq, 
-  filepath = file.path(
-    dir$outseq, 
-    paste0("S-gene_", refGenomeName, ".fasta")), 
-  format = "fasta")
+<!--       ## Define a sequence ID for the fasta header -->
+<!--       sequenceID <- genomeName -->
+<!--       if (!is.null(IDsuffix)) { -->
+<!--         sequenceID <- paste0(sequenceID, IDsuffix) -->
+<!--       }  -->
+<!--       sequenceID <- paste0(sequenceID, "_", start(subject), "-", end(subject)) -->
+<!--       names(seqStringSet) <- sequenceID -->
+<!--       #  -->
+<!--       ## Write pairwise alignment (temporarily disaactivated) -->
+<!--       # alignmentFile <- paste0("pairwise-alignment_",  -->
+<!--       #                         # gsub(pattern = "/", replacement = "-", x = genomeName),  -->
+<!--       #                         ".txt") -->
+<!--       # writePairwiseAlignments(x = alignment, file = outfile) -->
+
+<!--       ## Append the sequence to the file -->
+<!--       message("\tAppending sequence ", i, "/", nbAlignments, "\t", sequenceID) -->
+<!--       writeXStringSet(seqStringSet, -->
+<!--                       filepath = outfile, format = "fasta", append = TRUE) -->
+
+<!--     } -->
+<!--     message("\tExported alignments to\t", outfile) -->
+
+<!--   }  -->
+<!--   return(alignmentsNto1) -->
+
+<!-- } -->
+<!-- ``` -->
+
+<!-- ```{r Sgene_exportseq} -->
 
 
-## Export matches to S-gene
-outfiles["S gene matches"] <- file.path(
-  dir$outseq, 
-  paste0("S-gene_", refGenomeName, "_matches.fasta"))
-
-featureAlignmentsNto1All <- ExportSegmentMatches(
-  refsequence = refSeq,
-  genomes = genomes, 
-  IDsuffix = "_S-gene",
-  outfile = outfiles["S gene matches"])
-
-  
-kable(featureAlignmentsNto1All$stats[order(featureAlignmentsNto1All$stat$score, decreasing = TRUE),], 
-        caption = "N-to-one alignment of S genes")
-
-```
-
-## Export matches to the coding sequence of the S1 cleavage produc
+<!-- #### Export S gene sequences found in the reference genomes #### -->
+<!-- # toString(refSeq) -->
+<!-- writeXStringSet( -->
+<!--   refSeq,  -->
+<!--   filepath = file.path( -->
+<!--     dir$outseq,  -->
+<!--     paste0("S-gene_", refGenomeName, ".fasta")),  -->
+<!--   format = "fasta") -->
 
 
-## N-to-1 alignemnts of S1 coding sequences
+<!-- ## Export matches to S-gene -->
+<!-- outfiles["S gene matches"] <- file.path( -->
+<!--   dir$outseq,  -->
+<!--   paste0("S-gene_", refGenomeName, "_matches.fasta")) -->
 
-```{r S1_align_queries}
+<!-- featureAlignmentsNto1All <- ExportSegmentMatches( -->
+<!--   refsequence = refSeq, -->
+<!--   genomes = genomes,  -->
+<!--   IDsuffix = "_S-gene", -->
+<!--   outfile = outfiles["S gene matches"]) -->
 
-refS1Limits <- refSpikeLimits[1] + 3*c(13,	685)
 
-#### N-to-1 alignments of S1-coding sequences ####
+<!-- kable(featureAlignmentsNto1All$stats[order(featureAlignmentsNto1All$stat$score, decreasing = TRUE),],  -->
+<!--         caption = "N-to-one alignment of S genes") -->
 
-## Get sequences for reference and query genomes
-refS1 <- subseq(genomes[refGenomeName], start = refS1Limits[1], end = refS1Limits[2])
+<!-- ``` -->
 
-S1Nto1 <- alignNtoOne(refSequence = refS1, querySequences = queryGenomes, type = "global-local")
+<!-- ## Export matches to the coding sequence of the S1 cleavage product -->
 
-kable(S1Nto1$stats[order(S1Nto1$stat$score, decreasing = TRUE),], 
-      caption = "N-to-one alignment of S1 coding sequence")
 
-```
+<!-- ## N-to-1 alignemnts of S1 coding sequences -->
 
-### S1 gene PIP plot
+<!-- ```{r S1_align_queries} -->
 
-```{r S1_pip, fig.width=10, fig.height=5, out.width="100%", fig.cap="Percent Identical Positions profile over the whole genome of SARS-CoV-2. "}
+<!-- refS1Limits <- refSpikeLimits[1] + 3*c(13,	685) -->
 
-## PIP profile of S1 N-to-1 alignments
-plotPIPprofiles(alignments = S1Nto1$alignments, 
-                windowSize = 200, 
-                legend = paste0(names(S1Nto1$alignments), " (", round(digits = 2, S1Nto1$stats$pid), "%)"),
-                main = paste0("S1 coding sequence - PIP profile", "\nRef: ", refGenomeName),
-                legendMargin = 0, legendCorner = "bottomleft", legendCex = 0.8, ylim = c(30, 100))
+<!-- #### N-to-1 alignments of S1-coding sequences #### -->
 
-```
+<!-- ## Get sequences for reference and query genomes -->
+<!-- refS1 <- subseq(genomes[refGenomeName], start = refS1Limits[1], end = refS1Limits[2]) -->
+
+<!-- S1Nto1 <- alignNtoOne(refSequence = refS1, querySequences = queryGenomes, type = "global-local") -->
+
+<!-- kable(S1Nto1$stats[order(S1Nto1$stat$score, decreasing = TRUE),],  -->
+<!--       caption = "N-to-one alignment of S1 coding sequence") -->
+
+<!-- ``` -->
+
+<!-- ### S1 gene PIP plot -->
+
+<!-- ```{r S1_pip, fig.width=10, fig.height=5, out.width="100%", fig.cap="Percent Identical Positions profile over the whole genome of SARS-CoV-2. "} -->
+
+<!-- ## PIP profile of S1 N-to-1 alignments -->
+<!-- plotPIPprofiles(alignments = S1Nto1$alignments,  -->
+<!--                 windowSize = 200, colors = strainColors,  -->
+<!--                 legend = paste0(names(S1Nto1$alignments), " (", round(digits = 2, S1Nto1$stats$pid), "%)"), -->
+<!--                 main = paste0("S1 coding sequence - PIP profile", "\nRef: ", refGenomeName), -->
+<!--                 legendMargin = 0, legendCorner = "bottomleft", legendCex = 0.8, ylim = c(30, 100)) -->
+
+<!-- ``` -->
 
 
 ## Output files
