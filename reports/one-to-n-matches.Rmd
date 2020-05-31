@@ -203,8 +203,8 @@ excludePatterns <- c("PnGu-P2S_2019")
 features <- list()
 
 
-
 #### Specific features  ####
+
 
 ## S1, first cleavage product of the spike protein
 features[['S1']] <- c(start = 21599, end = 23617, isCDS = TRUE)
@@ -214,10 +214,6 @@ features[['S2']] <- c(start = 23618, end = 25381, isCDS = TRUE)
 
 ## Receptor binding domain
 features[['RBD']] <- c(start = 22517, end = 23185, isCDS = FALSE)
-
-## Recombinant region inside the RBD
-features[['RBD-rec']] <- c(start = 22760, end = 23160, isCDS = FALSE)
-
 
 
 ## Regions around the insertions
@@ -231,12 +227,21 @@ features[['Ins4-m240']] <- c(start = 23363, end = 23614, isCDS = FALSE)
 
 ## Potential Pangolin origin after Xiao (https://doi.org/10.1101/2020.02.17.951335)
 features[['Recomb-Xiao']] <- c(start = 22871, end = 23092, isCDS = FALSE)
+
 ## Recombinant region 1 seen on the PIP profiles
-features[['Recomb-reg-1']] <- c(start = 21500, end = 22800, isCDS = FALSE)
+features[['Recomb-reg-1']] <- c(start = 2900, end = 3800, isCDS = FALSE)
+
 ## Recombinant region 2 seen on the PIP profiles
-features[['Recomb-reg-2']] <- c(start = 22800, end = 24000, isCDS = FALSE)
+features[['Recomb-reg-2']] <- c(start = 21000, end = 24000, isCDS = FALSE)
+
+
 ## Recombinant region 3 seen on the PIP profiles
-features[['Recomb-reg-3']] <- c(start = 27800, end = 28350, isCDS = FALSE)
+features[['Recomb-reg-3']] <- c(start = 27500, end = 28550, isCDS = FALSE)
+
+## Recombinant region 4 in the RBD
+## Slighty wider than Xiao's limits in order to see the context
+features[['Recomb-RBD']] <- c(start = 22700, end = 23200, isCDS = FALSE)
+# features[['Recomb-RBD']] <- c(start = 22760, end = 23160, isCDS = FALSE)
 
 ## Annotated coding sequences
 features[['CDS-S']] <- c(start = 21563, end = 25384, isCDS = TRUE) ## Spike gene
@@ -410,7 +415,7 @@ for (g in strainNames) {
 speciesPalette <- list(
   Human = "#880000",
   Bat = "#888888",
-  Pangolin = "#448800",
+  Pangolin = "#447700",
   Camel = "#BB8800",
   Pig = "#FFBBBB",
   Civet = "#00BBFF"
@@ -428,7 +433,7 @@ speciesPrefix <- c("Hu" = "Human",
 strainColor <- c(
   "HuCoV2_WH01_2019" = "red",
   "HuSARS-Frankfurt-1_2003" = "#0044BB",
-  "PnGu1_2019" = "#00BB00",
+  "PnGu1_2019" = "#00CC00",
   "PnMP789" = "#00FF88",
   "BtRaTG13_" = "#FF6600",
   "BtYu-RmYN" = "#FFBB22",
@@ -485,7 +490,9 @@ The collection `r collection` contains `r length(genomes)` virus genome sequence
 
 
 i <- 1
-i <- which(names(features) == "CDS-ORF10")
+testFeature <- "Recomb-RBD"
+i <- which(names(features) == testFeature)
+
 ## Rune one-ton matches and translation-based mumti^ple alignment + PIP profiles
 for (i in 1:length(features)) {
   featureName <- names(features)[i]
@@ -599,7 +606,12 @@ for (i in 1:length(features)) {
       filepath = outfiles[paste0(featurePrefix, "_tralignedAA")] )
   }
   
-  kable(featureAlignmentsNto1$stats[seqOrder,], 
+  ## Compute sequence order by decreasing PIP score
+  seqOrder <- order(featureAlignmentsNto1$stat$score, decreasing = TRUE)
+  
+
+  ## Print matching statistics
+  kable(featureAlignmentsNto1$stats[seqOrder, ], 
         caption = paste0(
           "One-to-N alignment of feature ", 
           featureName))
@@ -617,9 +629,6 @@ for (i in 1:length(features)) {
   } else {
     windowSize <- max(50, 10 * round(featureLength / 100))
   }
-
-  ## Compute sequence order by decreasing PIP score
-  seqOrder <- order(featureAlignmentsNto1$stat$score, decreasing = TRUE)
 
   
   ## DNA PIP profile of one-to-N alignment
