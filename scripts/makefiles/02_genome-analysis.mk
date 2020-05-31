@@ -47,6 +47,7 @@ targets:
 	@echo
 	@echo "Genomic features"
 	@echo "	one_feature			phylogeny of a given genomic feature in a given collection"
+	@echo "	phylo_from_traligned_dna	infer a feature phylogeny from its translation-based multiple alignment of DNA"
 	@echo "	all_features_one_collection	phylogeny of all genomic features in a given collection"
 	@echo "	all_features_all_collections	phylogeny of all genomic features in all collections"
 
@@ -77,8 +78,7 @@ FEATURES= 		\
 	CDS-ORF3a	\
 	CDS-ORF6	\
 	CDS-ORF7a	\
-	CDS-ORF8	\
-	genomes
+	CDS-ORF8
 FEATURE=S1
 
 ## Collections of genomes
@@ -100,10 +100,11 @@ PHYLO_DIR=results/${FEATURE}_${COLLECTION}/
 list_param:
 	@echo
 	@echo "Generic parameters"
-	@echo "	FEATURES		${FEATURES}"
-	@echo "	FEATURE			${FEATURE}"
 	@echo "	COLLECTIONS		${COLLECTIONS}"
 	@echo "	COLLECTION		${COLLECTION}"
+	@echo "	FEATURES		${FEATURES}"
+	@echo "	FEATURE			${FEATURE}"
+	@echo "	FEATURE_TASKS		${FEATURE_TASKS}"
 	@echo
 	@echo "Input sequences"
 	@echo "	INSEQ_DIR		${INSEQ_DIR}"
@@ -112,29 +113,40 @@ list_param:
 	@echo "	INSEQ_FILE		${INSEQ_FILE}"
 	@echo "	INSEQ_NB		${INSEQ_NB}"
 	@echo
-	@echo "Similarity searches with blastn"
-	@echo "	DB_TAXON_NAME		${DB_TAXON_NAME}"
-	@echo "	DB_TAXON_DIR		${DB_TAXON_DIR}"
-	@echo "	DB_TAXON_DB		${DB_TAXON_DB}"
-	@echo "	DB_TAXON_SEQ		${DB_TAXON_SEQ}"
-	@echo
 	@echo "Multiple alignments"
+	@echo
 	@echo "	MUSCLE_DIR		${MUSCLE_DIR}"
-	@echo "	MUSCLE_PREFIX		${MUSCLE_PREFIX}"
-	@echo "	CLUSTALW_PREFIX		${CLUSTALW_PREFIX}"
+	@echo "	MUSCLE_SUFFIX		${MUSCLE_SUFFIX}"
+	@echo "	MUSCLE_BASENAME		${MUSCLE_BASENAME}"
+	@echo "	MUSCLE_PATH		${MUSCLE_PATH}"
+	@echo "	MUSCLE_FILE		${MUSCLE_FILE}"
+	@echo
+	@echo "	CLUSTALW_DIR		${CLUSTALW_DIR}"
+	@echo "	CLUSTALW_SUFFIX		${CLUSTALW_SUFFIX}"
+	@echo "	CLUSTALW_BASENAME	${CLUSTALW_BASENAME}"
+	@echo "	CLUSTALW_PATH		${CLUSTALW_PATH}"
+	@echo "	CLUSTALW_FILE		${CLUSTALW_FILE}"
+	@echo
 	@echo "	MALIGN_SOFT		${MALIGN_SOFT}"
 	@echo "	MALIGN_DIR		${MALIGN_DIR}"
-	@echo "	MALIGN_PEFIX		${MALIGN_PREFIX}"
+	@echo "	MALIGN_SUFFIX		${MALIGN_SUFFIX}"
+	@echo "	MALIGN_BASENAME		${MALIGN_BASENAME}"
+	@echo "	MALIGN_PATH		${MALIGN_PATH}"
+	@echo "	MALIGN_FORMAT		${MALIGN_FORMAT}"
+	@echo "	MALIGN_EXT		${MALIGN_EXT}"
+	@echo "	MALIGN_FILE		${MALIGN_FILE}"
 	@echo
-	@echo "Alignemtn cleaning with gblocks"
-	@echo "	GBLOCKS_PREFIX		${GBLOCKS_PREFIX}"
+	@echo "Alignement cleaning with gblocks"
+	@echo "	GBLOCKS_DIR		${GBLOCKS_DIR}"
+	@echo "	GBLOCKS_PATH		${GBLOCKS_PATH}"
 	@echo
 	@echo "Molecular phylogeny"
 	@echo "	PHYLO_DIR		${PHYLO_DIR}"
 	@echo "	PHYLO_TASKS		${PHYLO_TASKS}"
 	@echo
 	@echo "PhyML parameters"
-	@echo "	PHYML_THREAD  		${PHYML_THREADS}"
+	@echo "	PHYML_INPATH  		${PHYML_INPATH}"
+	@echo "	PHYML_OUTPATH  		${PHYML_OUTPATH}"
 	@echo "	PHYML_MODEL		${PHYML_MODEL}"
 	@echo "	PHYML_ADDOPT		${PHYML_ADDOPT}"
 	@echo "	PHYML_OPT		${PHYML_OPT}"
@@ -143,88 +155,18 @@ list_param:
 
 
 ################################################################
-## Download blast-formatted database of Betacoronavirus genomes from NCBI
-GENOME_DIR=data/genomes/
-DB_TAXON_NAME=Betacoronavirus
-DB_TAXON_DIR=${GENOME_DIR€/${DB_TAXON_NAME}
-DB_TAXON_DB=${DB_TAXON_DIR}/${DB_TAXON_NAME}
-DB_TAXON_SEQ=${DB_TAXON_DIR}/${DB_TAXON_NAME}.fasta
-DOWNLOAD_NAME=Betacoronavirus
-DOWNLOAD_DIR=${GENOME_DIR}/${DOWNLOAD_NAME}
-DOWNLOAD_DB=${DOWNLOAD_DIR}/${DOWNLOAD_NAME}
-DOWNLOAD_SEQ=${DOWNLOAD_DIR}/${DOWNLOAD_NAME}.fasta
-download_db:
-	@echo "Downloading ${DOWNLOAD_DB} genomes from NCBI"
-	@mkdir -p ${DOWNLOAD_DIR}
-	(cd ${DOWNLOAD_DIR}; update_blastdb.pl --decompress ${DOWNLOAD_NAME}; blastdbcmd -entry all -db ${DOWNLOAD_NAME} -out ${DOWNLOAD_NAME}.fasta)
-	@echo "	DOWNLOAD_DIR	${DOWNLOAD_DIR}"
-	@ls -lt ${DOWNLOAD_DIR}
-
-## Download BLAST database of Betacoronavirus from NCBI
-download_betacov_db:
-	@${MAKE} download_db DOWNLOAD_NAME=Betacoronavirus
-
-## Download BLAST database of reference virus from NCBI
-download_virus_db:
-	@${MAKE} download_db DOWNLOAD_NAME=ref_viruses_rep_genomes
-
-
-################################################################
-## Format a viral genome for blast searches
-DB_ORG=SARS-CoV-2
-DB_DIR=${GENOME_DIR}/${DB_ORG}/
-DB_SEQ=${DB_DIR}/${DB_ORG}_genome_seq.fasta
-blastdb:
-	@echo "Formating genome	for virus	${DB_ORG}"
-	@echo "	DB_ORG		${DB_ORG}"
-	makeblastdb -in ${DB_SEQ}  -dbtype nucl
-	@echo "	DB_DIR		${DB_DIR}"
-	@echo "	DB_SEQ		${DB_SEQ}"
-
-################################################################
-## Search similarities between two viral genomes
-QUERY_ORG=HIV
-QUERY_DIR=${GENOME_DIR}/${QUERY_ORG}
-QUERY_SEQ=${QUERY_DIR}/${QUERY_ORG}_genome_seq.fasta
-BLAST_PREFIX=${QUERY_ORG}_vs_${DB_ORG}
-BLAST_DIR=results/genome_blast/${BLAST_PREFIX}
-BLAST_EXT=.txt
-BLAST_RESULT=${BLAST_DIR}/${BLAST_PREFIX}_blastn${BLAST_EXT}
-BLAST_TASK=blastn
-OUTFMT=2
-genome_blast:
-	@echo "Searching similarities between genomes"
-	@echo "	QUERY_ORG	${QUERY_ORG}"
-	@echo "	DB_ORG		${DB_ORG}"
-	@echo "	BLAST_DIR	${BLAST_DIR}"
-	@mkdir -p ${BLAST_DIR}
-	blastn -db ${DB_SEQ} -query ${QUERY_SEQ} -task ${BLAST_TASK} -outfmt ${OUTFMT} -out ${BLAST_RESULT}
-	@echo "	BLAST_RESULT		${BLAST_RESULT}"
-
-cov2_vs_hiv:
-	@${MAKE} DB_ORG=HIV QUERY_ORG=SARS-CoV-2 blastdb genome_blast
-
-hiv_vs_cov2:
-	@${MAKE} DB_ORG=SARS-CoV-2 QUERY_ORG=HIV blastdb genome_blast
-
-betacov_vs_hiv:
-	@${MAKE} QUERY_ORG=Betacoronavirus QUERY_SEQ=${DB_TAXON_SEQ} DB_ORG=HIV genome_blast OUTFMT=6 BLAST_EXT=.tsv
-
-hiv_vs_betacov:
-	@${MAKE} DB_ORG=Betacoronavirus DB_SEQ=${DB_TAXON_DB} QUERY_ORG=HIV genome_blast OUTFMT=6 BLAST_EXT=.tsv
-
-
-
-################################################################
 ## Align reference genomes with MUSCLE
-MUSCLE_DIR=results/genome_phylogeny/muscle_alignments/
-MUSCLE_PREFIX=${MUSCLE_DIR}/${GENOME_PREFIX}_aligned_muscle
+MUSCLE_DIR=results/${FEATURE}_${COLLECTION}/muscle_alignments/
+MUSCLE_SUFFIX=_aligned_muscle
+MUSCLE_BASENAME=${INSEQ_PREFIX}${MUSCLE_SUFFIX}
+MUSCLE_PATH=${MUSCLE_DIR}/${MUSCLE_BASENAME}
 MUSCLE_FORMAT=clw
 MUSCLE_EXT=aln
-MUSCLE_LOG=${MUSCLE_PREFIX}_${MUSCLE_FORMAT}_log.txt
+MUSCLE_LOG=${MUSCLE_PATH}_${MUSCLE_FORMAT}_log.txt
 MUSCLE_MAXHOURS=3
 MUSCLE_OPT=-maxhours ${MUSCLE_MAXHOURS}
-MUSCLE_LOG=${MUSCLE_PREFIX}_${MUSCLE_FORMAT}_log.txt
+MUSCLE_LOG=${MUSCLE_PATH}_${MUSCLE_FORMAT}_log.txt
+MUSCLE_FILE=${MUSCLE_PATH}.${MUSCLE_EXT}
 multalign_muscle: list_param
 	@echo "Aligning reference genomes wih muscle"
 	@echo "	GENOME_SEQ	${GENOME_SEQ}"
@@ -232,21 +174,24 @@ multalign_muscle: list_param
 	@mkdir -p ${MUSCLE_DIR}
 	${TIME} muscle -in ${GENOME_SEQ} -${MUSCLE_FORMAT} ${MUSCLE_OPT} \
 		-log ${MUSCLE_LOG} \
-		-out ${MUSCLE_PREFIX}.${MUSCLE_EXT}
-	@echo "	${MUSCLE_PREFIX}.${MUSCLE_EXT}"
+		-out ${MUSCLE_PATH}.${MUSCLE_EXT}
+	@echo "	${MUSCLE_PATH}.${MUSCLE_EXT}"
 
 
 ################################################################
 ## Align reference genomes with clustalw
-CLUSTALW_PREFIX=${PHYLO_DIR}/${INSEQ_PREFIX}_clustalw
-CLUSTALW_FILE=${CLUSTALW_PREFIX}.aln
+CLUSTALW_DIR=results/${FEATURE}_${COLLECTION}
+CLUSTALW_SUFFIX=_clustalw
+CLUSTALW_BASENAME=${INSEQ_PREFIX}${CLUSTALW_SUFFIX}
+CLUSTALW_PATH=${CLUSTALW_DIR}/${CLUSTALW_BASENAME}
+CLUSTALW_FILE=${CLUSTALW_PATH}.aln
 multialign_clustalw: 
 	@echo "Aligning reference genomes wih clustalw"
 #	@echo "	INSEQ_DIR	${INSEQ_DIR}"
 #	@echo "	INSEQ_PREFIX	${INSEQ_PREFIX}"
 	@echo "	INSEQ_FILE	${INSEQ_FILE}"
 	@echo "	PHYLO_DIR	${PHYLO_DIR}"
-	@echo "	CLUSTALW_PREFIX	${CLUSTALW_PREFIX}"
+	@echo "	CLUSTALW_PATH	${CLUSTALW_PATH}"
 	@mkdir -p ${PHYLO_DIR}
 	${TIME} clustalw -infile=${INSEQ_FILE} \
 		-align -type=dna -quicktree \
@@ -254,35 +199,48 @@ multialign_clustalw:
 	@echo "	${CLUSTALW_FILE}"
 	@echo
 	@echo "Converting alignment to fasta format"
-	seqret -sequence ${CLUSTALW_FILE} -sformat aln -osformat fasta -outseq ${CLUSTALW_PREFIX}.fasta
-	@echo "	${CLUSTALW_PREFIX}.fasta"
+	seqret -sequence ${CLUSTALW_FILE} -sformat aln -osformat fasta -outseq ${CLUSTALW_PATH}.fasta
+	@echo "	${CLUSTALW_PATH}.fasta"
 	@${MAKE} nj_tree
 
 ################################################################
 ## Clean the multiple alignments with gblocks
 MALIGN_SOFT=clustalw
-MALIGN_DIR=${PHYLO_DIR}
-MALIGN_PREFIX=${CLUSTALW_PREFIX}
+MALIGN_DIR=${CLUSTALW_DIR}
+MALIGN_SUFFIX=${CLUSTALW_SUFFIX}
+MALIGN_BASENAME=${INSEQ_PREFIX}${MALIGN_SUFFIX}
+MALIGN_PATH=${MALIGN_DIR}/${MALIGN_BASENAME}
+MALIGN_FORMAT=aln
+MALIGN_EXT=.${MALIGN_FORMAT}
+MALIGN_FILE=${MALIGN_PATH}${MALIGN_EXT}
 GBLOCKS_EXT=.gb
 GBLOCKS_OPT=-t=d -b3=8 -b4=10 -g -e=${GBLOCKS_EXT}
-GBLOCKS_PREFIX=${MALIGN_PREFIX}.pir${GBLOCKS_EXT}
-GBLOCKS_LOG=${GBLOCKS_PREFIX}_logs.txt
+GBLOCKS_PATH=${MALIGN_PATH}.pir${GBLOCKS_EXT}
+GBLOCKS_LOG=${GBLOCKS_PATH}_logs.txt
 _gblocks_clean:
-	Gblocks ${MALIGN_PREFIX}.pir ${GBLOCKS_OPT} >& ${GBLOCKS_LOG}
+	Gblocks ${MALIGN_PATH}.pir ${GBLOCKS_OPT} >& ${GBLOCKS_LOG}
 
 gblocks_clean:
 	@echo
 	@echo "Converting alignment to PIR/PIR format"
-	@echo "	CLUSTALW_PREFIX	${CLUSTALW_PREFIX}"
-	seqret -sequence ${CLUSTALW_FILE} -sformat aln -osformat pir -outseq ${CLUSTALW_PREFIX}.pir
-	@echo "	${CLUSTALW_PREFIX}.pir"
+	@echo "	CLUSTALW_PATH	${CLUSTALW_PATH}"
+	seqret -sequence ${MALIGN_FILE} -sformat ${MALIGN_FORMAT} -osformat pir -outseq ${MALIGN_PATH}.pir
+	@echo "	${MALIGN_PATH}.pir"
 	@echo
 	@echo "Cleaning ${MALIGN_SOFT} alignments with gblocks"
 	@echo ""
 	@${MAKE} -i _gblocks_clean 2> /dev/null
-	@echo "	GBLOCKS_PREFIX	${GBLOCKS_PREFIX}"
+	@echo "	GBLOCKS_PATH	${GBLOCKS_PATH}"
 	@echo "	GBLOCKS_LOG	${GBLOCKS_LOG}"
 	@echo
+
+################################################################
+## Convert input sequence to clustalw format (.aln)
+to_aln:
+	@echo
+	@echo "Converting alignment from ${MALIGN_FORMAT} to aln format"
+	seqret -sequence ${MALIGN_FILE} -sformat ${MALIGN_FORMAT} -osformat aln -outseq ${MALIGN_PATH}.aln
+	@echo "	${MALIGN_PATH}.aln"
 
 
 ################################################################
@@ -291,13 +249,13 @@ nj_tree:
 	@echo
 	@echo "Generating species tree from aligned genomes with Neighbour-Joining method"
 	${TIME} clustalw -tree \
-		-infile=${MALIGN_PREFIX}.aln -type=dna \
+		-infile=${MALIGN_PATH}.aln -type=dna \
 		-clustering=NJ
 	${TIME} clustalw -bootstrap=1000 \
-		-infile=${MALIGN_PREFIX}.aln -type=dna \
+		-infile=${MALIGN_PATH}.aln -type=dna \
 		-clustering=NJ 
-	@echo "	${MALIGN_PREFIX}.ph"
-	@echo "	${MALIGN_PREFIX}.phb"
+	@echo "	${MALIGN_PATH}.ph"
+	@echo "	${MALIGN_PATH}.phb"
 
 # ################################################################
 # ## Convert sequences from clustalw format (aln extension) to phylip
@@ -305,12 +263,12 @@ nj_tree:
 # aln2phy:
 # 	@echo "Converting sequence from aln to phy"
 # 	seqret -auto -stdout \
-# 		-sequence ${MALIGN_PREFIX}.aln \
+# 		-sequence ${MALIGN_PATH}.aln \
 # 		-snucleotide1 \
 # 		-sformat1 clustal \
 # 		-osformat2 phylip \
-# 		>  ${MALIGN_PREFIX}.phy
-# 	@echo "	${MALIGN_PREFIX}.phy"
+# 		>  ${MALIGN_PATH}.phy
+# 	@echo "	${MALIGN_PATH}.phy"
 
 ################################################################
 ## Infer a phylogenetic tree of coronaviruses from their aligned
@@ -320,25 +278,26 @@ PHYML_BOOTSTRAP=100
 PHYML_MODEL=GTR
 PHYML_ADDOPT=
 PHYML_OPT=--datatype nt --bootstrap ${PHYML_BOOTSTRAP} --model ${PHYML_MODEL} ${PHYML_ADDOPT}
-PHYML_PREFIX=${MALIGN_PREFIX}_gblocks_${PHYML_MODEL}.phy_phyml_tree
-PHYML_TREE=${PHYML_PREFIX}.phb
+PHYML_INPATH=${MALIGN_PATH}_gblocks_${PHYML_MODEL}
+PHYML_OUTPATH=${PHYML_INPATH}.phy_phyml_tree
+PHYML_TREE=${PHYML_OUTPATH}.phb
 run_phyml:
 	@echo "Shortening sequence names"
-	@perl -pe 's|^>(.{12}).*|>$$1|' ${GBLOCKS_PREFIX} > ${GBLOCKS_PREFIX}_shortnames
-	@echo "	${GBLOCKS_PREFIX}_shortnames"
+	@perl -pe 's|^>(.{12}).*|>$$1|' ${GBLOCKS_PATH} > ${GBLOCKS_PATH}_shortnames
+	@echo "	${GBLOCKS_PATH}_shortnames"
 	@echo
 	@echo "Converting gblocks result to phylip format"
 	seqret -auto -stdout \
-		-sequence ${GBLOCKS_PREFIX}_shortnames \
+		-sequence ${GBLOCKS_PATH}_shortnames \
 		-sformat1 pir \
 		-snucleotide1 \
 		-osformat2 phylip \
-		>  ${MALIGN_PREFIX}_gblocks_${PHYML_MODEL}.phy
-	@echo "	${MALIGN_PREFIX}_gblocks.phy"
+		>  ${PHYML_INPATH}.phy
+	@echo "	${MALIGN_PATH}_gblocks.phy"
 	@echo
 	@echo "Inferring phylogeny with phyml"
-	${TIME} mpirun -n ${PHYML_THREADS} phyml-mpi --input ${MALIGN_PREFIX}_gblocks_${PHYML_MODEL}.phy ${PHYML_OPT}
-	cp ${PHYML_PREFIX}.txt ${PHYML_TREE}
+	${TIME} mpirun -n ${PHYML_THREADS} phyml-mpi --input ${PHYML_INPATH}.phy ${PHYML_OPT}
+	cp ${PHYML_OUTPATH}.txt ${PHYML_TREE}
 	@echo "	"
 	@echo "	PHYLO_DIR		${PHYLO_DIR}"
 	@echo "	PHYML_TREE		${PHYML_TREE}"
@@ -401,7 +360,7 @@ _Sgenes:
 # \
 # 		INSEQ_PREFIX=S-gene_${COLLECTION} \
 # 		PHYLO_DIR=results/S-gene/clustalw_alignments \
-# 		CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_${COLLECTION}
+# 		CLUSTALW_PATH=results/S-gene/clustalw_alignments/S-gene_${COLLECTION}
 
 Sgenes_around-cov2:
 	@${MAKE} _Sgenes COLLECTION=around-CoV-2
@@ -413,7 +372,7 @@ Sgenes_selected:
 # 	INSEQ_DIR=${SGENE_DIR} \
 # 	INSEQ_PREFIX=S-gene_selected \
 # 	PHYLO_DIR=results/S-gene/clustalw_alignments \
-# 	CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_selected
+# 	CLUSTALW_PATH=results/S-gene/clustalw_alignments/S-gene_selected
 
 ################################################################
 ## S-gene phylogeny for selected genomes from Genbank + GISAID
@@ -426,7 +385,7 @@ Sgenes_selected_gisaid:
 # 	INSEQ_DIR=${GISAID_DIR} \
 # 	INSEQ_PREFIX=S-gene_selected-plus-GISAID \
 # 	PHYLO_DIR=results/S-gene/clustalw_alignments \
-# 	CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_selected-plus-GISAID
+# 	CLUSTALW_PATH=results/S-gene/clustalw_alignments/S-gene_selected-plus-GISAID
 
 ################################################################
 ## S-gene phylogeny for genomes from Genbank + GISAID around-cov-2
@@ -439,7 +398,7 @@ Sgenes_around-cov-2_gisaid:
 #		INSEQ_DIR=${GISAID_DIR} \
 #		INSEQ_PREFIX=S-gene_around-cov-2-plus-GISAID \
 #		PHYLO_DIR=results/S-gene/clustalw_alignments \
-#		CLUSTALW_PREFIX=results/S-gene/clustalw_alignments/S-gene_around-cov-2-plus-GISAID
+#		CLUSTALW_PATH=results/S-gene/clustalw_alignments/S-gene_around-cov-2-plus-GISAID
 
 ################################################################
 ## Run phylogenic analysis on genomic regions obtained by one-to-N
@@ -451,13 +410,20 @@ one_feature:
 #	@echo "	COLLECTION	 ${COLLECTION}"
 	@${MAKE} ${PHYLO_TASKS}
 
+## Infer a feature phylogeny from its translation-based multiple alignment of DNA
+phylo_from_traligned_dna:
+	@echo
+	@echo "Inferring feature phylogeny from translation-based multiple alignment of DNA"	
+	${MAKE} MALIGN_SOFT=R MALIGN_FORMAT=fasta MALIGN_EXT=.fasta MALIGN_SUFFIX=_tralignedDNA ${PHYLO_TASKS}
+
+FEATURE_TASKS=phylo_from_traligned_dna
 all_features_one_collection:
 	@echo
 	@echo "Running phylogenetic analysis for all genomic features"
 	@echo "	FEATURES	${FEATURES}"
 	@echo "	COLLECTION	${COLLECTION}"
 	@for feature in ${FEATURES} ; do \
-		${MAKE} FEATURE=$${feature} ${PHYLO_TASKS} ; \
+		${MAKE} FEATURE=$${feature} ${FEATURE_TASKS} ; \
 	done
 
 all_features_all_collections:
@@ -468,3 +434,5 @@ all_features_all_collections:
 	@for collection in ${COLLECTIONS} ; do \
 		${MAKE} COLLECTION=$${collection} all_features_one_collection; \
 	done;
+
+
