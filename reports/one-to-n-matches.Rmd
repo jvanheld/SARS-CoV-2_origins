@@ -1,5 +1,5 @@
 ---
-knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file ='one-to-n-matches_around-CoV-2-plus-GISAID.html') })
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file ='one-to-n-matches_selected-plus-GISAID.html') })
 title: "One-to-N sequence matches in coronavirus genomes"
 author: "Jacques van Helden"
 date: "`r Sys.Date()`"
@@ -137,8 +137,8 @@ collections <- c(
 # collection <- "around-CoV-2" # 14 strains
 # collection <- "all" # 16 strains
 # collection <- "selected" # ~60 strains
-collection <- "around-CoV-2-plus-GISAID" # 16 strains
-# collection <- "selected-plus-GISAID" # ~40 strains
+# collection <- "around-CoV-2-plus-GISAID" # 16 strains
+collection <- "selected-plus-GISAID" # ~40 strains
 # collection <- "all-plus-GISAID" # ~60 strains
 
 ## Choose a collection-specific path for the figures
@@ -278,7 +278,6 @@ featureTable$length <- featureTable$end - featureTable$start + 1
 
 featureTable <- featureTable[order(featureTable$start), ]
 
-kable(featureTable, caption = "Feature coordinates. ")
 
 message("Analysing ", length(features), " features")
 message("\t", paste(collapse = ", ", names(features)))
@@ -475,6 +474,13 @@ kable(strainStats, caption = "Reference and query genomes")
 
 The collection `r collection` contains `r length(genomes)` virus genome sequences.
 
+## Features
+
+```{r feature_table}
+## Print feature coordinates
+kable(featureTable, caption = "Feature coordinates. ")
+
+```
 
 
 ## Feature matches and alignments
@@ -642,8 +648,10 @@ for (i in 1:length(features)) {
     #    colors = NULL,
     colors = strainColors,
     legendMargin = 0.25,
-    legendCorner = "topright", lwd = 1,
-    legendCex = 0.5, ylim = c(30, 100))
+    legendCorner = "topright", 
+    lwd = 1,
+    legendCex = 0.5, 
+    ylim = c(30, 100))
 
   ## Identify the correspodences between matches and sequences
   seqNames <- names(featureAlignmentsNto1$alignments)

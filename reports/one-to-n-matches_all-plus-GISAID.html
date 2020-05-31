@@ -11,7 +11,7 @@
 
 <meta name="author" content="Jacques van Helden" />
 
-<meta name="date" content="2020-05-23" />
+<meta name="date" content="2020-05-31" />
 
 <title>One-to-N sequence matches in coronavirus genomes</title>
 
@@ -352,14 +352,14 @@ div.tocify {
 
 <h1 class="title toc-ignore">One-to-N sequence matches in coronavirus genomes</h1>
 <h4 class="author">Jacques van Helden</h4>
-<h4 class="date">2020-05-23</h4>
+<h4 class="date">2020-05-31</h4>
 
 </div>
 
 
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co">#### General parameters for the analysis ####</span></a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1-3" data-line-number="3">reloadImage &lt;-<span class="st"> </span><span class="ot">FALSE</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">reloadImage &lt;-<span class="st"> </span><span class="ot">FALSE</span></a>
+<a class="sourceLine" id="cb1-3" data-line-number="3">quickTest &lt;-<span class="st"> </span><span class="ot">FALSE</span> <span class="co"># if True, only analyse the 2 first features</span></a>
 <a class="sourceLine" id="cb1-4" data-line-number="4"></a>
 <a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co">#### Sequence collection ####</span></a>
 <a class="sourceLine" id="cb1-6" data-line-number="6"></a>
@@ -400,214 +400,390 @@ div.tocify {
 <a class="sourceLine" id="cb1-41" data-line-number="41">dir &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">main =</span> <span class="st">&#39;..&#39;</span>)</a>
 <a class="sourceLine" id="cb1-42" data-line-number="42">dir<span class="op">$</span>R &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>main, <span class="st">&quot;scripts/R&quot;</span>)</a>
 <a class="sourceLine" id="cb1-43" data-line-number="43"></a>
-<a class="sourceLine" id="cb1-44" data-line-number="44"><span class="co">#### Create output directory for sequences ####</span></a>
+<a class="sourceLine" id="cb1-44" data-line-number="44"><span class="co">## Input directory for sequences</span></a>
 <a class="sourceLine" id="cb1-45" data-line-number="45">dir<span class="op">$</span>seqdata &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>main, <span class="st">&quot;data&quot;</span>)</a>
 <a class="sourceLine" id="cb1-46" data-line-number="46"><span class="kw">dir.create</span>(dir<span class="op">$</span>seqdata, <span class="dt">showWarnings =</span> <span class="ot">FALSE</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a>
 <a class="sourceLine" id="cb1-47" data-line-number="47"></a>
-<a class="sourceLine" id="cb1-48" data-line-number="48"><span class="co">## Instantiate a list for output files</span></a>
-<a class="sourceLine" id="cb1-49" data-line-number="49">outfiles &lt;-<span class="st"> </span><span class="kw">vector</span>()</a>
-<a class="sourceLine" id="cb1-50" data-line-number="50"></a>
-<a class="sourceLine" id="cb1-51" data-line-number="51"><span class="co">## Memory image</span></a>
-<a class="sourceLine" id="cb1-52" data-line-number="52">dir<span class="op">$</span>images &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>main, <span class="st">&quot;memory_images&quot;</span>)</a>
-<a class="sourceLine" id="cb1-53" data-line-number="53"><span class="kw">dir.create</span>(dir<span class="op">$</span>images, <span class="dt">recursive =</span> <span class="ot">TRUE</span>, <span class="dt">showWarnings =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb1-54" data-line-number="54">outfiles[<span class="st">&quot;Memory image&quot;</span>] &lt;-<span class="st"> </span><span class="kw">file.path</span>(</a>
-<a class="sourceLine" id="cb1-55" data-line-number="55">  dir<span class="op">$</span>images, </a>
-<a class="sourceLine" id="cb1-56" data-line-number="56">  <span class="kw">paste0</span>(collection, <span class="st">&quot;_one-to-n_matches.Rdata&quot;</span>))</a>
-<a class="sourceLine" id="cb1-57" data-line-number="57"></a>
-<a class="sourceLine" id="cb1-58" data-line-number="58"><span class="co">## Input files</span></a>
-<a class="sourceLine" id="cb1-59" data-line-number="59">infiles &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
-<a class="sourceLine" id="cb1-60" data-line-number="60"></a>
-<a class="sourceLine" id="cb1-61" data-line-number="61"><span class="co">## Output tables</span></a>
-<a class="sourceLine" id="cb1-62" data-line-number="62"><span class="co"># di$output &lt;- file.path(dir.main, &quot;&quot;)</span></a>
-<a class="sourceLine" id="cb1-63" data-line-number="63"><span class="co"># dir$tables &lt;- </span></a>
-<a class="sourceLine" id="cb1-64" data-line-number="64"></a>
-<a class="sourceLine" id="cb1-65" data-line-number="65"><span class="co">## Load custom functions</span></a>
-<a class="sourceLine" id="cb1-66" data-line-number="66"><span class="kw">source</span>(<span class="kw">file.path</span>(dir<span class="op">$</span>R, <span class="st">&quot;align_n_to_one.R&quot;</span>))</a>
-<a class="sourceLine" id="cb1-67" data-line-number="67"><span class="kw">source</span>(<span class="kw">file.path</span>(dir<span class="op">$</span>R, <span class="st">&quot;plot_pip_profiles.R&quot;</span>))</a>
-<a class="sourceLine" id="cb1-68" data-line-number="68"></a>
-<a class="sourceLine" id="cb1-69" data-line-number="69"><span class="co">## A unequivocal pattern to identify the reference genome in the sequence names of the input file</span></a>
-<a class="sourceLine" id="cb1-70" data-line-number="70">refPattern &lt;-<span class="st"> &quot;HuCoV2_WH01_2019&quot;</span></a>
-<a class="sourceLine" id="cb1-71" data-line-number="71"></a>
-<a class="sourceLine" id="cb1-72" data-line-number="72"><span class="co">## Exclude some genomes with a lot of Ns, because they bias the PIP profiles and alignments and trees</span></a>
-<a class="sourceLine" id="cb1-73" data-line-number="73">excludePatterns &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;PnMP789&quot;</span>, <span class="st">&quot;PnGu-P2S_2019&quot;</span>)</a>
+<a class="sourceLine" id="cb1-48" data-line-number="48"></a>
+<a class="sourceLine" id="cb1-49" data-line-number="49"><span class="co">## Create output directory for aligned sequences</span></a>
+<a class="sourceLine" id="cb1-50" data-line-number="50">dir<span class="op">$</span>results &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>main, <span class="st">&quot;results&quot;</span>)</a>
+<a class="sourceLine" id="cb1-51" data-line-number="51"><span class="kw">dir.create</span>(dir<span class="op">$</span>results, <span class="dt">showWarnings =</span> <span class="ot">FALSE</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-52" data-line-number="52"></a>
+<a class="sourceLine" id="cb1-53" data-line-number="53"><span class="co">## Instantiate a list for output files</span></a>
+<a class="sourceLine" id="cb1-54" data-line-number="54">outfiles &lt;-<span class="st"> </span><span class="kw">vector</span>()</a>
+<a class="sourceLine" id="cb1-55" data-line-number="55"></a>
+<a class="sourceLine" id="cb1-56" data-line-number="56"><span class="co">## Memory image</span></a>
+<a class="sourceLine" id="cb1-57" data-line-number="57">dir<span class="op">$</span>images &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>main, <span class="st">&quot;memory_images&quot;</span>)</a>
+<a class="sourceLine" id="cb1-58" data-line-number="58"><span class="kw">dir.create</span>(dir<span class="op">$</span>images, <span class="dt">recursive =</span> <span class="ot">TRUE</span>, <span class="dt">showWarnings =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-59" data-line-number="59">outfiles[<span class="st">&quot;Memory image&quot;</span>] &lt;-<span class="st"> </span><span class="kw">file.path</span>(</a>
+<a class="sourceLine" id="cb1-60" data-line-number="60">  dir<span class="op">$</span>images, </a>
+<a class="sourceLine" id="cb1-61" data-line-number="61">  <span class="kw">paste0</span>(collection, <span class="st">&quot;_one-to-n_matches.Rdata&quot;</span>))</a>
+<a class="sourceLine" id="cb1-62" data-line-number="62"></a>
+<a class="sourceLine" id="cb1-63" data-line-number="63"><span class="co">## Input files</span></a>
+<a class="sourceLine" id="cb1-64" data-line-number="64">infiles &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
+<a class="sourceLine" id="cb1-65" data-line-number="65"></a>
+<a class="sourceLine" id="cb1-66" data-line-number="66"><span class="co">## Output tables</span></a>
+<a class="sourceLine" id="cb1-67" data-line-number="67"><span class="co"># di$output &lt;- file.path(dir.main, &quot;&quot;)</span></a>
+<a class="sourceLine" id="cb1-68" data-line-number="68"><span class="co"># dir$tables &lt;- </span></a>
+<a class="sourceLine" id="cb1-69" data-line-number="69"></a>
+<a class="sourceLine" id="cb1-70" data-line-number="70"><span class="co">## Load custom functions</span></a>
+<a class="sourceLine" id="cb1-71" data-line-number="71"><span class="kw">source</span>(<span class="kw">file.path</span>(dir<span class="op">$</span>R, <span class="st">&quot;align_n_to_one.R&quot;</span>))</a>
+<a class="sourceLine" id="cb1-72" data-line-number="72"><span class="kw">source</span>(<span class="kw">file.path</span>(dir<span class="op">$</span>R, <span class="st">&quot;plot_pip_profiles.R&quot;</span>))</a>
+<a class="sourceLine" id="cb1-73" data-line-number="73"><span class="kw">source</span>(<span class="kw">file.path</span>(dir<span class="op">$</span>R, <span class="st">&quot;plot_pip_profiles_from_list.R&quot;</span>))</a>
 <a class="sourceLine" id="cb1-74" data-line-number="74"></a>
-<a class="sourceLine" id="cb1-75" data-line-number="75"><span class="co">#### Features of interest in the reference genome ####</span></a>
-<a class="sourceLine" id="cb1-76" data-line-number="76"></a>
-<a class="sourceLine" id="cb1-77" data-line-number="77">features &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
-<a class="sourceLine" id="cb1-78" data-line-number="78"></a>
-<a class="sourceLine" id="cb1-79" data-line-number="79"></a>
-<a class="sourceLine" id="cb1-80" data-line-number="80"><span class="co">#### Specific features  ####</span></a>
-<a class="sourceLine" id="cb1-81" data-line-number="81"></a>
-<a class="sourceLine" id="cb1-82" data-line-number="82"><span class="co">## Regions around the insertions</span></a>
-<a class="sourceLine" id="cb1-83" data-line-number="83">features[[<span class="st">&#39;Ins1-pm120&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21647</span>, <span class="dt">end =</span> <span class="dv">21907</span>)</a>
-<a class="sourceLine" id="cb1-84" data-line-number="84">features[[<span class="st">&#39;Ins2-pm120&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21899</span>, <span class="dt">end =</span> <span class="dv">22156</span>)</a>
-<a class="sourceLine" id="cb1-85" data-line-number="85">features[[<span class="st">&#39;Ins3-pm120&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21899</span>, <span class="dt">end =</span> <span class="dv">23152</span>)</a>
-<a class="sourceLine" id="cb1-86" data-line-number="86">features[[<span class="st">&#39;Ins4-pm120&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">23483</span>, <span class="dt">end =</span> <span class="dv">23734</span>)</a>
-<a class="sourceLine" id="cb1-87" data-line-number="87">features[[<span class="st">&#39;Ins4-m240&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">23363</span>, <span class="dt">end =</span> <span class="dv">23614</span>)</a>
+<a class="sourceLine" id="cb1-75" data-line-number="75"><span class="co">## A unequivocal pattern to identify the reference genome in the sequence names of the input file</span></a>
+<a class="sourceLine" id="cb1-76" data-line-number="76">refPattern &lt;-<span class="st"> &quot;HuCoV2_WH01_2019&quot;</span></a>
+<a class="sourceLine" id="cb1-77" data-line-number="77"></a>
+<a class="sourceLine" id="cb1-78" data-line-number="78"><span class="co">## Exclude some genomes with a lot of Ns, because they bias the PIP profiles and alignments and trees</span></a>
+<a class="sourceLine" id="cb1-79" data-line-number="79">excludePatterns &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;PnGu-P2S_2019&quot;</span>)</a>
+<a class="sourceLine" id="cb1-80" data-line-number="80"></a>
+<a class="sourceLine" id="cb1-81" data-line-number="81"><span class="co">#### Features of interest in the reference genome ####</span></a>
+<a class="sourceLine" id="cb1-82" data-line-number="82"></a>
+<a class="sourceLine" id="cb1-83" data-line-number="83">features &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
+<a class="sourceLine" id="cb1-84" data-line-number="84"></a>
+<a class="sourceLine" id="cb1-85" data-line-number="85"></a>
+<a class="sourceLine" id="cb1-86" data-line-number="86"><span class="co">#### Specific features  ####</span></a>
+<a class="sourceLine" id="cb1-87" data-line-number="87"></a>
 <a class="sourceLine" id="cb1-88" data-line-number="88"></a>
-<a class="sourceLine" id="cb1-89" data-line-number="89"><span class="co">## Potential Pangolin origin after Xiao (https://doi.org/10.1101/2020.02.17.951335)</span></a>
-<a class="sourceLine" id="cb1-90" data-line-number="90">features[[<span class="st">&#39;Recomb-Xiao&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">22871</span>, <span class="dt">end =</span> <span class="dv">23092</span>)</a>
-<a class="sourceLine" id="cb1-91" data-line-number="91"><span class="co">## Recombinant region 1 seen on the PIP profiles</span></a>
-<a class="sourceLine" id="cb1-92" data-line-number="92">features[[<span class="st">&#39;Recomb-reg-1&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21500</span>, <span class="dt">end =</span> <span class="dv">22800</span>)</a>
-<a class="sourceLine" id="cb1-93" data-line-number="93"><span class="co">## Recombinant region 2 seen on the PIP profiles</span></a>
-<a class="sourceLine" id="cb1-94" data-line-number="94">features[[<span class="st">&#39;Recomb-reg-2&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">22800</span>, <span class="dt">end =</span> <span class="dv">24000</span>)</a>
-<a class="sourceLine" id="cb1-95" data-line-number="95"><span class="co">## Recombinant region 3 seen on the PIP profiles</span></a>
-<a class="sourceLine" id="cb1-96" data-line-number="96">features[[<span class="st">&#39;Recomb-reg-3&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27800</span>, <span class="dt">end =</span> <span class="dv">28350</span>)</a>
+<a class="sourceLine" id="cb1-89" data-line-number="89"><span class="co">## S1, first cleavage product of the spike protein</span></a>
+<a class="sourceLine" id="cb1-90" data-line-number="90">features[[<span class="st">&#39;S1&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21599</span>, <span class="dt">end =</span> <span class="dv">23617</span>, <span class="dt">isCDS =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-91" data-line-number="91"></a>
+<a class="sourceLine" id="cb1-92" data-line-number="92"><span class="co">## S2, second cleavage product of the spike protein</span></a>
+<a class="sourceLine" id="cb1-93" data-line-number="93">features[[<span class="st">&#39;S2&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">23618</span>, <span class="dt">end =</span> <span class="dv">25381</span>, <span class="dt">isCDS =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-94" data-line-number="94"></a>
+<a class="sourceLine" id="cb1-95" data-line-number="95"><span class="co">## Receptor binding domain</span></a>
+<a class="sourceLine" id="cb1-96" data-line-number="96">features[[<span class="st">&#39;RBD&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">22517</span>, <span class="dt">end =</span> <span class="dv">23185</span>, <span class="dt">isCDS =</span> <span class="ot">FALSE</span>)</a>
 <a class="sourceLine" id="cb1-97" data-line-number="97"></a>
-<a class="sourceLine" id="cb1-98" data-line-number="98"><span class="co">## Annotated coding sequences</span></a>
-<a class="sourceLine" id="cb1-99" data-line-number="99">features[[<span class="st">&#39;CDS-S&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21563</span>, <span class="dt">end =</span> <span class="dv">25384</span>) <span class="co">## Spike gene</span></a>
-<a class="sourceLine" id="cb1-100" data-line-number="100">features[[<span class="st">&#39;CDS-ORF3a&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">25393</span>, <span class="dt">end =</span> <span class="dv">26220</span>)</a>
-<a class="sourceLine" id="cb1-101" data-line-number="101">features[[<span class="st">&#39;CDS-E&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">26245</span>, <span class="dt">end =</span> <span class="dv">26472</span>)</a>
-<a class="sourceLine" id="cb1-102" data-line-number="102">features[[<span class="st">&#39;CDS-M&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">26523</span>, <span class="dt">end =</span> <span class="dv">27191</span>)</a>
-<a class="sourceLine" id="cb1-103" data-line-number="103">features[[<span class="st">&#39;CDS-ORF6&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27202</span>, <span class="dt">end =</span> <span class="dv">27387</span>)</a>
-<a class="sourceLine" id="cb1-104" data-line-number="104">features[[<span class="st">&#39;CDS-ORF7a&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27394</span>, <span class="dt">end =</span> <span class="dv">27759</span>)</a>
-<a class="sourceLine" id="cb1-105" data-line-number="105">features[[<span class="st">&#39;CDS-ORF8&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27894</span>, <span class="dt">end =</span> <span class="dv">28259</span>)</a>
-<a class="sourceLine" id="cb1-106" data-line-number="106">features[[<span class="st">&#39;CDS-N&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">28274</span>, <span class="dt">end =</span> <span class="dv">29533</span>)</a>
-<a class="sourceLine" id="cb1-107" data-line-number="107">features[[<span class="st">&#39;CDS-ORF10&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">29558</span>, <span class="dt">end =</span> <span class="dv">29674</span>)</a>
-<a class="sourceLine" id="cb1-108" data-line-number="108">features[[<span class="st">&#39;CDS-ORF1ab&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">266</span>, <span class="dt">end =</span> <span class="dv">21555</span>)</a>
-<a class="sourceLine" id="cb1-109" data-line-number="109"></a>
-<a class="sourceLine" id="cb1-110" data-line-number="110"><span class="co">## All the sequences after the bif ORF coding for the polyproteinn 1ab</span></a>
-<a class="sourceLine" id="cb1-111" data-line-number="111">features[[<span class="st">&#39;After-ORF1ab&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21556</span>, <span class="dt">end =</span> <span class="dv">29899</span>)</a>
-<a class="sourceLine" id="cb1-112" data-line-number="112"></a>
-<a class="sourceLine" id="cb1-113" data-line-number="113"><span class="co">## Report the parameters</span></a>
-<a class="sourceLine" id="cb1-114" data-line-number="114"><span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Reference strain: &quot;</span>, refPattern)</a></code></pre></div>
+<a class="sourceLine" id="cb1-98" data-line-number="98"></a>
+<a class="sourceLine" id="cb1-99" data-line-number="99"><span class="co">## Regions around the insertions</span></a>
+<a class="sourceLine" id="cb1-100" data-line-number="100">features[[<span class="st">&#39;Ins1-pm120&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21647</span>, <span class="dt">end =</span> <span class="dv">21907</span>, <span class="dt">isCDS =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-101" data-line-number="101">features[[<span class="st">&#39;Ins2-pm120&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21899</span>, <span class="dt">end =</span> <span class="dv">22156</span>, <span class="dt">isCDS =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-102" data-line-number="102">features[[<span class="st">&#39;Ins3-pm120&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21899</span>, <span class="dt">end =</span> <span class="dv">23152</span>, <span class="dt">isCDS =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-103" data-line-number="103">features[[<span class="st">&#39;Ins4-pm120&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">23483</span>, <span class="dt">end =</span> <span class="dv">23734</span>, <span class="dt">isCDS =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-104" data-line-number="104">features[[<span class="st">&#39;Ins4-m240&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">23363</span>, <span class="dt">end =</span> <span class="dv">23614</span>, <span class="dt">isCDS =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-105" data-line-number="105"></a>
+<a class="sourceLine" id="cb1-106" data-line-number="106"><span class="co">## Receptor-binding domain</span></a>
+<a class="sourceLine" id="cb1-107" data-line-number="107"></a>
+<a class="sourceLine" id="cb1-108" data-line-number="108"><span class="co">## Potential Pangolin origin after Xiao (https://doi.org/10.1101/2020.02.17.951335)</span></a>
+<a class="sourceLine" id="cb1-109" data-line-number="109">features[[<span class="st">&#39;Recomb-Xiao&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">22871</span>, <span class="dt">end =</span> <span class="dv">23092</span>, <span class="dt">isCDS =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-110" data-line-number="110"></a>
+<a class="sourceLine" id="cb1-111" data-line-number="111"><span class="co">## Recombinant region 1 seen on the PIP profiles</span></a>
+<a class="sourceLine" id="cb1-112" data-line-number="112">features[[<span class="st">&#39;Recomb-reg-1&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">2900</span>, <span class="dt">end =</span> <span class="dv">3800</span>, <span class="dt">isCDS =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-113" data-line-number="113"></a>
+<a class="sourceLine" id="cb1-114" data-line-number="114"><span class="co">## Recombinant region 2 seen on the PIP profiles</span></a>
+<a class="sourceLine" id="cb1-115" data-line-number="115">features[[<span class="st">&#39;Recomb-reg-2&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21000</span>, <span class="dt">end =</span> <span class="dv">24000</span>, <span class="dt">isCDS =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-116" data-line-number="116"></a>
+<a class="sourceLine" id="cb1-117" data-line-number="117"></a>
+<a class="sourceLine" id="cb1-118" data-line-number="118"><span class="co">## Recombinant region 3 seen on the PIP profiles</span></a>
+<a class="sourceLine" id="cb1-119" data-line-number="119">features[[<span class="st">&#39;Recomb-reg-3&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27500</span>, <span class="dt">end =</span> <span class="dv">28550</span>, <span class="dt">isCDS =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-120" data-line-number="120"></a>
+<a class="sourceLine" id="cb1-121" data-line-number="121"><span class="co">## Recombinant region 4 in the RBD</span></a>
+<a class="sourceLine" id="cb1-122" data-line-number="122"><span class="co">## Slighty wider than Xiao&#39;s limits in order to see the context</span></a>
+<a class="sourceLine" id="cb1-123" data-line-number="123">features[[<span class="st">&#39;Recomb-RBD&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">22700</span>, <span class="dt">end =</span> <span class="dv">23200</span>, <span class="dt">isCDS =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-124" data-line-number="124"><span class="co"># features[[&#39;Recomb-RBD&#39;]] &lt;- c(start = 22760, end = 23160, isCDS = FALSE)</span></a>
+<a class="sourceLine" id="cb1-125" data-line-number="125"></a>
+<a class="sourceLine" id="cb1-126" data-line-number="126"><span class="co">## Annotated coding sequences</span></a>
+<a class="sourceLine" id="cb1-127" data-line-number="127">features[[<span class="st">&#39;CDS-S&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21563</span>, <span class="dt">end =</span> <span class="dv">25384</span>, <span class="dt">isCDS =</span> <span class="ot">TRUE</span>) <span class="co">## Spike gene</span></a>
+<a class="sourceLine" id="cb1-128" data-line-number="128">features[[<span class="st">&#39;CDS-ORF3a&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">25393</span>, <span class="dt">end =</span> <span class="dv">26220</span>, <span class="dt">isCDS =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-129" data-line-number="129">features[[<span class="st">&#39;CDS-E&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">26245</span>, <span class="dt">end =</span> <span class="dv">26472</span>, <span class="dt">isCDS =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-130" data-line-number="130">features[[<span class="st">&#39;CDS-M&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">26523</span>, <span class="dt">end =</span> <span class="dv">27191</span>, <span class="dt">isCDS =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-131" data-line-number="131">features[[<span class="st">&#39;CDS-ORF6&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27202</span>, <span class="dt">end =</span> <span class="dv">27387</span>, <span class="dt">isCDS =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-132" data-line-number="132">features[[<span class="st">&#39;CDS-ORF7a&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27394</span>, <span class="dt">end =</span> <span class="dv">27759</span>, <span class="dt">isCDS =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-133" data-line-number="133">features[[<span class="st">&#39;CDS-ORF8&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">27894</span>, <span class="dt">end =</span> <span class="dv">28259</span>, <span class="dt">isCDS =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-134" data-line-number="134">features[[<span class="st">&#39;CDS-N&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">28274</span>, <span class="dt">end =</span> <span class="dv">29533</span>, <span class="dt">isCDS =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-135" data-line-number="135">features[[<span class="st">&#39;CDS-ORF10&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">29558</span>, <span class="dt">end =</span> <span class="dv">29674</span>, <span class="dt">isCDS =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-136" data-line-number="136"></a>
+<a class="sourceLine" id="cb1-137" data-line-number="137"><span class="co">## Large ORF covering 2 thirds of the genome, coding for polyprotein</span></a>
+<a class="sourceLine" id="cb1-138" data-line-number="138">features[[<span class="st">&#39;CDS-ORF1ab&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">266</span>, <span class="dt">end =</span> <span class="dv">21555</span>, <span class="dt">isCDS =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-139" data-line-number="139"></a>
+<a class="sourceLine" id="cb1-140" data-line-number="140"><span class="co">## All the sequences after the big polyprotein-coding ORF1ab</span></a>
+<a class="sourceLine" id="cb1-141" data-line-number="141">features[[<span class="st">&#39;After-ORF1ab&#39;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">start =</span> <span class="dv">21556</span>, <span class="dt">end =</span> <span class="dv">29899</span>, <span class="dt">isCDS =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-142" data-line-number="142"></a>
+<a class="sourceLine" id="cb1-143" data-line-number="143"><span class="co">## Only keep the two first features if quick test has been specified</span></a>
+<a class="sourceLine" id="cb1-144" data-line-number="144"><span class="cf">if</span> (quickTest) {</a>
+<a class="sourceLine" id="cb1-145" data-line-number="145">  features &lt;-<span class="st"> </span>features[<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>]</a>
+<a class="sourceLine" id="cb1-146" data-line-number="146">}</a>
+<a class="sourceLine" id="cb1-147" data-line-number="147"></a>
+<a class="sourceLine" id="cb1-148" data-line-number="148"><span class="co">## Convert feature list into a feature tbale</span></a>
+<a class="sourceLine" id="cb1-149" data-line-number="149">featureTable &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(<span class="kw">t</span>(<span class="kw">as.data.frame.list</span>(</a>
+<a class="sourceLine" id="cb1-150" data-line-number="150">  features, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)),</a>
+<a class="sourceLine" id="cb1-151" data-line-number="151">  <span class="dt">row.names =</span> <span class="kw">names</span>(features)  <span class="co"># to avoid replacement of &quot;-&quot; by &quot;.&quot;</span></a>
+<a class="sourceLine" id="cb1-152" data-line-number="152">  )</a>
+<a class="sourceLine" id="cb1-153" data-line-number="153"></a>
+<a class="sourceLine" id="cb1-154" data-line-number="154"><span class="co"># class(featureTable)</span></a>
+<a class="sourceLine" id="cb1-155" data-line-number="155">featureTable<span class="op">$</span>length &lt;-<span class="st"> </span>featureTable<span class="op">$</span>end <span class="op">-</span><span class="st"> </span>featureTable<span class="op">$</span>start <span class="op">+</span><span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb1-156" data-line-number="156"><span class="co"># row.names(featureTable)</span></a>
+<a class="sourceLine" id="cb1-157" data-line-number="157"><span class="co"># featureTable[&quot;CDS.S&quot;, ]</span></a>
+<a class="sourceLine" id="cb1-158" data-line-number="158"></a>
+<a class="sourceLine" id="cb1-159" data-line-number="159">featureTable &lt;-<span class="st"> </span>featureTable[<span class="kw">order</span>(featureTable<span class="op">$</span>start), ]</a>
+<a class="sourceLine" id="cb1-160" data-line-number="160"></a>
+<a class="sourceLine" id="cb1-161" data-line-number="161"><span class="kw">kable</span>(featureTable, <span class="dt">caption =</span> <span class="st">&quot;Feature coordinates. &quot;</span>)</a></code></pre></div>
+<table>
+<caption>Feature coordinates.</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">start</th>
+<th align="right">end</th>
+<th align="right">isCDS</th>
+<th align="right">length</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CDS-ORF1ab</td>
+<td align="right">266</td>
+<td align="right">21555</td>
+<td align="right">1</td>
+<td align="right">21290</td>
+</tr>
+<tr class="even">
+<td>Recomb-reg-1</td>
+<td align="right">2900</td>
+<td align="right">3800</td>
+<td align="right">0</td>
+<td align="right">901</td>
+</tr>
+<tr class="odd">
+<td>Recomb-reg-2</td>
+<td align="right">21000</td>
+<td align="right">24000</td>
+<td align="right">0</td>
+<td align="right">3001</td>
+</tr>
+<tr class="even">
+<td>After-ORF1ab</td>
+<td align="right">21556</td>
+<td align="right">29899</td>
+<td align="right">0</td>
+<td align="right">8344</td>
+</tr>
+<tr class="odd">
+<td>CDS-S</td>
+<td align="right">21563</td>
+<td align="right">25384</td>
+<td align="right">1</td>
+<td align="right">3822</td>
+</tr>
+<tr class="even">
+<td>S1</td>
+<td align="right">21599</td>
+<td align="right">23617</td>
+<td align="right">1</td>
+<td align="right">2019</td>
+</tr>
+<tr class="odd">
+<td>Ins1-pm120</td>
+<td align="right">21647</td>
+<td align="right">21907</td>
+<td align="right">0</td>
+<td align="right">261</td>
+</tr>
+<tr class="even">
+<td>Ins2-pm120</td>
+<td align="right">21899</td>
+<td align="right">22156</td>
+<td align="right">0</td>
+<td align="right">258</td>
+</tr>
+<tr class="odd">
+<td>Ins3-pm120</td>
+<td align="right">21899</td>
+<td align="right">23152</td>
+<td align="right">0</td>
+<td align="right">1254</td>
+</tr>
+<tr class="even">
+<td>RBD</td>
+<td align="right">22517</td>
+<td align="right">23185</td>
+<td align="right">0</td>
+<td align="right">669</td>
+</tr>
+<tr class="odd">
+<td>Recomb-RBD</td>
+<td align="right">22700</td>
+<td align="right">23200</td>
+<td align="right">0</td>
+<td align="right">501</td>
+</tr>
+<tr class="even">
+<td>Recomb-Xiao</td>
+<td align="right">22871</td>
+<td align="right">23092</td>
+<td align="right">0</td>
+<td align="right">222</td>
+</tr>
+<tr class="odd">
+<td>Ins4-m240</td>
+<td align="right">23363</td>
+<td align="right">23614</td>
+<td align="right">0</td>
+<td align="right">252</td>
+</tr>
+<tr class="even">
+<td>Ins4-pm120</td>
+<td align="right">23483</td>
+<td align="right">23734</td>
+<td align="right">0</td>
+<td align="right">252</td>
+</tr>
+<tr class="odd">
+<td>S2</td>
+<td align="right">23618</td>
+<td align="right">25381</td>
+<td align="right">1</td>
+<td align="right">1764</td>
+</tr>
+<tr class="even">
+<td>CDS-ORF3a</td>
+<td align="right">25393</td>
+<td align="right">26220</td>
+<td align="right">1</td>
+<td align="right">828</td>
+</tr>
+<tr class="odd">
+<td>CDS-E</td>
+<td align="right">26245</td>
+<td align="right">26472</td>
+<td align="right">1</td>
+<td align="right">228</td>
+</tr>
+<tr class="even">
+<td>CDS-M</td>
+<td align="right">26523</td>
+<td align="right">27191</td>
+<td align="right">1</td>
+<td align="right">669</td>
+</tr>
+<tr class="odd">
+<td>CDS-ORF6</td>
+<td align="right">27202</td>
+<td align="right">27387</td>
+<td align="right">1</td>
+<td align="right">186</td>
+</tr>
+<tr class="even">
+<td>CDS-ORF7a</td>
+<td align="right">27394</td>
+<td align="right">27759</td>
+<td align="right">1</td>
+<td align="right">366</td>
+</tr>
+<tr class="odd">
+<td>Recomb-reg-3</td>
+<td align="right">27500</td>
+<td align="right">28550</td>
+<td align="right">0</td>
+<td align="right">1051</td>
+</tr>
+<tr class="even">
+<td>CDS-ORF8</td>
+<td align="right">27894</td>
+<td align="right">28259</td>
+<td align="right">1</td>
+<td align="right">366</td>
+</tr>
+<tr class="odd">
+<td>CDS-N</td>
+<td align="right">28274</td>
+<td align="right">29533</td>
+<td align="right">1</td>
+<td align="right">1260</td>
+</tr>
+<tr class="even">
+<td>CDS-ORF10</td>
+<td align="right">29558</td>
+<td align="right">29674</td>
+<td align="right">1</td>
+<td align="right">117</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">message</span>(<span class="st">&quot;Analysing &quot;</span>, <span class="kw">length</span>(features), <span class="st">&quot; features&quot;</span>)</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>, <span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;, &quot;</span>, <span class="kw">names</span>(features)))</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="co">## Report the parameters</span></a>
+<a class="sourceLine" id="cb2-5" data-line-number="5"><span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Reference strain: &quot;</span>, refPattern)</a></code></pre></div>
 <div id="strain-collection-all-plus-gisaid" class="section level2">
 <h2>Strain collection: all-plus-GISAID</h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co">## Genome dir and files</span></a>
-<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="cf">if</span> (<span class="kw">length</span>(<span class="kw">grep</span>(<span class="dt">pattern =</span> <span class="st">&quot;GISAID&quot;</span>, <span class="dt">x =</span> collection)) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) {</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3">  useGISAID &lt;-<span class="st"> </span><span class="ot">TRUE</span></a>
-<a class="sourceLine" id="cb2-4" data-line-number="4">  dir<span class="op">$</span>sequences &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>main, <span class="st">&quot;data&quot;</span>, <span class="st">&quot;GISAID_genomes&quot;</span>)</a>
-<a class="sourceLine" id="cb2-5" data-line-number="5">  <span class="co"># collections &lt;-  paste0(collections, &quot;-plus-GISAID&quot;)</span></a>
-<a class="sourceLine" id="cb2-6" data-line-number="6">  <span class="co"># collection &lt;-  paste0(collection, &quot;-plus-GISAID&quot;)</span></a>
-<a class="sourceLine" id="cb2-7" data-line-number="7">} <span class="cf">else</span> {</a>
-<a class="sourceLine" id="cb2-8" data-line-number="8">  dir<span class="op">$</span>sequences &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>main, <span class="st">&quot;data&quot;</span>, <span class="st">&quot;genomes&quot;</span>)</a>
-<a class="sourceLine" id="cb2-9" data-line-number="9">}</a>
-<a class="sourceLine" id="cb2-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb2-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="co">## Define the input sequences</span></a>
-<a class="sourceLine" id="cb2-13" data-line-number="13">infiles<span class="op">$</span>sequences &lt;-<span class="st"> </span><span class="kw">file.path</span>(</a>
-<a class="sourceLine" id="cb2-14" data-line-number="14">  dir<span class="op">$</span>sequences, </a>
-<a class="sourceLine" id="cb2-15" data-line-number="15">  <span class="kw">paste0</span>(<span class="st">&quot;genomes_&quot;</span>, collection, <span class="st">&quot;.fasta&quot;</span>))</a>
-<a class="sourceLine" id="cb2-16" data-line-number="16"></a>
-<a class="sourceLine" id="cb2-17" data-line-number="17"><span class="co">## Check if the input  sequence file exists</span></a>
-<a class="sourceLine" id="cb2-18" data-line-number="18"><span class="cf">if</span> (<span class="op">!</span><span class="kw">file.exists</span>(infiles<span class="op">$</span>sequences)) {</a>
-<a class="sourceLine" id="cb2-19" data-line-number="19">  <span class="kw">stop</span>(<span class="st">&quot;Genome sequence file is missing&quot;</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>, infiles<span class="op">$</span>sequences)</a>
-<a class="sourceLine" id="cb2-20" data-line-number="20">} <span class="cf">else</span> {</a>
-<a class="sourceLine" id="cb2-21" data-line-number="21">  <span class="kw">message</span>(<span class="st">&quot;Genome sequence file&quot;</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>, infiles<span class="op">$</span>sequences)</a>
-<a class="sourceLine" id="cb2-22" data-line-number="22">}</a>
-<a class="sourceLine" id="cb2-23" data-line-number="23"></a>
-<a class="sourceLine" id="cb2-24" data-line-number="24"><span class="co">#### Load genome sequences ####</span></a>
-<a class="sourceLine" id="cb2-25" data-line-number="25">genomes &lt;-<span class="st"> </span><span class="kw">readDNAStringSet</span>(<span class="dt">filepath =</span> infiles<span class="op">$</span>sequences, <span class="dt">format =</span> <span class="st">&quot;fasta&quot;</span>)</a>
-<a class="sourceLine" id="cb2-26" data-line-number="26"></a>
-<a class="sourceLine" id="cb2-27" data-line-number="27"><span class="co">## Shorten sequence names by suppressing the fasta comment (after the space)</span></a>
-<a class="sourceLine" id="cb2-28" data-line-number="28"><span class="kw">names</span>(genomes) &lt;-<span class="st"> </span><span class="kw">sub</span>(<span class="dt">pattern =</span> <span class="st">&quot; .*&quot;</span>, <span class="dt">replacement =</span> <span class="st">&quot;&quot;</span>, <span class="dt">x =</span> <span class="kw">names</span>(genomes), <span class="dt">perl =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb2-29" data-line-number="29"></a>
-<a class="sourceLine" id="cb2-30" data-line-number="30"><span class="co">## Exclude genomes</span></a>
-<a class="sourceLine" id="cb2-31" data-line-number="31"><span class="cf">if</span> (excludeIncomplete) {</a>
-<a class="sourceLine" id="cb2-32" data-line-number="32">  excludePattern =<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;(&quot;</span>, <span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;)|(&quot;</span>, excludePatterns), <span class="st">&quot;)&quot;</span>)</a>
-<a class="sourceLine" id="cb2-33" data-line-number="33">  excludedstrainNames &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="dt">pattern =</span> excludePattern, <span class="dt">x =</span> <span class="kw">names</span>(genomes), </a>
-<a class="sourceLine" id="cb2-34" data-line-number="34">                              <span class="dt">value =</span> <span class="ot">TRUE</span>, <span class="dt">invert =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb2-35" data-line-number="35">  filteredGenomeIndices &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="dt">pattern =</span> excludePattern, <span class="dt">x =</span> <span class="kw">names</span>(genomes), </a>
-<a class="sourceLine" id="cb2-36" data-line-number="36">                                <span class="dt">value =</span> <span class="ot">FALSE</span>, <span class="dt">invert =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb2-37" data-line-number="37">  <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Excluded &quot;</span>, <span class="kw">length</span>(excludedstrainNames),<span class="st">&quot; genomes: &quot;</span>, <span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;, &quot;</span>, excludedstrainNames)) </a>
-<a class="sourceLine" id="cb2-38" data-line-number="38">  <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Remaining genomes: &quot;</span>, <span class="kw">length</span>(filteredGenomeIndices))</a>
-<a class="sourceLine" id="cb2-39" data-line-number="39">  genomes &lt;-<span class="st"> </span>genomes[filteredGenomeIndices]</a>
-<a class="sourceLine" id="cb2-40" data-line-number="40"><span class="co"># names(genomes)</span></a>
-<a class="sourceLine" id="cb2-41" data-line-number="41">}</a>
-<a class="sourceLine" id="cb2-42" data-line-number="42"></a>
-<a class="sourceLine" id="cb2-43" data-line-number="43"><span class="co">## Report the number of genoomes</span></a>
-<a class="sourceLine" id="cb2-44" data-line-number="44">strainNames &lt;-<span class="st"> </span><span class="kw">names</span>(genomes)</a>
-<a class="sourceLine" id="cb2-45" data-line-number="45">nbStrains &lt;-<span class="st"> </span><span class="kw">length</span>(strainNames)</a>
-<a class="sourceLine" id="cb2-46" data-line-number="46"><span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Loaded &quot;</span>, nbStrains, <span class="st">&quot; genomes from file &quot;</span>, infiles<span class="op">$</span>sequences)</a>
-<a class="sourceLine" id="cb2-47" data-line-number="47"><span class="co"># View(genomes)</span></a>
-<a class="sourceLine" id="cb2-48" data-line-number="48"></a>
-<a class="sourceLine" id="cb2-49" data-line-number="49"></a>
-<a class="sourceLine" id="cb2-50" data-line-number="50"><span class="co">#### Define reference and query genomes ####</span></a>
-<a class="sourceLine" id="cb2-51" data-line-number="51">refStrainName &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="dt">pattern =</span> refPattern, <span class="dt">x =</span> <span class="kw">names</span>(genomes), </a>
-<a class="sourceLine" id="cb2-52" data-line-number="52">                      <span class="dt">ignore.case =</span> <span class="ot">TRUE</span>, <span class="dt">value =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb2-53" data-line-number="53"><span class="cf">if</span> (<span class="kw">is.null</span>(refStrainName)) {</a>
-<a class="sourceLine" id="cb2-54" data-line-number="54">  <span class="kw">stop</span>(<span class="st">&quot;Could not identify reference genome with pattern &quot;</span>, refPattern)</a>
-<a class="sourceLine" id="cb2-55" data-line-number="55">}</a>
-<a class="sourceLine" id="cb2-56" data-line-number="56"><span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Reference genome name: &quot;</span>, refStrainName)</a>
-<a class="sourceLine" id="cb2-57" data-line-number="57"></a>
-<a class="sourceLine" id="cb2-58" data-line-number="58"><span class="co">## Compute some statistics about sequence sizes</span></a>
-<a class="sourceLine" id="cb2-59" data-line-number="59">strainStats &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
-<a class="sourceLine" id="cb2-60" data-line-number="60">  <span class="dt">n =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(genomes),</a>
-<a class="sourceLine" id="cb2-61" data-line-number="61">  <span class="dt">row.names =</span> <span class="kw">names</span>(genomes),</a>
-<a class="sourceLine" id="cb2-62" data-line-number="62">  <span class="dt">status =</span> <span class="kw">rep</span>(<span class="st">&quot;Query&quot;</span>, <span class="dt">length.out =</span> <span class="kw">length</span>(strainNames))</a>
-<a class="sourceLine" id="cb2-63" data-line-number="63">)</a>
-<a class="sourceLine" id="cb2-64" data-line-number="64">strainStats[,<span class="st">&quot;status&quot;</span>] &lt;-<span class="st"> </span><span class="kw">as.vector</span>(strainStats[,<span class="st">&quot;status&quot;</span>])</a>
-<a class="sourceLine" id="cb2-65" data-line-number="65">strainStats[refStrainName,<span class="st">&quot;status&quot;</span>] &lt;-<span class="st"> &quot;Reference&quot;</span></a>
-<a class="sourceLine" id="cb2-66" data-line-number="66">g &lt;-<span class="st"> </span><span class="dv">1</span></a>
-<a class="sourceLine" id="cb2-67" data-line-number="67"><span class="cf">for</span> (g <span class="cf">in</span> strainNames) {</a>
-<a class="sourceLine" id="cb2-68" data-line-number="68">  strainStats[g, <span class="st">&quot;length&quot;</span>] &lt;-<span class="st"> </span><span class="kw">length</span>(genomes[[g]])</a>
-<a class="sourceLine" id="cb2-69" data-line-number="69">}</a></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co">#### Define the color associated to each sequence ####</span></a>
-<a class="sourceLine" id="cb3-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="co">## Color palette per species</span></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4">speciesPalette &lt;-<span class="st"> </span><span class="kw">list</span>(</a>
-<a class="sourceLine" id="cb3-5" data-line-number="5">  <span class="dt">Human =</span> <span class="st">&quot;#880000&quot;</span>,</a>
-<a class="sourceLine" id="cb3-6" data-line-number="6">  <span class="dt">Bat =</span> <span class="st">&quot;#888888&quot;</span>,</a>
-<a class="sourceLine" id="cb3-7" data-line-number="7">  <span class="dt">Pangolin =</span> <span class="st">&quot;#448800&quot;</span>,</a>
-<a class="sourceLine" id="cb3-8" data-line-number="8">  <span class="dt">Camel =</span> <span class="st">&quot;#BB8800&quot;</span>,</a>
-<a class="sourceLine" id="cb3-9" data-line-number="9">  <span class="dt">Pig =</span> <span class="st">&quot;#FFBBBB&quot;</span>,</a>
-<a class="sourceLine" id="cb3-10" data-line-number="10">  <span class="dt">Civet =</span> <span class="st">&quot;#00BBFF&quot;</span></a>
-<a class="sourceLine" id="cb3-11" data-line-number="11">)</a>
-<a class="sourceLine" id="cb3-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb3-13" data-line-number="13"><span class="co">## Species prefix in the tip labels</span></a>
-<a class="sourceLine" id="cb3-14" data-line-number="14">speciesPrefix &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Hu&quot;</span> =<span class="st"> &quot;Human&quot;</span>,</a>
-<a class="sourceLine" id="cb3-15" data-line-number="15">                   <span class="st">&quot;Bt&quot;</span> =<span class="st"> &quot;Bat&quot;</span>,</a>
-<a class="sourceLine" id="cb3-16" data-line-number="16">                   <span class="st">&quot;Pn&quot;</span> =<span class="st"> &quot;Pangolin&quot;</span>,</a>
-<a class="sourceLine" id="cb3-17" data-line-number="17">                   <span class="st">&quot;Cm&quot;</span> =<span class="st"> &quot;Camel&quot;</span>,</a>
-<a class="sourceLine" id="cb3-18" data-line-number="18">                   <span class="st">&quot;Pi&quot;</span> =<span class="st"> &quot;Pig&quot;</span>,</a>
-<a class="sourceLine" id="cb3-19" data-line-number="19">                   <span class="st">&quot;Cv&quot;</span> =<span class="st"> &quot;Civet&quot;</span>)</a>
-<a class="sourceLine" id="cb3-20" data-line-number="20"></a>
-<a class="sourceLine" id="cb3-21" data-line-number="21"><span class="co">## Strain-specific colors</span></a>
-<a class="sourceLine" id="cb3-22" data-line-number="22">strainColor &lt;-<span class="st"> </span><span class="kw">c</span>(</a>
-<a class="sourceLine" id="cb3-23" data-line-number="23">  <span class="st">&quot;HuCoV2_WH01_2019&quot;</span> =<span class="st"> &quot;red&quot;</span>,</a>
-<a class="sourceLine" id="cb3-24" data-line-number="24">  <span class="st">&quot;HuSARS-Frankfurt-1_2003&quot;</span> =<span class="st"> &quot;#0044BB&quot;</span>,</a>
-<a class="sourceLine" id="cb3-25" data-line-number="25">  <span class="st">&quot;PnGu1_2019&quot;</span> =<span class="st"> &quot;#00BB00&quot;</span>,</a>
-<a class="sourceLine" id="cb3-26" data-line-number="26">  <span class="st">&quot;BtRaTG13_&quot;</span> =<span class="st"> &quot;#FF6600&quot;</span>,</a>
-<a class="sourceLine" id="cb3-27" data-line-number="27">  <span class="st">&quot;BtYu-RmYN&quot;</span> =<span class="st"> &quot;#FFBB22&quot;</span>,</a>
-<a class="sourceLine" id="cb3-28" data-line-number="28">  <span class="st">&quot;BtZXC21&quot;</span> =<span class="st"> &quot;black&quot;</span>, </a>
-<a class="sourceLine" id="cb3-29" data-line-number="29">  <span class="st">&quot;BtZC45&quot;</span> =<span class="st"> &quot;black&quot;</span>)</a>
-<a class="sourceLine" id="cb3-30" data-line-number="30"></a>
-<a class="sourceLine" id="cb3-31" data-line-number="31"><span class="co">## Identify species per tip</span></a>
-<a class="sourceLine" id="cb3-32" data-line-number="32"><span class="cf">for</span> (prefix <span class="cf">in</span> <span class="kw">names</span>(speciesPrefix)) {</a>
-<a class="sourceLine" id="cb3-33" data-line-number="33">  strainStats[<span class="kw">grep</span>(<span class="dt">pattern =</span> <span class="kw">paste0</span>(<span class="st">&quot;^&quot;</span>, prefix), <span class="dt">x =</span> <span class="kw">row.names</span>(strainStats), <span class="dt">perl =</span> <span class="ot">TRUE</span>), <span class="st">&quot;species&quot;</span>] &lt;-<span class="st"> </span>speciesPrefix[prefix]</a>
-<a class="sourceLine" id="cb3-34" data-line-number="34">  </a>
-<a class="sourceLine" id="cb3-35" data-line-number="35">}</a>
-<a class="sourceLine" id="cb3-36" data-line-number="36"></a>
-<a class="sourceLine" id="cb3-37" data-line-number="37"><span class="co">## Assign acolor to each species</span></a>
-<a class="sourceLine" id="cb3-38" data-line-number="38">strainStats<span class="op">$</span>color &lt;-<span class="st"> &quot;grey&quot;</span> <span class="co"># default</span></a>
-<a class="sourceLine" id="cb3-39" data-line-number="39">strainStats<span class="op">$</span>color &lt;-<span class="st"> </span>speciesPalette[<span class="kw">as.vector</span>(strainStats<span class="op">$</span>species)]</a>
-<a class="sourceLine" id="cb3-40" data-line-number="40"></a>
-<a class="sourceLine" id="cb3-41" data-line-number="41"><span class="cf">for</span> (strain <span class="cf">in</span> <span class="kw">names</span>(strainColor)) {</a>
-<a class="sourceLine" id="cb3-42" data-line-number="42">  strainStats[<span class="kw">grep</span>(<span class="dt">pattern =</span> <span class="kw">paste0</span>(<span class="st">&quot;^&quot;</span>, strain), </a>
-<a class="sourceLine" id="cb3-43" data-line-number="43">                  <span class="dt">x =</span> <span class="kw">row.names</span>(strainStats), <span class="dt">perl =</span> <span class="ot">TRUE</span>), <span class="st">&quot;color&quot;</span>] &lt;-<span class="st"> </span>strainColor[strain]</a>
-<a class="sourceLine" id="cb3-44" data-line-number="44">  </a>
-<a class="sourceLine" id="cb3-45" data-line-number="45">}</a>
-<a class="sourceLine" id="cb3-46" data-line-number="46"></a>
-<a class="sourceLine" id="cb3-47" data-line-number="47"></a>
-<a class="sourceLine" id="cb3-48" data-line-number="48"><span class="co">## Assign specific color to some nodes</span></a>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co">## Genome dir and files</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="cf">if</span> (<span class="kw">length</span>(<span class="kw">grep</span>(<span class="dt">pattern =</span> <span class="st">&quot;GISAID&quot;</span>, <span class="dt">x =</span> collection)) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) {</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">  useGISAID &lt;-<span class="st"> </span><span class="ot">TRUE</span></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">  dir<span class="op">$</span>sequences &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>main, <span class="st">&quot;data&quot;</span>, <span class="st">&quot;GISAID_genomes&quot;</span>)</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">  <span class="co"># collections &lt;-  paste0(collections, &quot;-plus-GISAID&quot;)</span></a>
+<a class="sourceLine" id="cb3-6" data-line-number="6">  <span class="co"># collection &lt;-  paste0(collection, &quot;-plus-GISAID&quot;)</span></a>
+<a class="sourceLine" id="cb3-7" data-line-number="7">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb3-8" data-line-number="8">  dir<span class="op">$</span>sequences &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>main, <span class="st">&quot;data&quot;</span>, <span class="st">&quot;genomes&quot;</span>)</a>
+<a class="sourceLine" id="cb3-9" data-line-number="9">}</a>
+<a class="sourceLine" id="cb3-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb3-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb3-12" data-line-number="12"><span class="co">## Define the input sequences</span></a>
+<a class="sourceLine" id="cb3-13" data-line-number="13">infiles<span class="op">$</span>sequences &lt;-<span class="st"> </span><span class="kw">file.path</span>(</a>
+<a class="sourceLine" id="cb3-14" data-line-number="14">  dir<span class="op">$</span>sequences, </a>
+<a class="sourceLine" id="cb3-15" data-line-number="15">  <span class="kw">paste0</span>(<span class="st">&quot;genomes_&quot;</span>, collection, <span class="st">&quot;.fasta&quot;</span>))</a>
+<a class="sourceLine" id="cb3-16" data-line-number="16"></a>
+<a class="sourceLine" id="cb3-17" data-line-number="17"><span class="co">## Check if the input  sequence file exists</span></a>
+<a class="sourceLine" id="cb3-18" data-line-number="18"><span class="cf">if</span> (<span class="op">!</span><span class="kw">file.exists</span>(infiles<span class="op">$</span>sequences)) {</a>
+<a class="sourceLine" id="cb3-19" data-line-number="19">  <span class="kw">stop</span>(<span class="st">&quot;Genome sequence file is missing&quot;</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>, infiles<span class="op">$</span>sequences)</a>
+<a class="sourceLine" id="cb3-20" data-line-number="20">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb3-21" data-line-number="21">  <span class="kw">message</span>(<span class="st">&quot;Genome sequence file&quot;</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>, infiles<span class="op">$</span>sequences)</a>
+<a class="sourceLine" id="cb3-22" data-line-number="22">}</a>
+<a class="sourceLine" id="cb3-23" data-line-number="23"></a>
+<a class="sourceLine" id="cb3-24" data-line-number="24"><span class="co">#### Load genome sequences ####</span></a>
+<a class="sourceLine" id="cb3-25" data-line-number="25">genomes &lt;-<span class="st"> </span><span class="kw">readDNAStringSet</span>(<span class="dt">filepath =</span> infiles<span class="op">$</span>sequences, <span class="dt">format =</span> <span class="st">&quot;fasta&quot;</span>)</a>
+<a class="sourceLine" id="cb3-26" data-line-number="26"></a>
+<a class="sourceLine" id="cb3-27" data-line-number="27"><span class="co">## Shorten sequence names by suppressing the fasta comment (after the space)</span></a>
+<a class="sourceLine" id="cb3-28" data-line-number="28"><span class="kw">names</span>(genomes) &lt;-<span class="st"> </span><span class="kw">sub</span>(<span class="dt">pattern =</span> <span class="st">&quot; .*&quot;</span>, <span class="dt">replacement =</span> <span class="st">&quot;&quot;</span>, <span class="dt">x =</span> <span class="kw">names</span>(genomes), <span class="dt">perl =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb3-29" data-line-number="29"></a>
+<a class="sourceLine" id="cb3-30" data-line-number="30"><span class="co">## Exclude genomes</span></a>
+<a class="sourceLine" id="cb3-31" data-line-number="31"><span class="cf">if</span> (excludeIncomplete) {</a>
+<a class="sourceLine" id="cb3-32" data-line-number="32">  excludePattern =<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;(&quot;</span>, <span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;)|(&quot;</span>, excludePatterns), <span class="st">&quot;)&quot;</span>)</a>
+<a class="sourceLine" id="cb3-33" data-line-number="33">  excludedstrainNames &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="dt">pattern =</span> excludePattern, <span class="dt">x =</span> <span class="kw">names</span>(genomes), </a>
+<a class="sourceLine" id="cb3-34" data-line-number="34">                              <span class="dt">value =</span> <span class="ot">TRUE</span>, <span class="dt">invert =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb3-35" data-line-number="35">  filteredGenomeIndices &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="dt">pattern =</span> excludePattern, <span class="dt">x =</span> <span class="kw">names</span>(genomes), </a>
+<a class="sourceLine" id="cb3-36" data-line-number="36">                                <span class="dt">value =</span> <span class="ot">FALSE</span>, <span class="dt">invert =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb3-37" data-line-number="37">  <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Excluded &quot;</span>, <span class="kw">length</span>(excludedstrainNames),<span class="st">&quot; genomes: &quot;</span>, <span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;, &quot;</span>, excludedstrainNames)) </a>
+<a class="sourceLine" id="cb3-38" data-line-number="38">  <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Remaining genomes: &quot;</span>, <span class="kw">length</span>(filteredGenomeIndices))</a>
+<a class="sourceLine" id="cb3-39" data-line-number="39">  genomes &lt;-<span class="st"> </span>genomes[filteredGenomeIndices]</a>
+<a class="sourceLine" id="cb3-40" data-line-number="40"><span class="co"># names(genomes)</span></a>
+<a class="sourceLine" id="cb3-41" data-line-number="41">}</a>
+<a class="sourceLine" id="cb3-42" data-line-number="42"></a>
+<a class="sourceLine" id="cb3-43" data-line-number="43"><span class="co">## Report the number of genoomes</span></a>
+<a class="sourceLine" id="cb3-44" data-line-number="44">strainNames &lt;-<span class="st"> </span><span class="kw">names</span>(genomes)</a>
+<a class="sourceLine" id="cb3-45" data-line-number="45">nbStrains &lt;-<span class="st"> </span><span class="kw">length</span>(strainNames)</a>
+<a class="sourceLine" id="cb3-46" data-line-number="46"><span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Loaded &quot;</span>, nbStrains, <span class="st">&quot; genomes from file &quot;</span>, infiles<span class="op">$</span>sequences)</a>
+<a class="sourceLine" id="cb3-47" data-line-number="47"><span class="co"># View(genomes)</span></a>
+<a class="sourceLine" id="cb3-48" data-line-number="48"></a>
 <a class="sourceLine" id="cb3-49" data-line-number="49"></a>
-<a class="sourceLine" id="cb3-50" data-line-number="50"><span class="co">## Define a color for each strain</span></a>
-<a class="sourceLine" id="cb3-51" data-line-number="51">strainColors &lt;-<span class="st"> </span>(<span class="kw">unlist</span>(strainStats<span class="op">$</span>color))</a>
-<a class="sourceLine" id="cb3-52" data-line-number="52"><span class="kw">names</span>(strainColors) &lt;-<span class="st"> </span><span class="kw">row.names</span>(strainStats)</a></code></pre></div>
+<a class="sourceLine" id="cb3-50" data-line-number="50"><span class="co">#### Define reference and query genomes ####</span></a>
+<a class="sourceLine" id="cb3-51" data-line-number="51">refStrainName &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="dt">pattern =</span> refPattern, <span class="dt">x =</span> <span class="kw">names</span>(genomes), </a>
+<a class="sourceLine" id="cb3-52" data-line-number="52">                      <span class="dt">ignore.case =</span> <span class="ot">TRUE</span>, <span class="dt">value =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb3-53" data-line-number="53"><span class="cf">if</span> (<span class="kw">is.null</span>(refStrainName)) {</a>
+<a class="sourceLine" id="cb3-54" data-line-number="54">  <span class="kw">stop</span>(<span class="st">&quot;Could not identify reference genome with pattern &quot;</span>, refPattern)</a>
+<a class="sourceLine" id="cb3-55" data-line-number="55">}</a>
+<a class="sourceLine" id="cb3-56" data-line-number="56"><span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Reference genome name: &quot;</span>, refStrainName)</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">allFeatureAlignments &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="co">## Reload memory image if specified in parameters</span></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4"><span class="cf">if</span> (reloadImage) {</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">  <span class="kw">load</span>(outfiles[<span class="st">&quot;Memory image&quot;</span>])</a>
+<a class="sourceLine" id="cb4-6" data-line-number="6">  reloadImage &lt;-<span class="st"> </span><span class="ot">TRUE</span></a>
+<a class="sourceLine" id="cb4-7" data-line-number="7">}</a></code></pre></div>
 </div>
 <div id="parameters" class="section level2">
 <h2>Parameters</h2>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co">## Define a list of parameters</span></a>
-<a class="sourceLine" id="cb4-2" data-line-number="2">parameters &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
-<a class="sourceLine" id="cb4-3" data-line-number="3">parameters<span class="op">$</span>collection &lt;-<span class="st"> </span>collection</a>
-<a class="sourceLine" id="cb4-4" data-line-number="4">parameters<span class="op">$</span>refStrainName &lt;-<span class="st"> </span>refStrainName</a>
-<a class="sourceLine" id="cb4-5" data-line-number="5">parameters<span class="op">$</span>nbStrains &lt;-<span class="st"> </span>nbStrains</a>
-<a class="sourceLine" id="cb4-6" data-line-number="6">parameters<span class="op">$</span>sequenceDir &lt;-<span class="st"> </span>dir<span class="op">$</span>sequences</a>
-<a class="sourceLine" id="cb4-7" data-line-number="7">parameters<span class="op">$</span>sequenceFile &lt;-<span class="st"> </span>infiles<span class="op">$</span>sequences</a>
-<a class="sourceLine" id="cb4-8" data-line-number="8">parameters<span class="op">$</span>memoryImage &lt;-<span class="st"> </span>outfiles[<span class="st">&quot;Memory image&quot;</span>]</a>
-<a class="sourceLine" id="cb4-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb4-10" data-line-number="10"><span class="kw">kable</span>(<span class="kw">t</span>(<span class="kw">as.data.frame.list</span>(parameters)), <span class="dt">caption =</span> <span class="st">&quot;Parameters of the analysis&quot;</span>, </a>
-<a class="sourceLine" id="cb4-11" data-line-number="11">      <span class="dt">col.names =</span> <span class="st">&quot;Parameter&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co">## Define a list of parameters</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">parameters &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">parameters<span class="op">$</span>collection &lt;-<span class="st"> </span>collection</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">parameters<span class="op">$</span>refStrainName &lt;-<span class="st"> </span>refStrainName</a>
+<a class="sourceLine" id="cb5-5" data-line-number="5">parameters<span class="op">$</span>nbStrains &lt;-<span class="st"> </span>nbStrains</a>
+<a class="sourceLine" id="cb5-6" data-line-number="6">parameters<span class="op">$</span>sequenceDir &lt;-<span class="st"> </span>dir<span class="op">$</span>sequences</a>
+<a class="sourceLine" id="cb5-7" data-line-number="7">parameters<span class="op">$</span>sequenceFile &lt;-<span class="st"> </span>infiles<span class="op">$</span>sequences</a>
+<a class="sourceLine" id="cb5-8" data-line-number="8">parameters<span class="op">$</span>memoryImage &lt;-<span class="st"> </span>outfiles[<span class="st">&quot;Memory image&quot;</span>]</a>
+<a class="sourceLine" id="cb5-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb5-10" data-line-number="10"><span class="kw">kable</span>(<span class="kw">t</span>(<span class="kw">as.data.frame.list</span>(parameters)), <span class="dt">caption =</span> <span class="st">&quot;Parameters of the analysis&quot;</span>, </a>
+<a class="sourceLine" id="cb5-11" data-line-number="11">      <span class="dt">col.names =</span> <span class="st">&quot;Parameter&quot;</span>)</a></code></pre></div>
 <table>
 <caption>Parameters of the analysis</caption>
 <thead>
@@ -627,7 +803,7 @@ div.tocify {
 </tr>
 <tr class="odd">
 <td>nbStrains</td>
-<td align="left">64</td>
+<td align="left">39</td>
 </tr>
 <tr class="even">
 <td>sequenceDir</td>
@@ -644,9 +820,75 @@ div.tocify {
 </tbody>
 </table>
 </div>
-<div id="genome-statistics" class="section level2">
-<h2>Genome statistics</h2>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">kable</span>(strainStats, <span class="dt">caption =</span> <span class="st">&quot;Reference and query genomes&quot;</span>)</a></code></pre></div>
+<div id="strain-statistics" class="section level2">
+<h2>Strain statistics</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co">#### Compute statistics about sequence sizes </span><span class="al">###</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2">strainStats &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
+<a class="sourceLine" id="cb6-3" data-line-number="3">  <span class="dt">n =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(genomes),</a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">  <span class="dt">row.names =</span> <span class="kw">names</span>(genomes),</a>
+<a class="sourceLine" id="cb6-5" data-line-number="5">  <span class="dt">status =</span> <span class="kw">rep</span>(<span class="st">&quot;Query&quot;</span>, <span class="dt">length.out =</span> <span class="kw">length</span>(strainNames))</a>
+<a class="sourceLine" id="cb6-6" data-line-number="6">)</a>
+<a class="sourceLine" id="cb6-7" data-line-number="7">strainStats[,<span class="st">&quot;status&quot;</span>] &lt;-<span class="st"> </span><span class="kw">as.vector</span>(strainStats[,<span class="st">&quot;status&quot;</span>])</a>
+<a class="sourceLine" id="cb6-8" data-line-number="8">strainStats[refStrainName,<span class="st">&quot;status&quot;</span>] &lt;-<span class="st"> &quot;Reference&quot;</span></a>
+<a class="sourceLine" id="cb6-9" data-line-number="9">g &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb6-10" data-line-number="10"><span class="cf">for</span> (g <span class="cf">in</span> strainNames) {</a>
+<a class="sourceLine" id="cb6-11" data-line-number="11">  strainStats[g, <span class="st">&quot;length&quot;</span>] &lt;-<span class="st"> </span><span class="kw">length</span>(genomes[[g]])</a>
+<a class="sourceLine" id="cb6-12" data-line-number="12">}</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="co">#### Define the color associated to each sequence ####</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb7-4" data-line-number="4"><span class="co">## Color palette per species</span></a>
+<a class="sourceLine" id="cb7-5" data-line-number="5">speciesPalette &lt;-<span class="st"> </span><span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb7-6" data-line-number="6">  <span class="dt">Human =</span> <span class="st">&quot;#880000&quot;</span>,</a>
+<a class="sourceLine" id="cb7-7" data-line-number="7">  <span class="dt">Bat =</span> <span class="st">&quot;#888888&quot;</span>,</a>
+<a class="sourceLine" id="cb7-8" data-line-number="8">  <span class="dt">Pangolin =</span> <span class="st">&quot;#447700&quot;</span>,</a>
+<a class="sourceLine" id="cb7-9" data-line-number="9">  <span class="dt">Camel =</span> <span class="st">&quot;#BB8800&quot;</span>,</a>
+<a class="sourceLine" id="cb7-10" data-line-number="10">  <span class="dt">Pig =</span> <span class="st">&quot;#FFBBBB&quot;</span>,</a>
+<a class="sourceLine" id="cb7-11" data-line-number="11">  <span class="dt">Civet =</span> <span class="st">&quot;#00BBFF&quot;</span></a>
+<a class="sourceLine" id="cb7-12" data-line-number="12">)</a>
+<a class="sourceLine" id="cb7-13" data-line-number="13"></a>
+<a class="sourceLine" id="cb7-14" data-line-number="14"><span class="co">## Species prefix in the tip labels</span></a>
+<a class="sourceLine" id="cb7-15" data-line-number="15">speciesPrefix &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Hu&quot;</span> =<span class="st"> &quot;Human&quot;</span>,</a>
+<a class="sourceLine" id="cb7-16" data-line-number="16">                   <span class="st">&quot;Bt&quot;</span> =<span class="st"> &quot;Bat&quot;</span>,</a>
+<a class="sourceLine" id="cb7-17" data-line-number="17">                   <span class="st">&quot;Pn&quot;</span> =<span class="st"> &quot;Pangolin&quot;</span>,</a>
+<a class="sourceLine" id="cb7-18" data-line-number="18">                   <span class="st">&quot;Cm&quot;</span> =<span class="st"> &quot;Camel&quot;</span>,</a>
+<a class="sourceLine" id="cb7-19" data-line-number="19">                   <span class="st">&quot;Pi&quot;</span> =<span class="st"> &quot;Pig&quot;</span>,</a>
+<a class="sourceLine" id="cb7-20" data-line-number="20">                   <span class="st">&quot;Cv&quot;</span> =<span class="st"> &quot;Civet&quot;</span>)</a>
+<a class="sourceLine" id="cb7-21" data-line-number="21"></a>
+<a class="sourceLine" id="cb7-22" data-line-number="22"><span class="co">## Strain-specific colors</span></a>
+<a class="sourceLine" id="cb7-23" data-line-number="23">strainColor &lt;-<span class="st"> </span><span class="kw">c</span>(</a>
+<a class="sourceLine" id="cb7-24" data-line-number="24">  <span class="st">&quot;HuCoV2_WH01_2019&quot;</span> =<span class="st"> &quot;red&quot;</span>,</a>
+<a class="sourceLine" id="cb7-25" data-line-number="25">  <span class="st">&quot;HuSARS-Frankfurt-1_2003&quot;</span> =<span class="st"> &quot;#0044BB&quot;</span>,</a>
+<a class="sourceLine" id="cb7-26" data-line-number="26">  <span class="st">&quot;PnGu1_2019&quot;</span> =<span class="st"> &quot;#00CC00&quot;</span>,</a>
+<a class="sourceLine" id="cb7-27" data-line-number="27">  <span class="st">&quot;PnMP789&quot;</span> =<span class="st"> &quot;#00FF88&quot;</span>,</a>
+<a class="sourceLine" id="cb7-28" data-line-number="28">  <span class="st">&quot;BtRaTG13_&quot;</span> =<span class="st"> &quot;#FF6600&quot;</span>,</a>
+<a class="sourceLine" id="cb7-29" data-line-number="29">  <span class="st">&quot;BtYu-RmYN&quot;</span> =<span class="st"> &quot;#FFBB22&quot;</span>,</a>
+<a class="sourceLine" id="cb7-30" data-line-number="30">  <span class="st">&quot;BtZXC21&quot;</span> =<span class="st"> &quot;black&quot;</span>, </a>
+<a class="sourceLine" id="cb7-31" data-line-number="31">  <span class="st">&quot;BtZC45&quot;</span> =<span class="st"> &quot;black&quot;</span>)</a>
+<a class="sourceLine" id="cb7-32" data-line-number="32"></a>
+<a class="sourceLine" id="cb7-33" data-line-number="33"><span class="co">## Identify species per tip</span></a>
+<a class="sourceLine" id="cb7-34" data-line-number="34"><span class="cf">for</span> (prefix <span class="cf">in</span> <span class="kw">names</span>(speciesPrefix)) {</a>
+<a class="sourceLine" id="cb7-35" data-line-number="35">  strainStats[<span class="kw">grep</span>(<span class="dt">pattern =</span> <span class="kw">paste0</span>(<span class="st">&quot;^&quot;</span>, prefix), <span class="dt">x =</span> <span class="kw">row.names</span>(strainStats), <span class="dt">perl =</span> <span class="ot">TRUE</span>), <span class="st">&quot;species&quot;</span>] &lt;-<span class="st"> </span>speciesPrefix[prefix]</a>
+<a class="sourceLine" id="cb7-36" data-line-number="36">  </a>
+<a class="sourceLine" id="cb7-37" data-line-number="37">}</a>
+<a class="sourceLine" id="cb7-38" data-line-number="38"></a>
+<a class="sourceLine" id="cb7-39" data-line-number="39"><span class="co">## Assign acolor to each species</span></a>
+<a class="sourceLine" id="cb7-40" data-line-number="40">strainStats<span class="op">$</span>color &lt;-<span class="st"> &quot;grey&quot;</span> <span class="co"># default</span></a>
+<a class="sourceLine" id="cb7-41" data-line-number="41">strainStats<span class="op">$</span>color &lt;-<span class="st"> </span>speciesPalette[<span class="kw">as.vector</span>(strainStats<span class="op">$</span>species)]</a>
+<a class="sourceLine" id="cb7-42" data-line-number="42"></a>
+<a class="sourceLine" id="cb7-43" data-line-number="43"><span class="cf">for</span> (strain <span class="cf">in</span> <span class="kw">names</span>(strainColor)) {</a>
+<a class="sourceLine" id="cb7-44" data-line-number="44">  strainStats[<span class="kw">grep</span>(<span class="dt">pattern =</span> <span class="kw">paste0</span>(<span class="st">&quot;^&quot;</span>, strain), </a>
+<a class="sourceLine" id="cb7-45" data-line-number="45">                  <span class="dt">x =</span> <span class="kw">row.names</span>(strainStats), <span class="dt">perl =</span> <span class="ot">TRUE</span>), <span class="st">&quot;color&quot;</span>] &lt;-<span class="st"> </span>strainColor[strain]</a>
+<a class="sourceLine" id="cb7-46" data-line-number="46">  </a>
+<a class="sourceLine" id="cb7-47" data-line-number="47">}</a>
+<a class="sourceLine" id="cb7-48" data-line-number="48"></a>
+<a class="sourceLine" id="cb7-49" data-line-number="49"></a>
+<a class="sourceLine" id="cb7-50" data-line-number="50"><span class="co">## Assign specific color to some nodes</span></a>
+<a class="sourceLine" id="cb7-51" data-line-number="51"></a>
+<a class="sourceLine" id="cb7-52" data-line-number="52"><span class="co">## Define a color for each strain</span></a>
+<a class="sourceLine" id="cb7-53" data-line-number="53">strainColors &lt;-<span class="st"> </span>(<span class="kw">unlist</span>(strainStats<span class="op">$</span>color))</a>
+<a class="sourceLine" id="cb7-54" data-line-number="54"><span class="kw">names</span>(strainColors) &lt;-<span class="st"> </span><span class="kw">row.names</span>(strainStats)</a></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw">kable</span>(strainStats, <span class="dt">caption =</span> <span class="st">&quot;Reference and query genomes&quot;</span>)</a></code></pre></div>
 <table>
 <caption>Reference and query genomes</caption>
 <thead>
@@ -677,408 +919,232 @@ div.tocify {
 <td align="left">#888888</td>
 </tr>
 <tr class="odd">
-<td>BtCoV_273-2005</td>
-<td align="right">3</td>
-<td align="left">Query</td>
-<td align="right">29704</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
-<tr class="even">
 <td>BtCp-Yun_2011</td>
-<td align="right">4</td>
+<td align="right">3</td>
 <td align="left">Query</td>
 <td align="right">29452</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>BtGX2013</td>
-<td align="right">5</td>
+<td align="right">4</td>
 <td align="left">Query</td>
 <td align="right">29161</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>BtHKU3-12</td>
-<td align="right">6</td>
-<td align="left">Query</td>
-<td align="right">29704</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
-<tr class="odd">
-<td>BtHKU3-6</td>
-<td align="right">7</td>
+<td align="right">5</td>
 <td align="left">Query</td>
 <td align="right">29704</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
 <tr class="even">
-<td>BtHKU3-8</td>
-<td align="right">8</td>
-<td align="left">Query</td>
-<td align="right">29681</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
-<tr class="odd">
 <td>BtHKU5</td>
-<td align="right">9</td>
+<td align="right">6</td>
 <td align="left">Query</td>
 <td align="right">30482</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>BtHKU9-1</td>
-<td align="right">10</td>
+<td align="right">7</td>
 <td align="left">Query</td>
 <td align="right">29114</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>BtJL2012</td>
-<td align="right">11</td>
+<td align="right">8</td>
 <td align="left">Query</td>
 <td align="right">29037</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="even">
-<td>BtJTMC15</td>
-<td align="right">12</td>
-<td align="left">Query</td>
-<td align="right">28761</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
 <tr class="odd">
-<td>BtLongquan-140</td>
-<td align="right">13</td>
-<td align="left">Query</td>
-<td align="right">29676</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
-<tr class="even">
 <td>BtLYRa11</td>
-<td align="right">14</td>
+<td align="right">9</td>
 <td align="left">Query</td>
 <td align="right">29805</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>BtRaTG13_2013_Yunnan</td>
-<td align="right">15</td>
+<td align="right">10</td>
 <td align="left">Query</td>
 <td align="right">29855</td>
 <td align="left">Bat</td>
 <td align="left">#FF6600</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Btrec-SARSg_2008</td>
-<td align="right">16</td>
+<td align="right">11</td>
 <td align="left">Query</td>
 <td align="right">29750</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="odd">
-<td>BtRf-HeB-2013</td>
-<td align="right">17</td>
-<td align="left">Query</td>
-<td align="right">29443</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
 <tr class="even">
-<td>BtRf1-2004</td>
-<td align="right">18</td>
-<td align="left">Query</td>
-<td align="right">29709</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
-<tr class="odd">
 <td>BtRm1/2004</td>
-<td align="right">19</td>
+<td align="right">12</td>
 <td align="left">Query</td>
 <td align="right">29749</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>BtRp-Shaanxi2011</td>
-<td align="right">20</td>
+<td align="right">13</td>
 <td align="left">Query</td>
 <td align="right">29484</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>BtRp3-2004</td>
-<td align="right">21</td>
+<td align="right">14</td>
 <td align="left">Query</td>
 <td align="right">29736</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>BtRs_672-2006</td>
-<td align="right">22</td>
+<td align="right">15</td>
 <td align="left">Query</td>
 <td align="right">29059</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="odd">
-<td>BtRs-HuB-2013</td>
-<td align="right">23</td>
-<td align="left">Query</td>
-<td align="right">29658</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
-<tr class="even">
-<td>BtRs3367</td>
-<td align="right">24</td>
-<td align="left">Query</td>
-<td align="right">29792</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
-<tr class="odd">
-<td>BtRs4081</td>
-<td align="right">25</td>
-<td align="left">Query</td>
-<td align="right">29741</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
-<tr class="even">
-<td>BtRs4084</td>
-<td align="right">26</td>
-<td align="left">Query</td>
-<td align="right">29770</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
-<tr class="odd">
-<td>BtRs4231</td>
-<td align="right">27</td>
-<td align="left">Query</td>
-<td align="right">29782</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
-<tr class="even">
-<td>BtRs4237</td>
-<td align="right">28</td>
-<td align="left">Query</td>
-<td align="right">29741</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
-<tr class="odd">
-<td>BtRs4247</td>
-<td align="right">29</td>
-<td align="left">Query</td>
-<td align="right">29743</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
 <tr class="even">
 <td>BtRs4874</td>
-<td align="right">30</td>
+<td align="right">16</td>
 <td align="left">Query</td>
 <td align="right">30311</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
 <tr class="odd">
-<td>BtRs7327</td>
-<td align="right">31</td>
-<td align="left">Query</td>
-<td align="right">30307</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
-<tr class="even">
-<td>BtRsSHC014</td>
-<td align="right">32</td>
-<td align="left">Query</td>
-<td align="right">29787</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
-<tr class="odd">
 <td>BtSC2018</td>
-<td align="right">33</td>
+<td align="right">17</td>
 <td align="left">Query</td>
 <td align="right">29648</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
 <tr class="even">
-<td>BtWIV16_2013</td>
-<td align="right">34</td>
-<td align="left">Query</td>
-<td align="right">30290</td>
-<td align="left">Bat</td>
-<td align="left">#888888</td>
-</tr>
-<tr class="odd">
 <td>BtYN2013</td>
-<td align="right">35</td>
+<td align="right">18</td>
 <td align="left">Query</td>
 <td align="right">29142</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>BtYN2018B</td>
-<td align="right">36</td>
+<td align="right">19</td>
 <td align="left">Query</td>
 <td align="right">30256</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>BtYN2018C</td>
-<td align="right">37</td>
+<td align="right">20</td>
 <td align="left">Query</td>
 <td align="right">29689</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>BtYNLF_31C</td>
-<td align="right">38</td>
+<td align="right">21</td>
 <td align="left">Query</td>
 <td align="right">29723</td>
 <td align="left">Bat</td>
 <td align="left">#888888</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>BtZC45</td>
-<td align="right">39</td>
+<td align="right">22</td>
 <td align="left">Query</td>
 <td align="right">29802</td>
 <td align="left">Bat</td>
 <td align="left">black</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>BtZXC21</td>
-<td align="right">40</td>
+<td align="right">23</td>
 <td align="left">Query</td>
 <td align="right">29732</td>
 <td align="left">Bat</td>
 <td align="left">black</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>CmMERS</td>
-<td align="right">41</td>
+<td align="right">24</td>
 <td align="left">Query</td>
 <td align="right">29851</td>
 <td align="left">Camel</td>
 <td align="left">#BB8800</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Cv007-2004</td>
-<td align="right">42</td>
+<td align="right">25</td>
 <td align="left">Query</td>
 <td align="right">29540</td>
 <td align="left">Civet</td>
 <td align="left">#00BBFF</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Hu229E</td>
-<td align="right">43</td>
+<td align="right">26</td>
 <td align="left">Query</td>
 <td align="right">27317</td>
 <td align="left">Human</td>
 <td align="left">#880000</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>HuCoV2_WH01_2019</td>
-<td align="right">44</td>
+<td align="right">27</td>
 <td align="left">Reference</td>
 <td align="right">29899</td>
 <td align="left">Human</td>
 <td align="left">red</td>
 </tr>
-<tr class="odd">
-<td>HuCoV2_Whu1_2019</td>
-<td align="right">45</td>
-<td align="left">Query</td>
-<td align="right">29903</td>
-<td align="left">Human</td>
-<td align="left">#880000</td>
-</tr>
 <tr class="even">
-<td>HuCoV2_WIV04°2019</td>
-<td align="right">46</td>
-<td align="left">Query</td>
-<td align="right">29891</td>
-<td align="left">Human</td>
-<td align="left">#880000</td>
-</tr>
-<tr class="odd">
-<td>HuHK04-02</td>
-<td align="right">47</td>
-<td align="left">Query</td>
-<td align="right">30722</td>
-<td align="left">Human</td>
-<td align="left">#880000</td>
-</tr>
-<tr class="even">
-<td>HuHKU1_N23</td>
-<td align="right">48</td>
-<td align="left">Query</td>
-<td align="right">29926</td>
-<td align="left">Human</td>
-<td align="left">#880000</td>
-</tr>
-<tr class="odd">
 <td>HuMERS_172-06_2015</td>
-<td align="right">49</td>
+<td align="right">28</td>
 <td align="left">Query</td>
 <td align="right">30068</td>
 <td align="left">Human</td>
 <td align="left">#880000</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>HuNL63</td>
-<td align="right">50</td>
+<td align="right">29</td>
 <td align="left">Query</td>
 <td align="right">27553</td>
 <td align="left">Human</td>
 <td align="left">#880000</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>HuOC43</td>
-<td align="right">51</td>
+<td align="right">30</td>
 <td align="left">Query</td>
 <td align="right">30741</td>
 <td align="left">Human</td>
 <td align="left">#880000</td>
 </tr>
-<tr class="even">
-<td>HuSARS-CoV_Tor2-FP1-10895</td>
-<td align="right">52</td>
-<td align="left">Query</td>
-<td align="right">29646</td>
-<td align="left">Human</td>
-<td align="left">#880000</td>
-</tr>
 <tr class="odd">
 <td>HuSARS-Frankfurt-1_2003</td>
-<td align="right">53</td>
+<td align="right">31</td>
 <td align="left">Query</td>
 <td align="right">29727</td>
 <td align="left">Human</td>
@@ -1086,204 +1152,342 @@ div.tocify {
 </tr>
 <tr class="even">
 <td>HuTGEV</td>
-<td align="right">54</td>
+<td align="right">32</td>
 <td align="left">Query</td>
 <td align="right">28586</td>
 <td align="left">Human</td>
 <td align="left">#880000</td>
 </tr>
 <tr class="odd">
-<td>HuTW11-SARS</td>
-<td align="right">55</td>
-<td align="left">Query</td>
-<td align="right">29727</td>
-<td align="left">Human</td>
-<td align="left">#880000</td>
-</tr>
-<tr class="even">
 <td>PiPRCV</td>
-<td align="right">56</td>
+<td align="right">33</td>
 <td align="left">Query</td>
 <td align="right">27765</td>
 <td align="left">Pig</td>
 <td align="left">#FFBBBB</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>PiSADS</td>
-<td align="right">57</td>
+<td align="right">34</td>
 <td align="left">Query</td>
 <td align="right">27163</td>
 <td align="left">Pig</td>
 <td align="left">#FFBBBB</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>PnGX-P1E_2017</td>
-<td align="right">58</td>
+<td align="right">35</td>
 <td align="left">Query</td>
 <td align="right">29801</td>
 <td align="left">Pangolin</td>
-<td align="left">#448800</td>
+<td align="left">#447700</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>PnGX-P2V_2018</td>
-<td align="right">59</td>
+<td align="right">36</td>
 <td align="left">Query</td>
 <td align="right">29795</td>
 <td align="left">Pangolin</td>
-<td align="left">#448800</td>
-</tr>
-<tr class="even">
-<td>PnGX-P4L</td>
-<td align="right">60</td>
-<td align="left">Query</td>
-<td align="right">29805</td>
-<td align="left">Pangolin</td>
-<td align="left">#448800</td>
+<td align="left">#447700</td>
 </tr>
 <tr class="odd">
-<td>PnGX-P5E</td>
-<td align="right">61</td>
+<td>PnMP789</td>
+<td align="right">37</td>
 <td align="left">Query</td>
-<td align="right">29802</td>
+<td align="right">29521</td>
 <td align="left">Pangolin</td>
-<td align="left">#448800</td>
+<td align="left">#00FF88</td>
 </tr>
 <tr class="even">
-<td>PnGX-P5L</td>
-<td align="right">62</td>
-<td align="left">Query</td>
-<td align="right">29806</td>
-<td align="left">Pangolin</td>
-<td align="left">#448800</td>
-</tr>
-<tr class="odd">
 <td>BtYu-RmYN02_2019</td>
-<td align="right">63</td>
+<td align="right">38</td>
 <td align="left">Query</td>
 <td align="right">29671</td>
 <td align="left">Bat</td>
 <td align="left">#FFBB22</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>PnGu1_2019</td>
-<td align="right">64</td>
+<td align="right">39</td>
 <td align="left">Query</td>
 <td align="right">29825</td>
 <td align="left">Pangolin</td>
-<td align="left">#00BB00</td>
+<td align="left">#00CC00</td>
 </tr>
 </tbody>
 </table>
-<p>The collection all-plus-GISAID contains 64 virus genome sequences.</p>
+<p>The collection all-plus-GISAID contains 39 virus genome sequences.</p>
 </div>
-<div id="one-to-n-alignemnts-of-selected-features" class="section level2">
-<h2>One-to-N alignemnts of selected features</h2>
-<p>We perform a global pairwise alignment (Needle-Waterman algorithm) between each feature of the reference (HuCoV2_WH01_2019) and each one of the query genomes.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co">#### One-to-N alignmemnt of user-speficied genomic features ####</span></a>
-<a class="sourceLine" id="cb6-2" data-line-number="2">featureName &lt;-<span class="st"> &quot;CDS-S&quot;</span> <span class="co"># for the test</span></a>
-<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="co"># featureName &lt;- &quot;S1&quot; # for the test</span></a>
-<a class="sourceLine" id="cb6-4" data-line-number="4"><span class="co"># featureName &lt;- &quot;Recomb-reg-3&quot; # for the test</span></a>
-<a class="sourceLine" id="cb6-5" data-line-number="5"><span class="co"># featureName &lt;- &quot;RBD&quot; # for the test</span></a>
-<a class="sourceLine" id="cb6-6" data-line-number="6"><span class="co"># for (collection in (collections)) {</span></a>
-<a class="sourceLine" id="cb6-7" data-line-number="7"><span class="cf">if</span> (reloadImage) {</a>
-<a class="sourceLine" id="cb6-8" data-line-number="8">  <span class="kw">load</span>(outfiles[<span class="st">&quot;Memory image&quot;</span>])</a>
-<a class="sourceLine" id="cb6-9" data-line-number="9">  reloadImage &lt;-<span class="st"> </span><span class="ot">TRUE</span></a>
-<a class="sourceLine" id="cb6-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb6-11" data-line-number="11">} <span class="cf">else</span> {</a>
-<a class="sourceLine" id="cb6-12" data-line-number="12">  allFeatureAlignments &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
-<a class="sourceLine" id="cb6-13" data-line-number="13">}</a>
-<a class="sourceLine" id="cb6-14" data-line-number="14"><span class="cf">for</span> (featureName <span class="cf">in</span> <span class="kw">names</span>(features)) {</a>
-<a class="sourceLine" id="cb6-15" data-line-number="15">  <span class="co">## Compute feature length</span></a>
-<a class="sourceLine" id="cb6-16" data-line-number="16">  featureLimits &lt;-<span class="st"> </span>features[[featureName]]</a>
-<a class="sourceLine" id="cb6-17" data-line-number="17">  featureStart &lt;-<span class="st"> </span>featureLimits[[<span class="st">&quot;start&quot;</span>]]</a>
-<a class="sourceLine" id="cb6-18" data-line-number="18">  featureEnd &lt;-<span class="st"> </span>featureLimits[[<span class="st">&quot;end&quot;</span>]]</a>
-<a class="sourceLine" id="cb6-19" data-line-number="19">  featureLength &lt;-<span class="st"> </span></a>
-<a class="sourceLine" id="cb6-20" data-line-number="20"><span class="st">    </span>featureEnd <span class="op">-</span><span class="st"> </span>featureStart  <span class="op">+</span><span class="st"> </span><span class="dv">1</span></a>
-<a class="sourceLine" id="cb6-21" data-line-number="21">  </a>
-<a class="sourceLine" id="cb6-22" data-line-number="22">  <span class="kw">message</span>(<span class="st">&quot;Searching matches for feature &quot;</span>, featureName, </a>
-<a class="sourceLine" id="cb6-23" data-line-number="23">          <span class="st">&quot; (&quot;</span>, featureLimits[<span class="dv">1</span>], <span class="st">&quot;-&quot;</span>, featureLimits[<span class="dv">2</span>], <span class="st">&quot;)&quot;</span>, </a>
-<a class="sourceLine" id="cb6-24" data-line-number="24">          <span class="st">&quot; in collection &quot;</span>, collection)</a>
-<a class="sourceLine" id="cb6-25" data-line-number="25">  </a>
-<a class="sourceLine" id="cb6-26" data-line-number="26">  <span class="co">## Print a seciton title with the feature name and limits</span></a>
-<a class="sourceLine" id="cb6-27" data-line-number="27">  <span class="kw">cat</span>(<span class="dt">sep =</span> <span class="st">&quot;&quot;</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">### &quot;</span>,  featureName, </a>
-<a class="sourceLine" id="cb6-28" data-line-number="28">      <span class="st">&quot; (&quot;</span>, featureLimits[<span class="dv">1</span>], <span class="st">&quot;-&quot;</span>, featureLimits[<span class="dv">2</span>], </a>
-<a class="sourceLine" id="cb6-29" data-line-number="29">      <span class="st">&quot;; &quot;</span>, featureLength,<span class="st">&quot;bp)&quot;</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
-<a class="sourceLine" id="cb6-30" data-line-number="30"></a>
-<a class="sourceLine" id="cb6-31" data-line-number="31"></a>
-<a class="sourceLine" id="cb6-32" data-line-number="32">  <span class="co">## Choose a collection- and feature-specific path for the figures</span></a>
-<a class="sourceLine" id="cb6-33" data-line-number="33">  knitr<span class="op">::</span>opts_chunk<span class="op">$</span><span class="kw">set</span>(<span class="dt">fig.path =</span> <span class="kw">paste0</span>(</a>
-<a class="sourceLine" id="cb6-34" data-line-number="34">    <span class="st">&#39;figures/one-to-n-matches_&#39;</span>, collection, <span class="st">&#39;/&#39;</span>,</a>
-<a class="sourceLine" id="cb6-35" data-line-number="35">    collection, <span class="st">&#39;_vs_&#39;</span>, featureName))</a>
-<a class="sourceLine" id="cb6-36" data-line-number="36"></a>
-<a class="sourceLine" id="cb6-37" data-line-number="37">  </a>
-<a class="sourceLine" id="cb6-38" data-line-number="38">  <span class="co">#### N-to-1 alignments of spike-coding sequences ####</span></a>
-<a class="sourceLine" id="cb6-39" data-line-number="39">  featurePrefix &lt;-<span class="st"> </span><span class="kw">paste0</span>(</a>
-<a class="sourceLine" id="cb6-40" data-line-number="40">    featureName,</a>
-<a class="sourceLine" id="cb6-41" data-line-number="41">    <span class="st">&quot;_&quot;</span>, collection)</a>
-<a class="sourceLine" id="cb6-42" data-line-number="42">  </a>
-<a class="sourceLine" id="cb6-43" data-line-number="43">  dir[[featureName]] &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>seqdata, featureName)</a>
-<a class="sourceLine" id="cb6-44" data-line-number="44">  <span class="kw">dir.create</span>(dir[[featureName]], <span class="dt">showWarnings =</span> <span class="ot">FALSE</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb6-45" data-line-number="45">  outfiles[featureName]  &lt;-<span class="st"> </span><span class="kw">file.path</span>(</a>
-<a class="sourceLine" id="cb6-46" data-line-number="46">    dir[[featureName]], <span class="kw">paste0</span>(featurePrefix, <span class="st">&quot;.fasta&quot;</span>))</a>
-<a class="sourceLine" id="cb6-47" data-line-number="47">  <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Output directory: &quot;</span>, dir[[featureName]] )</a>
-<a class="sourceLine" id="cb6-48" data-line-number="48">  </a>
-<a class="sourceLine" id="cb6-49" data-line-number="49">  <span class="co">## Get sequence of the feature from the reference genome</span></a>
-<a class="sourceLine" id="cb6-50" data-line-number="50">  refSeq &lt;-<span class="st"> </span><span class="kw">subseq</span>(genomes[refStrainName], </a>
-<a class="sourceLine" id="cb6-51" data-line-number="51">                   <span class="dt">start =</span> featureLimits[<span class="dv">1</span>], </a>
-<a class="sourceLine" id="cb6-52" data-line-number="52">                   <span class="dt">end =</span> featureLimits[<span class="dv">2</span>])</a>
-<a class="sourceLine" id="cb6-53" data-line-number="53">  </a>
-<a class="sourceLine" id="cb6-54" data-line-number="54">  <span class="co">## Match the reference feature with all the genomes</span></a>
-<a class="sourceLine" id="cb6-55" data-line-number="55">  <span class="cf">if</span> (reloadImage) {</a>
-<a class="sourceLine" id="cb6-56" data-line-number="56">    featureAlignmentsNto1 &lt;-<span class="st"> </span>allFeatureAlignments[[featureName]]</a>
-<a class="sourceLine" id="cb6-57" data-line-number="57">  } <span class="cf">else</span> {  </a>
-<a class="sourceLine" id="cb6-58" data-line-number="58">    featureAlignmentsNto1 &lt;-<span class="st"> </span><span class="kw">alignNtoOne</span>(</a>
-<a class="sourceLine" id="cb6-59" data-line-number="59">      <span class="dt">refSequence =</span> refSeq, </a>
-<a class="sourceLine" id="cb6-60" data-line-number="60">      <span class="dt">querySequences =</span> genomes, </a>
-<a class="sourceLine" id="cb6-61" data-line-number="61">      <span class="dt">type =</span> <span class="st">&quot;global-local&quot;</span>,</a>
-<a class="sourceLine" id="cb6-62" data-line-number="62">      <span class="dt">outfile =</span> outfiles[featureName])</a>
-<a class="sourceLine" id="cb6-63" data-line-number="63">    </a>
-<a class="sourceLine" id="cb6-64" data-line-number="64">    allFeatureAlignments[[featureName]] &lt;-<span class="st"> </span>featureAlignmentsNto1</a>
-<a class="sourceLine" id="cb6-65" data-line-number="65">  }</a>
-<a class="sourceLine" id="cb6-66" data-line-number="66">  </a>
-<a class="sourceLine" id="cb6-67" data-line-number="67">  <span class="co">## Choose window size  </span></a>
-<a class="sourceLine" id="cb6-68" data-line-number="68">  <span class="cf">if</span> (featureLength <span class="op">&gt;</span><span class="st"> </span><span class="dv">20000</span>) {</a>
-<a class="sourceLine" id="cb6-69" data-line-number="69">    windowSize &lt;-<span class="st"> </span><span class="dv">800</span> </a>
-<a class="sourceLine" id="cb6-70" data-line-number="70">  } <span class="cf">else</span> <span class="cf">if</span> (featureLength <span class="op">&gt;</span><span class="st"> </span><span class="dv">5000</span>) {</a>
-<a class="sourceLine" id="cb6-71" data-line-number="71">    windowSize &lt;-<span class="st"> </span><span class="dv">500</span> </a>
-<a class="sourceLine" id="cb6-72" data-line-number="72">  } <span class="cf">else</span> <span class="cf">if</span> (featureLength <span class="op">&gt;</span><span class="st"> </span><span class="dv">3000</span>) {</a>
-<a class="sourceLine" id="cb6-73" data-line-number="73">    windowSize &lt;-<span class="st"> </span><span class="dv">200</span> </a>
-<a class="sourceLine" id="cb6-74" data-line-number="74">  } <span class="cf">else</span> {</a>
-<a class="sourceLine" id="cb6-75" data-line-number="75">    windowSize &lt;-<span class="st"> </span><span class="kw">max</span>(<span class="dv">50</span>, <span class="dv">10</span> <span class="op">*</span><span class="st"> </span><span class="kw">round</span>(featureLength <span class="op">/</span><span class="st"> </span><span class="dv">100</span>))</a>
-<a class="sourceLine" id="cb6-76" data-line-number="76">  }</a>
-<a class="sourceLine" id="cb6-77" data-line-number="77"></a>
-<a class="sourceLine" id="cb6-78" data-line-number="78">  <span class="co">## Compute sequence order by decreasing PIP score</span></a>
-<a class="sourceLine" id="cb6-79" data-line-number="79">  seqOrder &lt;-<span class="st"> </span><span class="kw">order</span>(featureAlignmentsNto1<span class="op">$</span>stat<span class="op">$</span>score, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb6-80" data-line-number="80"></a>
-<a class="sourceLine" id="cb6-81" data-line-number="81">  <span class="co">## PIP profile of one-to-N alignment</span></a>
-<a class="sourceLine" id="cb6-82" data-line-number="82">  <span class="kw">plotPIPprofiles</span>(</a>
-<a class="sourceLine" id="cb6-83" data-line-number="83"><span class="co">#    alignments = featureAlignmentsNto1$alignments[seqOrder],</span></a>
-<a class="sourceLine" id="cb6-84" data-line-number="84">    <span class="dt">alignments =</span> featureAlignmentsNto1<span class="op">$</span>alignments,</a>
-<a class="sourceLine" id="cb6-85" data-line-number="85">    <span class="dt">reversePlot =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb6-86" data-line-number="86">    <span class="dt">windowSize =</span> windowSize, </a>
-<a class="sourceLine" id="cb6-87" data-line-number="87">    <span class="dt">main =</span> <span class="kw">paste0</span>(<span class="st">&quot;PIP profiles: collection &quot;</span>, collection, </a>
-<a class="sourceLine" id="cb6-88" data-line-number="88">                  <span class="st">&quot;Genomic feature &quot;</span>, featureName, <span class="st">&quot; (&quot;</span>, featureStart, <span class="st">&quot;:&quot;</span>, featureEnd ,<span class="st">&quot;, &quot;</span>, featureLength, <span class="st">&quot; bp)&quot;</span>), </a>
-<a class="sourceLine" id="cb6-89" data-line-number="89">    <span class="co">#    colors = NULL,</span></a>
-<a class="sourceLine" id="cb6-90" data-line-number="90">    <span class="dt">colors =</span> strainColors,</a>
-<a class="sourceLine" id="cb6-91" data-line-number="91">    <span class="dt">legendMargin =</span> <span class="fl">0.25</span>, </a>
-<a class="sourceLine" id="cb6-92" data-line-number="92">    <span class="dt">legendCorner =</span> <span class="st">&quot;topright&quot;</span>, <span class="dt">lwd =</span> <span class="dv">1</span>,</a>
-<a class="sourceLine" id="cb6-93" data-line-number="93">    <span class="dt">legendCex =</span> <span class="fl">0.5</span>, <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">30</span>, <span class="dv">100</span>))</a>
-<a class="sourceLine" id="cb6-94" data-line-number="94">  </a>
-<a class="sourceLine" id="cb6-95" data-line-number="95">  </a>
-<a class="sourceLine" id="cb6-96" data-line-number="96">  <span class="kw">kable</span>(featureAlignmentsNto1<span class="op">$</span>stats[seqOrder,], </a>
-<a class="sourceLine" id="cb6-97" data-line-number="97">        <span class="dt">caption =</span> <span class="kw">paste0</span>(</a>
-<a class="sourceLine" id="cb6-98" data-line-number="98">          <span class="st">&quot;One-to-N alignment of feature &quot;</span>, </a>
-<a class="sourceLine" id="cb6-99" data-line-number="99">          featureName))</a>
-<a class="sourceLine" id="cb6-100" data-line-number="100">  </a>
-<a class="sourceLine" id="cb6-101" data-line-number="101">}</a></code></pre></div>
+<div id="feature-matches-and-alignments" class="section level2">
+<h2>Feature matches and alignments</h2>
+<ol style="list-style-type: decimal">
+<li><p>We perform a global pairwise alignment (Needle-Waterman algorithm) between each feature of the reference strain (HuCoV2_WH01_2019) and each one of the query genomes.</p></li>
+<li><p>The collected nucleic sequences are then aligned based on their translated sequences. This ensures a more relevant placing of the gaps. These translation-based alignments are exported in aminoacids and DNA formats (the DNA sequences are obtained by reverse-mapping the aligned aminoacid sequences onto the input DNA sequences).</p></li>
+<li><p>For each alignment (AA and DNA) wee compute a consensus matrix, indicating the frequency of each residue (row of the consensus matrix) in each position of the alignment (column of the matrix).</p></li>
+</ol>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="co">#### One-to-N alignmemnt of user-speficied genomic features ####</span></a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb9-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb9-4" data-line-number="4">i &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb9-5" data-line-number="5">testFeature &lt;-<span class="st"> &quot;Recomb-RBD&quot;</span></a>
+<a class="sourceLine" id="cb9-6" data-line-number="6">i &lt;-<span class="st"> </span><span class="kw">which</span>(<span class="kw">names</span>(features) <span class="op">==</span><span class="st"> </span>testFeature)</a>
+<a class="sourceLine" id="cb9-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb9-8" data-line-number="8"><span class="co">## Rune one-ton matches and translation-based mumti^ple alignment + PIP profiles</span></a>
+<a class="sourceLine" id="cb9-9" data-line-number="9"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(features)) {</a>
+<a class="sourceLine" id="cb9-10" data-line-number="10">  featureName &lt;-<span class="st"> </span><span class="kw">names</span>(features)[i]</a>
+<a class="sourceLine" id="cb9-11" data-line-number="11">  </a>
+<a class="sourceLine" id="cb9-12" data-line-number="12">  <span class="co">## Compute feature length</span></a>
+<a class="sourceLine" id="cb9-13" data-line-number="13">  featureLimits &lt;-<span class="st"> </span>features[[featureName]]</a>
+<a class="sourceLine" id="cb9-14" data-line-number="14">  featureStart &lt;-<span class="st"> </span>featureLimits[[<span class="st">&quot;start&quot;</span>]]</a>
+<a class="sourceLine" id="cb9-15" data-line-number="15">  featureEnd &lt;-<span class="st"> </span>featureLimits[[<span class="st">&quot;end&quot;</span>]]</a>
+<a class="sourceLine" id="cb9-16" data-line-number="16">  featureLength &lt;-<span class="st"> </span></a>
+<a class="sourceLine" id="cb9-17" data-line-number="17"><span class="st">    </span>featureEnd <span class="op">-</span><span class="st"> </span>featureStart  <span class="op">+</span><span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb9-18" data-line-number="18">  </a>
+<a class="sourceLine" id="cb9-19" data-line-number="19">  <span class="kw">message</span>(<span class="st">&quot;Searching matches for feature &quot;</span>, </a>
+<a class="sourceLine" id="cb9-20" data-line-number="20">          i, <span class="st">&quot;/&quot;</span>, <span class="kw">length</span>(features), <span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>,</a>
+<a class="sourceLine" id="cb9-21" data-line-number="21">          featureName, </a>
+<a class="sourceLine" id="cb9-22" data-line-number="22">          <span class="st">&quot; (&quot;</span>, featureLimits[<span class="dv">1</span>], <span class="st">&quot;-&quot;</span>, featureLimits[<span class="dv">2</span>], <span class="st">&quot;)&quot;</span>, </a>
+<a class="sourceLine" id="cb9-23" data-line-number="23">          <span class="st">&quot; in collection &quot;</span>, collection)</a>
+<a class="sourceLine" id="cb9-24" data-line-number="24">  </a>
+<a class="sourceLine" id="cb9-25" data-line-number="25">  <span class="co">## Print a section title with the feature name and limits</span></a>
+<a class="sourceLine" id="cb9-26" data-line-number="26">  <span class="kw">cat</span>(<span class="dt">sep =</span> <span class="st">&quot;&quot;</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">### &quot;</span>,  featureName, </a>
+<a class="sourceLine" id="cb9-27" data-line-number="27">      <span class="st">&quot; (&quot;</span>, featureLimits[<span class="dv">1</span>], <span class="st">&quot;-&quot;</span>, featureLimits[<span class="dv">2</span>], </a>
+<a class="sourceLine" id="cb9-28" data-line-number="28">      <span class="st">&quot;; &quot;</span>, featureLength,<span class="st">&quot;bp)&quot;</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb9-29" data-line-number="29"></a>
+<a class="sourceLine" id="cb9-30" data-line-number="30"></a>
+<a class="sourceLine" id="cb9-31" data-line-number="31">  <span class="co">## Choose a collection- and feature-specific path for the figures</span></a>
+<a class="sourceLine" id="cb9-32" data-line-number="32">  knitr<span class="op">::</span>opts_chunk<span class="op">$</span><span class="kw">set</span>(<span class="dt">fig.path =</span> <span class="kw">paste0</span>(</a>
+<a class="sourceLine" id="cb9-33" data-line-number="33">    <span class="st">&#39;figures/one-to-n-matches_&#39;</span>, collection, <span class="st">&#39;/&#39;</span>,</a>
+<a class="sourceLine" id="cb9-34" data-line-number="34">    collection, <span class="st">&#39;_vs_&#39;</span>, featureName))</a>
+<a class="sourceLine" id="cb9-35" data-line-number="35"></a>
+<a class="sourceLine" id="cb9-36" data-line-number="36">  </a>
+<a class="sourceLine" id="cb9-37" data-line-number="37">  <span class="co">#### Define feature-specific output directory ####</span></a>
+<a class="sourceLine" id="cb9-38" data-line-number="38">  featurePrefix &lt;-<span class="st"> </span><span class="kw">paste0</span>(</a>
+<a class="sourceLine" id="cb9-39" data-line-number="39">    featureName,</a>
+<a class="sourceLine" id="cb9-40" data-line-number="40">    <span class="st">&quot;_&quot;</span>, collection)</a>
+<a class="sourceLine" id="cb9-41" data-line-number="41">  </a>
+<a class="sourceLine" id="cb9-42" data-line-number="42">  dir[[featureName]] &lt;-<span class="st"> </span><span class="kw">file.path</span>(dir<span class="op">$</span>results, featurePrefix)</a>
+<a class="sourceLine" id="cb9-43" data-line-number="43">  <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Output directory: &quot;</span>, dir[[featureName]] )</a>
+<a class="sourceLine" id="cb9-44" data-line-number="44">  <span class="kw">dir.create</span>(dir[[featureName]], <span class="dt">showWarnings =</span> <span class="ot">FALSE</span>, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb9-45" data-line-number="45">  </a>
+<a class="sourceLine" id="cb9-46" data-line-number="46">  <span class="co">#### Find feature matches by 1-to-1 alignment with each genome ####</span></a>
+<a class="sourceLine" id="cb9-47" data-line-number="47"></a>
+<a class="sourceLine" id="cb9-48" data-line-number="48">  <span class="co">## Define output file for unaligned matching sequences</span></a>
+<a class="sourceLine" id="cb9-49" data-line-number="49">  outfiles[<span class="kw">paste0</span>(featurePrefix, <span class="st">&quot;_matches&quot;</span>)]  &lt;-<span class="st"> </span><span class="kw">file.path</span>(</a>
+<a class="sourceLine" id="cb9-50" data-line-number="50">    dir[[featureName]], <span class="kw">paste0</span>(featurePrefix, <span class="st">&quot;_matches.fasta&quot;</span>))</a>
+<a class="sourceLine" id="cb9-51" data-line-number="51">  <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Matching sequences: &quot;</span>, </a>
+<a class="sourceLine" id="cb9-52" data-line-number="52">          outfiles[<span class="kw">paste0</span>(featurePrefix, <span class="st">&quot;_matches&quot;</span>)])</a>
+<a class="sourceLine" id="cb9-53" data-line-number="53">  </a>
+<a class="sourceLine" id="cb9-54" data-line-number="54">  <span class="co">## Get sequence of the feature from the reference genome</span></a>
+<a class="sourceLine" id="cb9-55" data-line-number="55">  refSeq &lt;-<span class="st"> </span><span class="kw">subseq</span>(genomes[refStrainName], </a>
+<a class="sourceLine" id="cb9-56" data-line-number="56">                   <span class="dt">start =</span> featureLimits[<span class="dv">1</span>], </a>
+<a class="sourceLine" id="cb9-57" data-line-number="57">                   <span class="dt">end =</span> featureLimits[<span class="dv">2</span>])</a>
+<a class="sourceLine" id="cb9-58" data-line-number="58"></a>
+<a class="sourceLine" id="cb9-59" data-line-number="59">  <span class="co">## Match the reference feature with all the genomes</span></a>
+<a class="sourceLine" id="cb9-60" data-line-number="60">  <span class="cf">if</span> (reloadImage) {</a>
+<a class="sourceLine" id="cb9-61" data-line-number="61">    featureAlignmentsNto1 &lt;-<span class="st"> </span>allFeatureAlignments[[featureName]]</a>
+<a class="sourceLine" id="cb9-62" data-line-number="62">  } <span class="cf">else</span> {  </a>
+<a class="sourceLine" id="cb9-63" data-line-number="63">    featureAlignmentsNto1 &lt;-<span class="st"> </span><span class="kw">alignNtoOne</span>(</a>
+<a class="sourceLine" id="cb9-64" data-line-number="64">      <span class="dt">refSequence =</span> refSeq, </a>
+<a class="sourceLine" id="cb9-65" data-line-number="65">      <span class="dt">querySequences =</span> genomes, </a>
+<a class="sourceLine" id="cb9-66" data-line-number="66">      <span class="dt">type =</span> <span class="st">&quot;global-local&quot;</span>,</a>
+<a class="sourceLine" id="cb9-67" data-line-number="67">      <span class="dt">outfile =</span> outfiles[<span class="kw">paste0</span>(featurePrefix, <span class="st">&quot;_matches&quot;</span>)])</a>
+<a class="sourceLine" id="cb9-68" data-line-number="68">    allFeatureAlignments[[featureName]] &lt;-<span class="st"> </span>featureAlignmentsNto1</a>
+<a class="sourceLine" id="cb9-69" data-line-number="69">    </a>
+<a class="sourceLine" id="cb9-70" data-line-number="70">  }</a>
+<a class="sourceLine" id="cb9-71" data-line-number="71">  </a>
+<a class="sourceLine" id="cb9-72" data-line-number="72">  </a>
+<a class="sourceLine" id="cb9-73" data-line-number="73">  </a>
+<a class="sourceLine" id="cb9-74" data-line-number="74">   </a>
+<a class="sourceLine" id="cb9-75" data-line-number="75">  </a>
+<a class="sourceLine" id="cb9-76" data-line-number="76">  </a>
+<a class="sourceLine" id="cb9-77" data-line-number="77">  <span class="co">#### Translation-based alignments ####</span></a>
+<a class="sourceLine" id="cb9-78" data-line-number="78">  <span class="cf">if</span> (featureTable[featureName, <span class="st">&quot;isCDS&quot;</span>]) {</a>
+<a class="sourceLine" id="cb9-79" data-line-number="79">    <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Translation-based multiple alignment of feature &quot;</span>, featureName, <span class="st">&quot;; DNA output&quot;</span>)</a>
+<a class="sourceLine" id="cb9-80" data-line-number="80">    </a>
+<a class="sourceLine" id="cb9-81" data-line-number="81">    <span class="co">#### Align translated sequenecs and return correponding nucleic sequences ####</span></a>
+<a class="sourceLine" id="cb9-82" data-line-number="82">    featureAlignmentsNto1<span class="op">$</span>tralignedDNA &lt;-<span class="st"> </span><span class="kw">AlignTranslation</span>(</a>
+<a class="sourceLine" id="cb9-83" data-line-number="83">      <span class="kw">DNAStringSet</span>(featureAlignmentsNto1<span class="op">$</span>sequences), </a>
+<a class="sourceLine" id="cb9-84" data-line-number="84">      <span class="dt">type =</span> <span class="st">&quot;DNAStringSet&quot;</span>,</a>
+<a class="sourceLine" id="cb9-85" data-line-number="85">      <span class="dt">verbose =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb9-86" data-line-number="86">    </a>
+<a class="sourceLine" id="cb9-87" data-line-number="87">    <span class="co">## Save multiple-aligned DNA sequences</span></a>
+<a class="sourceLine" id="cb9-88" data-line-number="88">    outfiles[<span class="kw">paste0</span>(featurePrefix, <span class="st">&quot;_tralignedDNA&quot;</span>)]  &lt;-<span class="st"> </span><span class="kw">file.path</span>(</a>
+<a class="sourceLine" id="cb9-89" data-line-number="89">      dir[[featureName]], <span class="kw">paste0</span>(featurePrefix, <span class="st">&quot;_tralignedDNA.fasta&quot;</span>))</a>
+<a class="sourceLine" id="cb9-90" data-line-number="90">    <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Translation-based alignment saved in file &quot;</span>, </a>
+<a class="sourceLine" id="cb9-91" data-line-number="91">            outfiles[<span class="kw">paste0</span>(featurePrefix, <span class="st">&quot;_tralignedDNA&quot;</span>)])</a>
+<a class="sourceLine" id="cb9-92" data-line-number="92">    <span class="kw">writeXStringSet</span>(</a>
+<a class="sourceLine" id="cb9-93" data-line-number="93">      <span class="dt">x =</span> featureAlignmentsNto1<span class="op">$</span>tralignedDNA, </a>
+<a class="sourceLine" id="cb9-94" data-line-number="94">      <span class="dt">filepath =</span> outfiles[<span class="kw">paste0</span>(featurePrefix, <span class="st">&quot;_tralignedDNA&quot;</span>)] )</a>
+<a class="sourceLine" id="cb9-95" data-line-number="95"></a>
+<a class="sourceLine" id="cb9-96" data-line-number="96">    <span class="co">## Convert alignment to position-weight matrix</span></a>
+<a class="sourceLine" id="cb9-97" data-line-number="97">    featureAlignmentsNto1<span class="op">$</span>tralignedDNAConsensus &lt;-<span class="st"> </span><span class="kw">consensusMatrix</span>(</a>
+<a class="sourceLine" id="cb9-98" data-line-number="98">      <span class="dt">x =</span> featureAlignmentsNto1<span class="op">$</span>tralignedDNA)</a>
+<a class="sourceLine" id="cb9-99" data-line-number="99">    </a>
+<a class="sourceLine" id="cb9-100" data-line-number="100">    <span class="co">#### Align translated sequenecs and return correponding AA sequences ####</span></a>
+<a class="sourceLine" id="cb9-101" data-line-number="101">    <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Translation-based multiple alignment of feature &quot;</span>, featureName, <span class="st">&quot;; AA output&quot;</span>)</a>
+<a class="sourceLine" id="cb9-102" data-line-number="102">    featureAlignmentsNto1<span class="op">$</span>tralignedAA &lt;-<span class="st"> </span><span class="kw">AlignTranslation</span>(</a>
+<a class="sourceLine" id="cb9-103" data-line-number="103">      <span class="kw">DNAStringSet</span>(featureAlignmentsNto1<span class="op">$</span>sequences), </a>
+<a class="sourceLine" id="cb9-104" data-line-number="104">      <span class="dt">type =</span> <span class="st">&quot;AAStringSet&quot;</span>,</a>
+<a class="sourceLine" id="cb9-105" data-line-number="105">      <span class="dt">verbose =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb9-106" data-line-number="106"></a>
+<a class="sourceLine" id="cb9-107" data-line-number="107">    <span class="co">## Convert alignment to position-weight matrix</span></a>
+<a class="sourceLine" id="cb9-108" data-line-number="108">    featureAlignmentsNto1<span class="op">$</span>tralignedAAConsensus &lt;-<span class="st"> </span><span class="kw">consensusMatrix</span>(</a>
+<a class="sourceLine" id="cb9-109" data-line-number="109">      <span class="dt">x =</span> featureAlignmentsNto1<span class="op">$</span>tralignedAA)</a>
+<a class="sourceLine" id="cb9-110" data-line-number="110">  </a>
+<a class="sourceLine" id="cb9-111" data-line-number="111">    <span class="co">## Save multiple-aligned AA sequences</span></a>
+<a class="sourceLine" id="cb9-112" data-line-number="112">    outfiles[<span class="kw">paste0</span>(featurePrefix, <span class="st">&quot;_tralignedAA&quot;</span>)]  &lt;-<span class="st"> </span><span class="kw">file.path</span>(</a>
+<a class="sourceLine" id="cb9-113" data-line-number="113">      dir[[featureName]], <span class="kw">paste0</span>(featurePrefix, <span class="st">&quot;_tralignedAA.fasta&quot;</span>))</a>
+<a class="sourceLine" id="cb9-114" data-line-number="114">    <span class="kw">message</span>(<span class="st">&quot;</span><span class="ch">\t</span><span class="st">Translation-based alignment saved in file &quot;</span>, </a>
+<a class="sourceLine" id="cb9-115" data-line-number="115">            outfiles[<span class="kw">paste0</span>(featurePrefix, <span class="st">&quot;_tralignedAA&quot;</span>)])</a>
+<a class="sourceLine" id="cb9-116" data-line-number="116">    <span class="kw">writeXStringSet</span>(</a>
+<a class="sourceLine" id="cb9-117" data-line-number="117">      <span class="dt">x =</span> featureAlignmentsNto1<span class="op">$</span>tralignedAA, </a>
+<a class="sourceLine" id="cb9-118" data-line-number="118">      <span class="dt">filepath =</span> outfiles[<span class="kw">paste0</span>(featurePrefix, <span class="st">&quot;_tralignedAA&quot;</span>)] )</a>
+<a class="sourceLine" id="cb9-119" data-line-number="119">  }</a>
+<a class="sourceLine" id="cb9-120" data-line-number="120">  </a>
+<a class="sourceLine" id="cb9-121" data-line-number="121">  <span class="co">## Compute sequence order by decreasing PIP score</span></a>
+<a class="sourceLine" id="cb9-122" data-line-number="122">  seqOrder &lt;-<span class="st"> </span><span class="kw">order</span>(featureAlignmentsNto1<span class="op">$</span>stat<span class="op">$</span>score, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb9-123" data-line-number="123">  </a>
+<a class="sourceLine" id="cb9-124" data-line-number="124"></a>
+<a class="sourceLine" id="cb9-125" data-line-number="125">  <span class="co">## Print matching statistics</span></a>
+<a class="sourceLine" id="cb9-126" data-line-number="126">  <span class="kw">kable</span>(featureAlignmentsNto1<span class="op">$</span>stats[seqOrder, ], </a>
+<a class="sourceLine" id="cb9-127" data-line-number="127">        <span class="dt">caption =</span> <span class="kw">paste0</span>(</a>
+<a class="sourceLine" id="cb9-128" data-line-number="128">          <span class="st">&quot;One-to-N alignment of feature &quot;</span>, </a>
+<a class="sourceLine" id="cb9-129" data-line-number="129">          featureName))</a>
+<a class="sourceLine" id="cb9-130" data-line-number="130">  </a>
+<a class="sourceLine" id="cb9-131" data-line-number="131">  <span class="co">#### PIP profiles ####</span></a>
+<a class="sourceLine" id="cb9-132" data-line-number="132">  <span class="co">## Choose window size  </span></a>
+<a class="sourceLine" id="cb9-133" data-line-number="133">  <span class="cf">if</span> (featureLength <span class="op">&gt;</span><span class="st"> </span><span class="dv">20000</span>) {</a>
+<a class="sourceLine" id="cb9-134" data-line-number="134">    windowSize &lt;-<span class="st"> </span><span class="dv">800</span> </a>
+<a class="sourceLine" id="cb9-135" data-line-number="135">  } <span class="cf">else</span> <span class="cf">if</span> (featureLength <span class="op">&gt;</span><span class="st"> </span><span class="dv">5000</span>) {</a>
+<a class="sourceLine" id="cb9-136" data-line-number="136">    windowSize &lt;-<span class="st"> </span><span class="dv">500</span> </a>
+<a class="sourceLine" id="cb9-137" data-line-number="137">  } <span class="cf">else</span> <span class="cf">if</span> (featureLength <span class="op">&gt;</span><span class="st"> </span><span class="dv">3000</span>) {</a>
+<a class="sourceLine" id="cb9-138" data-line-number="138">    windowSize &lt;-<span class="st"> </span><span class="dv">200</span> </a>
+<a class="sourceLine" id="cb9-139" data-line-number="139">  } <span class="cf">else</span> <span class="cf">if</span> (featureLength <span class="op">&gt;</span><span class="st"> </span><span class="dv">400</span>) {</a>
+<a class="sourceLine" id="cb9-140" data-line-number="140">    windowSize &lt;-<span class="st"> </span><span class="dv">100</span> </a>
+<a class="sourceLine" id="cb9-141" data-line-number="141">  } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb9-142" data-line-number="142">    windowSize &lt;-<span class="st"> </span><span class="kw">max</span>(<span class="dv">50</span>, <span class="dv">10</span> <span class="op">*</span><span class="st"> </span><span class="kw">round</span>(featureLength <span class="op">/</span><span class="st"> </span><span class="dv">100</span>))</a>
+<a class="sourceLine" id="cb9-143" data-line-number="143">  }</a>
+<a class="sourceLine" id="cb9-144" data-line-number="144"></a>
+<a class="sourceLine" id="cb9-145" data-line-number="145">  </a>
+<a class="sourceLine" id="cb9-146" data-line-number="146">  <span class="co">## DNA PIP profile of one-to-N alignment</span></a>
+<a class="sourceLine" id="cb9-147" data-line-number="147">  <span class="kw">PlotPIPprofilesFromList</span>(</a>
+<a class="sourceLine" id="cb9-148" data-line-number="148"><span class="co">#    alignments = featureAlignmentsNto1$alignments[seqOrder],</span></a>
+<a class="sourceLine" id="cb9-149" data-line-number="149">    <span class="dt">alignments =</span> featureAlignmentsNto1<span class="op">$</span>alignments,</a>
+<a class="sourceLine" id="cb9-150" data-line-number="150">    <span class="dt">reversePlot =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb9-151" data-line-number="151">    <span class="dt">windowSize =</span> windowSize,</a>
+<a class="sourceLine" id="cb9-152" data-line-number="152">    <span class="dt">main =</span> <span class="kw">paste0</span>(<span class="st">&quot;PIP profiles: collection &quot;</span>, collection,</a>
+<a class="sourceLine" id="cb9-153" data-line-number="153">                  <span class="st">&quot;</span><span class="ch">\n</span><span class="st">Genomic feature &quot;</span>, featureName, <span class="st">&quot; (&quot;</span>, featureStart, <span class="st">&quot;:&quot;</span>, featureEnd ,<span class="st">&quot;, &quot;</span>, featureLength, <span class="st">&quot; bp)&quot;</span>),</a>
+<a class="sourceLine" id="cb9-154" data-line-number="154">    <span class="co">#    colors = NULL,</span></a>
+<a class="sourceLine" id="cb9-155" data-line-number="155">    <span class="dt">colors =</span> strainColors,</a>
+<a class="sourceLine" id="cb9-156" data-line-number="156">    <span class="dt">legendMargin =</span> <span class="fl">0.25</span>,</a>
+<a class="sourceLine" id="cb9-157" data-line-number="157">    <span class="dt">legendCorner =</span> <span class="st">&quot;topright&quot;</span>, <span class="dt">lwd =</span> <span class="dv">1</span>,</a>
+<a class="sourceLine" id="cb9-158" data-line-number="158">    <span class="dt">legendCex =</span> <span class="fl">0.5</span>, <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">30</span>, <span class="dv">100</span>))</a>
+<a class="sourceLine" id="cb9-159" data-line-number="159"></a>
+<a class="sourceLine" id="cb9-160" data-line-number="160">  <span class="co">## Identify the correspodences between matches and sequences</span></a>
+<a class="sourceLine" id="cb9-161" data-line-number="161">  seqNames &lt;-<span class="st"> </span><span class="kw">names</span>(featureAlignmentsNto1<span class="op">$</span>alignments)</a>
+<a class="sourceLine" id="cb9-162" data-line-number="162">  refSeqName &lt;-<span class="st"> </span>refStrainName</a>
+<a class="sourceLine" id="cb9-163" data-line-number="163">  matchNames &lt;-<span class="st"> </span><span class="kw">names</span>(featureAlignmentsNto1<span class="op">$</span>sequences) </a>
+<a class="sourceLine" id="cb9-164" data-line-number="164">  refMatchName &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="dt">pattern =</span> <span class="kw">paste0</span>(<span class="st">&quot;^&quot;</span>, refStrainName), matchNames, </a>
+<a class="sourceLine" id="cb9-165" data-line-number="165">                       <span class="dt">perl =</span> <span class="ot">TRUE</span>, <span class="dt">value =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb9-166" data-line-number="166"></a>
+<a class="sourceLine" id="cb9-167" data-line-number="167">  <span class="co">## Define colors</span></a>
+<a class="sourceLine" id="cb9-168" data-line-number="168">  matchColors &lt;-<span class="st"> </span>strainColors[seqNames]</a>
+<a class="sourceLine" id="cb9-169" data-line-number="169">  <span class="kw">names</span>(matchColors) &lt;-<span class="st"> </span>matchNames</a>
+<a class="sourceLine" id="cb9-170" data-line-number="170">  </a>
+<a class="sourceLine" id="cb9-171" data-line-number="171">  <span class="cf">if</span> (featureTable[featureName, <span class="st">&quot;isCDS&quot;</span>]) {</a>
+<a class="sourceLine" id="cb9-172" data-line-number="172">    </a>
+<a class="sourceLine" id="cb9-173" data-line-number="173">    <span class="co">#### DNA PIP profile of translation-based multiple alignment ####</span></a>
+<a class="sourceLine" id="cb9-174" data-line-number="174">    <span class="kw">PlotPIPprofiles</span>(</a>
+<a class="sourceLine" id="cb9-175" data-line-number="175">      <span class="dt">alignment =</span> featureAlignmentsNto1<span class="op">$</span>tralignedDNA, </a>
+<a class="sourceLine" id="cb9-176" data-line-number="176">      <span class="dt">refSeqName =</span> refMatchName,</a>
+<a class="sourceLine" id="cb9-177" data-line-number="177">      <span class="dt">plotRefGaps =</span> <span class="ot">FALSE</span>,</a>
+<a class="sourceLine" id="cb9-178" data-line-number="178">      <span class="dt">reversePlot =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb9-179" data-line-number="179">      <span class="dt">windowSize =</span> windowSize,</a>
+<a class="sourceLine" id="cb9-180" data-line-number="180">      <span class="dt">main =</span> <span class="kw">paste0</span>(<span class="st">&quot;DNA PIP profiles – collection: &quot;</span>, collection,</a>
+<a class="sourceLine" id="cb9-181" data-line-number="181">                    <span class="st">&quot;</span><span class="ch">\n</span><span class="st">Genomic feature &quot;</span>, featureName, <span class="st">&quot; (&quot;</span>, featureStart, <span class="st">&quot;:&quot;</span>, featureEnd ,<span class="st">&quot;, &quot;</span>, featureLength, <span class="st">&quot; bp)&quot;</span>),</a>
+<a class="sourceLine" id="cb9-182" data-line-number="182">      <span class="dt">colors =</span> matchColors,</a>
+<a class="sourceLine" id="cb9-183" data-line-number="183">      <span class="dt">legendMargin =</span> <span class="fl">0.3</span>,</a>
+<a class="sourceLine" id="cb9-184" data-line-number="184">      <span class="dt">legendCorner =</span> <span class="st">&quot;topright&quot;</span>,</a>
+<a class="sourceLine" id="cb9-185" data-line-number="185">      <span class="dt">lwd =</span> <span class="dv">1</span>,</a>
+<a class="sourceLine" id="cb9-186" data-line-number="186">      <span class="dt">legendCex =</span> <span class="fl">0.5</span>,</a>
+<a class="sourceLine" id="cb9-187" data-line-number="187">      <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">30</span>, <span class="dv">100</span>))</a>
+<a class="sourceLine" id="cb9-188" data-line-number="188">    </a>
+<a class="sourceLine" id="cb9-189" data-line-number="189">    <span class="co">## AA PIP profile of translation-based multiple alignment</span></a>
+<a class="sourceLine" id="cb9-190" data-line-number="190">    <span class="kw">PlotPIPprofiles</span>(</a>
+<a class="sourceLine" id="cb9-191" data-line-number="191">      <span class="co">#    alignments = featureAlignmentsNto1$alignments[seqOrder],</span></a>
+<a class="sourceLine" id="cb9-192" data-line-number="192">      <span class="dt">alignment =</span> featureAlignmentsNto1<span class="op">$</span>tralignedAA, </a>
+<a class="sourceLine" id="cb9-193" data-line-number="193">      <span class="dt">refSeqName =</span> refMatchName,</a>
+<a class="sourceLine" id="cb9-194" data-line-number="194">      <span class="dt">plotRefGaps =</span> <span class="ot">FALSE</span>,</a>
+<a class="sourceLine" id="cb9-195" data-line-number="195">      <span class="dt">reversePlot =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb9-196" data-line-number="196">      <span class="dt">windowSize =</span> windowSize<span class="op">/</span><span class="dv">3</span>,</a>
+<a class="sourceLine" id="cb9-197" data-line-number="197">      <span class="dt">main =</span> <span class="kw">paste0</span>(<span class="st">&quot;AA PIP profiles: collection &quot;</span>, collection,</a>
+<a class="sourceLine" id="cb9-198" data-line-number="198">                    <span class="st">&quot;</span><span class="ch">\n</span><span class="st">Genomic feature &quot;</span>, featureName, <span class="st">&quot; (&quot;</span>, featureStart, <span class="st">&quot;:&quot;</span>, featureEnd ,<span class="st">&quot;, &quot;</span>, featureLength, <span class="st">&quot; bp)&quot;</span>),</a>
+<a class="sourceLine" id="cb9-199" data-line-number="199">      <span class="dt">colors =</span> matchColors,</a>
+<a class="sourceLine" id="cb9-200" data-line-number="200">      <span class="dt">legendMargin =</span> <span class="fl">0.3</span>,</a>
+<a class="sourceLine" id="cb9-201" data-line-number="201">      <span class="dt">legendCorner =</span> <span class="st">&quot;topright&quot;</span>,</a>
+<a class="sourceLine" id="cb9-202" data-line-number="202">      <span class="dt">lwd =</span> <span class="dv">1</span>,</a>
+<a class="sourceLine" id="cb9-203" data-line-number="203">      <span class="dt">legendCex =</span> <span class="fl">0.5</span>,</a>
+<a class="sourceLine" id="cb9-204" data-line-number="204">      <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">30</span>, <span class="dv">100</span>))</a>
+<a class="sourceLine" id="cb9-205" data-line-number="205">  }    </a>
+<a class="sourceLine" id="cb9-206" data-line-number="206">  </a>
+<a class="sourceLine" id="cb9-207" data-line-number="207">  </a>
+<a class="sourceLine" id="cb9-208" data-line-number="208">}</a></code></pre></div>
+<div id="s1-21599-23617-2019bp" class="section level3">
+<h3>S1 (21599-23617; 2019bp)</h3>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-1.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-2.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-3.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+</div>
+<div id="s2-23618-25381-1764bp" class="section level3">
+<h3>S2 (23618-25381; 1764bp)</h3>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-4.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-5.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-6.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+</div>
+<div id="rbd-22517-23185-669bp" class="section level3">
+<h3>RBD (22517-23185; 669bp)</h3>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-7.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+</div>
 <div id="ins1-pm120-21647-21907-261bp" class="section level3">
 <h3>Ins1-pm120 (21647-21907; 261bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-1.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-8.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1292,7 +1496,7 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="ins2-pm120-21899-22156-258bp" class="section level3">
 <h3>Ins2-pm120 (21899-22156; 258bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-2.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-9.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1301,7 +1505,7 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="ins3-pm120-21899-23152-1254bp" class="section level3">
 <h3>Ins3-pm120 (21899-23152; 1254bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-3.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-10.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1310,7 +1514,7 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="ins4-pm120-23483-23734-252bp" class="section level3">
 <h3>Ins4-pm120 (23483-23734; 252bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-4.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-11.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1319,7 +1523,7 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="ins4-m240-23363-23614-252bp" class="section level3">
 <h3>Ins4-m240 (23363-23614; 252bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-5.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-12.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1328,34 +1532,43 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="recomb-xiao-22871-23092-222bp" class="section level3">
 <h3>Recomb-Xiao (22871-23092; 222bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-6.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-13.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
 </div>
 </div>
-<div id="recomb-reg-1-21500-22800-1301bp" class="section level3">
-<h3>Recomb-reg-1 (21500-22800; 1301bp)</h3>
+<div id="recomb-reg-1-2900-3800-901bp" class="section level3">
+<h3>Recomb-reg-1 (2900-3800; 901bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-7.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-14.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
 </div>
 </div>
-<div id="recomb-reg-2-22800-24000-1201bp" class="section level3">
-<h3>Recomb-reg-2 (22800-24000; 1201bp)</h3>
+<div id="recomb-reg-2-21000-24000-3001bp" class="section level3">
+<h3>Recomb-reg-2 (21000-24000; 3001bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-8.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-15.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
 </div>
 </div>
-<div id="recomb-reg-3-27800-28350-551bp" class="section level3">
-<h3>Recomb-reg-3 (27800-28350; 551bp)</h3>
+<div id="recomb-reg-3-27500-28550-1051bp" class="section level3">
+<h3>Recomb-reg-3 (27500-28550; 1051bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-9.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-16.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+</div>
+<div id="recomb-rbd-22700-23200-501bp" class="section level3">
+<h3>Recomb-RBD (22700-23200; 501bp)</h3>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-17.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1364,7 +1577,19 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="cds-s-21563-25384-3822bp" class="section level3">
 <h3>CDS-S (21563-25384; 3822bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-10.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-18.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-19.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-20.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1373,7 +1598,19 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="cds-orf3a-25393-26220-828bp" class="section level3">
 <h3>CDS-ORF3a (25393-26220; 828bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-11.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-21.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-22.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-23.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1382,7 +1619,19 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="cds-e-26245-26472-228bp" class="section level3">
 <h3>CDS-E (26245-26472; 228bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-12.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-24.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-25.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-26.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1391,7 +1640,19 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="cds-m-26523-27191-669bp" class="section level3">
 <h3>CDS-M (26523-27191; 669bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-13.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-27.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-28.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-29.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1400,7 +1661,19 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="cds-orf6-27202-27387-186bp" class="section level3">
 <h3>CDS-ORF6 (27202-27387; 186bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-14.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-30.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-31.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-32.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1409,7 +1682,19 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="cds-orf7a-27394-27759-366bp" class="section level3">
 <h3>CDS-ORF7a (27394-27759; 366bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-15.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-33.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-34.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-35.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1418,7 +1703,19 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="cds-orf8-27894-28259-366bp" class="section level3">
 <h3>CDS-ORF8 (27894-28259; 366bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-16.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-36.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-37.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-38.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1427,7 +1724,19 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="cds-n-28274-29533-1260bp" class="section level3">
 <h3>CDS-N (28274-29533; 1260bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-17.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-39.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-40.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-41.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1436,7 +1745,19 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="cds-orf10-29558-29674-117bp" class="section level3">
 <h3>CDS-ORF10 (29558-29674; 117bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-18.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-42.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-43.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-44.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1445,7 +1766,19 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="cds-orf1ab-266-21555-21290bp" class="section level3">
 <h3>CDS-ORF1ab (266-21555; 21290bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-19.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-45.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-46.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<p class="caption">
+Feature-specific Percent Identical Positions (PIP) profiles.
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-47.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
@@ -1454,12 +1787,48 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="after-orf1ab-21556-29899-8344bp" class="section level3">
 <h3>After-ORF1ab (21556-29899; 8344bp)</h3>
 <div class="figure" style="text-align: center">
-<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-20.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
+<img src="figures/one-to-n-matches_all-plus-GISAID/all-plus-GISAID_one2N_feature_matches-48.png" alt="Feature-specific Percent Identical Positions (PIP) profiles. " width="100%" />
 <p class="caption">
 Feature-specific Percent Identical Positions (PIP) profiles.
 </p>
 </div>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="co"># }</span></a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co"># }</span></a></code></pre></div>
+<!-- ## Translation-based multiple alignments -->
+<!-- For the features corresponding to coding sequences (and in frame), it is more accurate to run aminoacid-based alignment, and to align in a second time the RNA codons onto the aligned aminoacids.  -->
+<!-- ```{r align_translation} -->
+<!-- # featureName <- "CDS-S" -->
+<!-- featureName <- "S1" -->
+<!-- for (featureName in row.names(featureTable)) { -->
+<!--   if (featureTable[featureName, "isCDS"]) { -->
+<!--     message("Translation-based multiple alignment of feature ", featureName) -->
+<!--     featureAlignmentsNto1 <- allFeatureAlignments[[featureName]] -->
+<!--     rawSequences <- DNAStringSet(featureAlignmentsNto1$sequences) -->
+<!--     class(rawSequences) -->
+<!--     traligned <- AlignTranslation( -->
+<!--       rawSequences,  -->
+<!--       type = "DNAStringSet", -->
+<!--       verbose = FALSE) -->
+<!--     allFeatureAlignments[[featureName]]$trAlignment <- traligned -->
+<!--     # names(allFeatureAlignments[[featureName]]) -->
+<!--     ## Save alignment -->
+<!--     featurePrefix <- paste0( -->
+<!--       featureName, -->
+<!--       "_", collection) -->
+<!--     ## Define output file for unaligned matching sequences -->
+<!--     outfiles[paste0(featurePrefix, "_traligned")]  <- file.path( -->
+<!--       dir[[featureName]], paste0(featurePrefix, "_traligned.fasta")) -->
+<!--     message("\tTranslation-based alignment saved in file ",  -->
+<!--             outfiles[paste0(featurePrefix, "_traligned")]) -->
+<!--     ## Save aligned sequences in fasta format -->
+<!--     writeXStringSet( -->
+<!--       x = traligned,  -->
+<!--       filepath = outfiles[paste0(featurePrefix, "_traligned")]) -->
+<!--   } -->
+<!--   ## Convert alignment to position-weight matrix -->
+<!--   consensusM <- consensusMatrix(x = traligned) -->
+<!--   allFeatureAlignments[[featureName]]$consensusM <- consensusM -->
+<!-- } -->
+<!-- ``` -->
 <!-- ```{r one2N_feature_matches_PIP, fig.width=10, fig.height=6, out.width="100%", fig.cap="Feature-specific Percent Identical Positions (PIP) profiles. "} -->
 <!-- #### One-to-N alignmemnt of user-speficied genomic features #### -->
 <!-- allFeatureAlignments <- list() -->
@@ -1481,7 +1850,7 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <!--   featurePrefix <- paste0( -->
 <!--     featureName, -->
 <!--     "_", collection) -->
-<!--   dir[[featureName]] <- file.path(dir$seqdata, featureName) -->
+<!--   dir[[featureName]] <- file.path(dir$results, featureName) -->
 <!--   dir.create(dir[[featureName]], showWarnings = FALSE, recursive = TRUE) -->
 <!--   outfiles[featureName]  <- file.path( -->
 <!--     dir[[featureName]], paste0(featurePrefix, ".fasta")) -->
@@ -1523,7 +1892,7 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 </div>
 <div id="output-files" class="section level2">
 <h2>Output files</h2>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw">kable</span>(<span class="kw">t</span>(<span class="kw">as.data.frame</span>(dir)), <span class="dt">col.names =</span> <span class="st">&quot;Dir&quot;</span>, <span class="dt">caption =</span> <span class="st">&quot;Directories&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw">kable</span>(<span class="kw">t</span>(<span class="kw">as.data.frame</span>(dir)), <span class="dt">col.names =</span> <span class="st">&quot;Dir&quot;</span>, <span class="dt">caption =</span> <span class="st">&quot;Directories&quot;</span>)</a></code></pre></div>
 <table>
 <caption>Directories</caption>
 <thead>
@@ -1546,105 +1915,125 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <td align="left">../data</td>
 </tr>
 <tr class="even">
+<td>results</td>
+<td align="left">../results</td>
+</tr>
+<tr class="odd">
 <td>images</td>
 <td align="left">../memory_images</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>sequences</td>
 <td align="left">../data/GISAID_genomes</td>
 </tr>
+<tr class="odd">
+<td>S1</td>
+<td align="left">../results/S1_all-plus-GISAID</td>
+</tr>
+<tr class="even">
+<td>S2</td>
+<td align="left">../results/S2_all-plus-GISAID</td>
+</tr>
+<tr class="odd">
+<td>RBD</td>
+<td align="left">../results/RBD_all-plus-GISAID</td>
+</tr>
 <tr class="even">
 <td>Ins1.pm120</td>
-<td align="left">../data/Ins1-pm120</td>
+<td align="left">../results/Ins1-pm120_all-plus-GISAID</td>
 </tr>
 <tr class="odd">
 <td>Ins2.pm120</td>
-<td align="left">../data/Ins2-pm120</td>
+<td align="left">../results/Ins2-pm120_all-plus-GISAID</td>
 </tr>
 <tr class="even">
 <td>Ins3.pm120</td>
-<td align="left">../data/Ins3-pm120</td>
+<td align="left">../results/Ins3-pm120_all-plus-GISAID</td>
 </tr>
 <tr class="odd">
 <td>Ins4.pm120</td>
-<td align="left">../data/Ins4-pm120</td>
+<td align="left">../results/Ins4-pm120_all-plus-GISAID</td>
 </tr>
 <tr class="even">
 <td>Ins4.m240</td>
-<td align="left">../data/Ins4-m240</td>
+<td align="left">../results/Ins4-m240_all-plus-GISAID</td>
 </tr>
 <tr class="odd">
 <td>Recomb.Xiao</td>
-<td align="left">../data/Recomb-Xiao</td>
+<td align="left">../results/Recomb-Xiao_all-plus-GISAID</td>
 </tr>
 <tr class="even">
 <td>Recomb.reg.1</td>
-<td align="left">../data/Recomb-reg-1</td>
+<td align="left">../results/Recomb-reg-1_all-plus-GISAID</td>
 </tr>
 <tr class="odd">
 <td>Recomb.reg.2</td>
-<td align="left">../data/Recomb-reg-2</td>
+<td align="left">../results/Recomb-reg-2_all-plus-GISAID</td>
 </tr>
 <tr class="even">
 <td>Recomb.reg.3</td>
-<td align="left">../data/Recomb-reg-3</td>
+<td align="left">../results/Recomb-reg-3_all-plus-GISAID</td>
 </tr>
 <tr class="odd">
+<td>Recomb.RBD</td>
+<td align="left">../results/Recomb-RBD_all-plus-GISAID</td>
+</tr>
+<tr class="even">
 <td>CDS.S</td>
-<td align="left">../data/CDS-S</td>
+<td align="left">../results/CDS-S_all-plus-GISAID</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>CDS.ORF3a</td>
-<td align="left">../data/CDS-ORF3a</td>
+<td align="left">../results/CDS-ORF3a_all-plus-GISAID</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>CDS.E</td>
-<td align="left">../data/CDS-E</td>
+<td align="left">../results/CDS-E_all-plus-GISAID</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>CDS.M</td>
-<td align="left">../data/CDS-M</td>
+<td align="left">../results/CDS-M_all-plus-GISAID</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>CDS.ORF6</td>
-<td align="left">../data/CDS-ORF6</td>
+<td align="left">../results/CDS-ORF6_all-plus-GISAID</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>CDS.ORF7a</td>
-<td align="left">../data/CDS-ORF7a</td>
+<td align="left">../results/CDS-ORF7a_all-plus-GISAID</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>CDS.ORF8</td>
-<td align="left">../data/CDS-ORF8</td>
+<td align="left">../results/CDS-ORF8_all-plus-GISAID</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>CDS.N</td>
-<td align="left">../data/CDS-N</td>
-</tr>
-<tr class="odd">
-<td>CDS.ORF10</td>
-<td align="left">../data/CDS-ORF10</td>
+<td align="left">../results/CDS-N_all-plus-GISAID</td>
 </tr>
 <tr class="even">
-<td>CDS.ORF1ab</td>
-<td align="left">../data/CDS-ORF1ab</td>
+<td>CDS.ORF10</td>
+<td align="left">../results/CDS-ORF10_all-plus-GISAID</td>
 </tr>
 <tr class="odd">
+<td>CDS.ORF1ab</td>
+<td align="left">../results/CDS-ORF1ab_all-plus-GISAID</td>
+</tr>
+<tr class="even">
 <td>After.ORF1ab</td>
-<td align="left">../data/After-ORF1ab</td>
+<td align="left">../results/After-ORF1ab_all-plus-GISAID</td>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1">outfileTable &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">path =</span> <span class="kw">as.vector</span>(outfiles))</a>
-<a class="sourceLine" id="cb9-2" data-line-number="2">outfileTable<span class="op">$</span>basename &lt;-<span class="st"> </span><span class="kw">basename</span>(<span class="kw">as.vector</span>(outfileTable<span class="op">$</span>path))</a>
-<a class="sourceLine" id="cb9-3" data-line-number="3">outfileTable<span class="op">$</span>dir &lt;-<span class="st"> </span><span class="kw">dirname</span>(<span class="kw">as.vector</span>(outfileTable<span class="op">$</span>path))</a>
-<a class="sourceLine" id="cb9-4" data-line-number="4">outfileTable<span class="op">$</span>link &lt;-<span class="st"> </span><span class="kw">paste0</span>(</a>
-<a class="sourceLine" id="cb9-5" data-line-number="5">  <span class="st">&quot;[&quot;</span>, outfileTable<span class="op">$</span>basename, <span class="st">&quot;](&quot;</span>, outfileTable<span class="op">$</span>path, <span class="st">&quot;)&quot;</span></a>
-<a class="sourceLine" id="cb9-6" data-line-number="6">)</a>
-<a class="sourceLine" id="cb9-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb9-8" data-line-number="8"><span class="kw">kable</span>(outfileTable[, <span class="kw">c</span>(<span class="st">&quot;dir&quot;</span>, <span class="st">&quot;link&quot;</span>)], </a>
-<a class="sourceLine" id="cb9-9" data-line-number="9">      <span class="dt">col.names =</span> <span class="kw">c</span>(<span class="st">&quot;dir&quot;</span>, <span class="st">&quot;file&quot;</span>), </a>
-<a class="sourceLine" id="cb9-10" data-line-number="10">      <span class="dt">caption =</span> <span class="st">&quot;Output files&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1">outfileTable &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">path =</span> <span class="kw">as.vector</span>(outfiles))</a>
+<a class="sourceLine" id="cb12-2" data-line-number="2">outfileTable<span class="op">$</span>basename &lt;-<span class="st"> </span><span class="kw">basename</span>(<span class="kw">as.vector</span>(outfileTable<span class="op">$</span>path))</a>
+<a class="sourceLine" id="cb12-3" data-line-number="3">outfileTable<span class="op">$</span>dir &lt;-<span class="st"> </span><span class="kw">dirname</span>(<span class="kw">as.vector</span>(outfileTable<span class="op">$</span>path))</a>
+<a class="sourceLine" id="cb12-4" data-line-number="4">outfileTable<span class="op">$</span>link &lt;-<span class="st"> </span><span class="kw">paste0</span>(</a>
+<a class="sourceLine" id="cb12-5" data-line-number="5">  <span class="st">&quot;[&quot;</span>, outfileTable<span class="op">$</span>basename, <span class="st">&quot;](&quot;</span>, outfileTable<span class="op">$</span>path, <span class="st">&quot;)&quot;</span></a>
+<a class="sourceLine" id="cb12-6" data-line-number="6">)</a>
+<a class="sourceLine" id="cb12-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb12-8" data-line-number="8"><span class="kw">kable</span>(outfileTable[, <span class="kw">c</span>(<span class="st">&quot;dir&quot;</span>, <span class="st">&quot;link&quot;</span>)], </a>
+<a class="sourceLine" id="cb12-9" data-line-number="9">      <span class="dt">col.names =</span> <span class="kw">c</span>(<span class="st">&quot;dir&quot;</span>, <span class="st">&quot;file&quot;</span>), </a>
+<a class="sourceLine" id="cb12-10" data-line-number="10">      <span class="dt">caption =</span> <span class="st">&quot;Output files&quot;</span>)</a></code></pre></div>
 <table>
 <caption>Output files</caption>
 <thead>
@@ -1659,84 +2048,196 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <td align="left"><a href="../memory_images/all-plus-GISAID_one-to-n_matches.Rdata">all-plus-GISAID_one-to-n_matches.Rdata</a></td>
 </tr>
 <tr class="even">
-<td align="left">../data/Ins1-pm120</td>
-<td align="left"><a href="../data/Ins1-pm120/Ins1-pm120_all-plus-GISAID.fasta">Ins1-pm120_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/S1_all-plus-GISAID</td>
+<td align="left"><a href="../results/S1_all-plus-GISAID/S1_all-plus-GISAID_matches.fasta">S1_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 <tr class="odd">
-<td align="left">../data/Ins2-pm120</td>
-<td align="left"><a href="../data/Ins2-pm120/Ins2-pm120_all-plus-GISAID.fasta">Ins2-pm120_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/S1_all-plus-GISAID</td>
+<td align="left"><a href="../results/S1_all-plus-GISAID/S1_all-plus-GISAID_tralignedDNA.fasta">S1_all-plus-GISAID_tralignedDNA.fasta</a></td>
 </tr>
 <tr class="even">
-<td align="left">../data/Ins3-pm120</td>
-<td align="left"><a href="../data/Ins3-pm120/Ins3-pm120_all-plus-GISAID.fasta">Ins3-pm120_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/S1_all-plus-GISAID</td>
+<td align="left"><a href="../results/S1_all-plus-GISAID/S1_all-plus-GISAID_tralignedAA.fasta">S1_all-plus-GISAID_tralignedAA.fasta</a></td>
 </tr>
 <tr class="odd">
-<td align="left">../data/Ins4-pm120</td>
-<td align="left"><a href="../data/Ins4-pm120/Ins4-pm120_all-plus-GISAID.fasta">Ins4-pm120_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/S2_all-plus-GISAID</td>
+<td align="left"><a href="../results/S2_all-plus-GISAID/S2_all-plus-GISAID_matches.fasta">S2_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 <tr class="even">
-<td align="left">../data/Ins4-m240</td>
-<td align="left"><a href="../data/Ins4-m240/Ins4-m240_all-plus-GISAID.fasta">Ins4-m240_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/S2_all-plus-GISAID</td>
+<td align="left"><a href="../results/S2_all-plus-GISAID/S2_all-plus-GISAID_tralignedDNA.fasta">S2_all-plus-GISAID_tralignedDNA.fasta</a></td>
 </tr>
 <tr class="odd">
-<td align="left">../data/Recomb-Xiao</td>
-<td align="left"><a href="../data/Recomb-Xiao/Recomb-Xiao_all-plus-GISAID.fasta">Recomb-Xiao_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/S2_all-plus-GISAID</td>
+<td align="left"><a href="../results/S2_all-plus-GISAID/S2_all-plus-GISAID_tralignedAA.fasta">S2_all-plus-GISAID_tralignedAA.fasta</a></td>
 </tr>
 <tr class="even">
-<td align="left">../data/Recomb-reg-1</td>
-<td align="left"><a href="../data/Recomb-reg-1/Recomb-reg-1_all-plus-GISAID.fasta">Recomb-reg-1_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/RBD_all-plus-GISAID</td>
+<td align="left"><a href="../results/RBD_all-plus-GISAID/RBD_all-plus-GISAID_matches.fasta">RBD_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 <tr class="odd">
-<td align="left">../data/Recomb-reg-2</td>
-<td align="left"><a href="../data/Recomb-reg-2/Recomb-reg-2_all-plus-GISAID.fasta">Recomb-reg-2_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/Ins1-pm120_all-plus-GISAID</td>
+<td align="left"><a href="../results/Ins1-pm120_all-plus-GISAID/Ins1-pm120_all-plus-GISAID_matches.fasta">Ins1-pm120_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 <tr class="even">
-<td align="left">../data/Recomb-reg-3</td>
-<td align="left"><a href="../data/Recomb-reg-3/Recomb-reg-3_all-plus-GISAID.fasta">Recomb-reg-3_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/Ins2-pm120_all-plus-GISAID</td>
+<td align="left"><a href="../results/Ins2-pm120_all-plus-GISAID/Ins2-pm120_all-plus-GISAID_matches.fasta">Ins2-pm120_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 <tr class="odd">
-<td align="left">../data/CDS-S</td>
-<td align="left"><a href="../data/CDS-S/CDS-S_all-plus-GISAID.fasta">CDS-S_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/Ins3-pm120_all-plus-GISAID</td>
+<td align="left"><a href="../results/Ins3-pm120_all-plus-GISAID/Ins3-pm120_all-plus-GISAID_matches.fasta">Ins3-pm120_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 <tr class="even">
-<td align="left">../data/CDS-ORF3a</td>
-<td align="left"><a href="../data/CDS-ORF3a/CDS-ORF3a_all-plus-GISAID.fasta">CDS-ORF3a_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/Ins4-pm120_all-plus-GISAID</td>
+<td align="left"><a href="../results/Ins4-pm120_all-plus-GISAID/Ins4-pm120_all-plus-GISAID_matches.fasta">Ins4-pm120_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 <tr class="odd">
-<td align="left">../data/CDS-E</td>
-<td align="left"><a href="../data/CDS-E/CDS-E_all-plus-GISAID.fasta">CDS-E_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/Ins4-m240_all-plus-GISAID</td>
+<td align="left"><a href="../results/Ins4-m240_all-plus-GISAID/Ins4-m240_all-plus-GISAID_matches.fasta">Ins4-m240_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 <tr class="even">
-<td align="left">../data/CDS-M</td>
-<td align="left"><a href="../data/CDS-M/CDS-M_all-plus-GISAID.fasta">CDS-M_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/Recomb-Xiao_all-plus-GISAID</td>
+<td align="left"><a href="../results/Recomb-Xiao_all-plus-GISAID/Recomb-Xiao_all-plus-GISAID_matches.fasta">Recomb-Xiao_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 <tr class="odd">
-<td align="left">../data/CDS-ORF6</td>
-<td align="left"><a href="../data/CDS-ORF6/CDS-ORF6_all-plus-GISAID.fasta">CDS-ORF6_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/Recomb-reg-1_all-plus-GISAID</td>
+<td align="left"><a href="../results/Recomb-reg-1_all-plus-GISAID/Recomb-reg-1_all-plus-GISAID_matches.fasta">Recomb-reg-1_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 <tr class="even">
-<td align="left">../data/CDS-ORF7a</td>
-<td align="left"><a href="../data/CDS-ORF7a/CDS-ORF7a_all-plus-GISAID.fasta">CDS-ORF7a_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/Recomb-reg-2_all-plus-GISAID</td>
+<td align="left"><a href="../results/Recomb-reg-2_all-plus-GISAID/Recomb-reg-2_all-plus-GISAID_matches.fasta">Recomb-reg-2_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 <tr class="odd">
-<td align="left">../data/CDS-ORF8</td>
-<td align="left"><a href="../data/CDS-ORF8/CDS-ORF8_all-plus-GISAID.fasta">CDS-ORF8_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/Recomb-reg-3_all-plus-GISAID</td>
+<td align="left"><a href="../results/Recomb-reg-3_all-plus-GISAID/Recomb-reg-3_all-plus-GISAID_matches.fasta">Recomb-reg-3_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 <tr class="even">
-<td align="left">../data/CDS-N</td>
-<td align="left"><a href="../data/CDS-N/CDS-N_all-plus-GISAID.fasta">CDS-N_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/Recomb-RBD_all-plus-GISAID</td>
+<td align="left"><a href="../results/Recomb-RBD_all-plus-GISAID/Recomb-RBD_all-plus-GISAID_matches.fasta">Recomb-RBD_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 <tr class="odd">
-<td align="left">../data/CDS-ORF10</td>
-<td align="left"><a href="../data/CDS-ORF10/CDS-ORF10_all-plus-GISAID.fasta">CDS-ORF10_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/CDS-S_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-S_all-plus-GISAID/CDS-S_all-plus-GISAID_matches.fasta">CDS-S_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 <tr class="even">
-<td align="left">../data/CDS-ORF1ab</td>
-<td align="left"><a href="../data/CDS-ORF1ab/CDS-ORF1ab_all-plus-GISAID.fasta">CDS-ORF1ab_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/CDS-S_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-S_all-plus-GISAID/CDS-S_all-plus-GISAID_tralignedDNA.fasta">CDS-S_all-plus-GISAID_tralignedDNA.fasta</a></td>
 </tr>
 <tr class="odd">
-<td align="left">../data/After-ORF1ab</td>
-<td align="left"><a href="../data/After-ORF1ab/After-ORF1ab_all-plus-GISAID.fasta">After-ORF1ab_all-plus-GISAID.fasta</a></td>
+<td align="left">../results/CDS-S_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-S_all-plus-GISAID/CDS-S_all-plus-GISAID_tralignedAA.fasta">CDS-S_all-plus-GISAID_tralignedAA.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../results/CDS-ORF3a_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF3a_all-plus-GISAID/CDS-ORF3a_all-plus-GISAID_matches.fasta">CDS-ORF3a_all-plus-GISAID_matches.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../results/CDS-ORF3a_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF3a_all-plus-GISAID/CDS-ORF3a_all-plus-GISAID_tralignedDNA.fasta">CDS-ORF3a_all-plus-GISAID_tralignedDNA.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../results/CDS-ORF3a_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF3a_all-plus-GISAID/CDS-ORF3a_all-plus-GISAID_tralignedAA.fasta">CDS-ORF3a_all-plus-GISAID_tralignedAA.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../results/CDS-E_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-E_all-plus-GISAID/CDS-E_all-plus-GISAID_matches.fasta">CDS-E_all-plus-GISAID_matches.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../results/CDS-E_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-E_all-plus-GISAID/CDS-E_all-plus-GISAID_tralignedDNA.fasta">CDS-E_all-plus-GISAID_tralignedDNA.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../results/CDS-E_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-E_all-plus-GISAID/CDS-E_all-plus-GISAID_tralignedAA.fasta">CDS-E_all-plus-GISAID_tralignedAA.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../results/CDS-M_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-M_all-plus-GISAID/CDS-M_all-plus-GISAID_matches.fasta">CDS-M_all-plus-GISAID_matches.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../results/CDS-M_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-M_all-plus-GISAID/CDS-M_all-plus-GISAID_tralignedDNA.fasta">CDS-M_all-plus-GISAID_tralignedDNA.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../results/CDS-M_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-M_all-plus-GISAID/CDS-M_all-plus-GISAID_tralignedAA.fasta">CDS-M_all-plus-GISAID_tralignedAA.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../results/CDS-ORF6_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF6_all-plus-GISAID/CDS-ORF6_all-plus-GISAID_matches.fasta">CDS-ORF6_all-plus-GISAID_matches.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../results/CDS-ORF6_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF6_all-plus-GISAID/CDS-ORF6_all-plus-GISAID_tralignedDNA.fasta">CDS-ORF6_all-plus-GISAID_tralignedDNA.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../results/CDS-ORF6_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF6_all-plus-GISAID/CDS-ORF6_all-plus-GISAID_tralignedAA.fasta">CDS-ORF6_all-plus-GISAID_tralignedAA.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../results/CDS-ORF7a_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF7a_all-plus-GISAID/CDS-ORF7a_all-plus-GISAID_matches.fasta">CDS-ORF7a_all-plus-GISAID_matches.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../results/CDS-ORF7a_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF7a_all-plus-GISAID/CDS-ORF7a_all-plus-GISAID_tralignedDNA.fasta">CDS-ORF7a_all-plus-GISAID_tralignedDNA.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../results/CDS-ORF7a_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF7a_all-plus-GISAID/CDS-ORF7a_all-plus-GISAID_tralignedAA.fasta">CDS-ORF7a_all-plus-GISAID_tralignedAA.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../results/CDS-ORF8_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF8_all-plus-GISAID/CDS-ORF8_all-plus-GISAID_matches.fasta">CDS-ORF8_all-plus-GISAID_matches.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../results/CDS-ORF8_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF8_all-plus-GISAID/CDS-ORF8_all-plus-GISAID_tralignedDNA.fasta">CDS-ORF8_all-plus-GISAID_tralignedDNA.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../results/CDS-ORF8_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF8_all-plus-GISAID/CDS-ORF8_all-plus-GISAID_tralignedAA.fasta">CDS-ORF8_all-plus-GISAID_tralignedAA.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../results/CDS-N_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-N_all-plus-GISAID/CDS-N_all-plus-GISAID_matches.fasta">CDS-N_all-plus-GISAID_matches.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../results/CDS-N_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-N_all-plus-GISAID/CDS-N_all-plus-GISAID_tralignedDNA.fasta">CDS-N_all-plus-GISAID_tralignedDNA.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../results/CDS-N_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-N_all-plus-GISAID/CDS-N_all-plus-GISAID_tralignedAA.fasta">CDS-N_all-plus-GISAID_tralignedAA.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../results/CDS-ORF10_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF10_all-plus-GISAID/CDS-ORF10_all-plus-GISAID_matches.fasta">CDS-ORF10_all-plus-GISAID_matches.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../results/CDS-ORF10_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF10_all-plus-GISAID/CDS-ORF10_all-plus-GISAID_tralignedDNA.fasta">CDS-ORF10_all-plus-GISAID_tralignedDNA.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../results/CDS-ORF10_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF10_all-plus-GISAID/CDS-ORF10_all-plus-GISAID_tralignedAA.fasta">CDS-ORF10_all-plus-GISAID_tralignedAA.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../results/CDS-ORF1ab_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF1ab_all-plus-GISAID/CDS-ORF1ab_all-plus-GISAID_matches.fasta">CDS-ORF1ab_all-plus-GISAID_matches.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../results/CDS-ORF1ab_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF1ab_all-plus-GISAID/CDS-ORF1ab_all-plus-GISAID_tralignedDNA.fasta">CDS-ORF1ab_all-plus-GISAID_tralignedDNA.fasta</a></td>
+</tr>
+<tr class="even">
+<td align="left">../results/CDS-ORF1ab_all-plus-GISAID</td>
+<td align="left"><a href="../results/CDS-ORF1ab_all-plus-GISAID/CDS-ORF1ab_all-plus-GISAID_tralignedAA.fasta">CDS-ORF1ab_all-plus-GISAID_tralignedAA.fasta</a></td>
+</tr>
+<tr class="odd">
+<td align="left">../results/After-ORF1ab_all-plus-GISAID</td>
+<td align="left"><a href="../results/After-ORF1ab_all-plus-GISAID/After-ORF1ab_all-plus-GISAID_matches.fasta">After-ORF1ab_all-plus-GISAID_matches.fasta</a></td>
 </tr>
 </tbody>
 </table>
@@ -1744,18 +2245,18 @@ Feature-specific Percent Identical Positions (PIP) profiles.
 <div id="memory-image" class="section level2">
 <h2>Memory image</h2>
 <p>We store the result ina memory image, in oder to be able reloading it to plot PIP profiles with different parameters.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">save.image</span>(<span class="dt">file =</span> outfiles[<span class="st">&quot;Memory image&quot;</span>])</a></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw">save.image</span>(<span class="dt">file =</span> outfiles[<span class="st">&quot;Memory image&quot;</span>])</a></code></pre></div>
 </div>
 <div id="session-info" class="section level2">
 <h2>Session info</h2>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw">sessionInfo</span>()</a></code></pre></div>
-<pre><code>R version 3.6.1 (2019-07-05)
-Platform: x86_64-apple-darwin15.6.0 (64-bit)
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="kw">sessionInfo</span>()</a></code></pre></div>
+<pre><code>R version 4.0.0 (2020-04-24)
+Platform: x86_64-apple-darwin17.0 (64-bit)
 Running under: macOS Mojave 10.14.6
 
 Matrix products: default
-BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
-LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
 
 locale:
 [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
@@ -1764,11 +2265,11 @@ attached base packages:
 [1] stats4    parallel  stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] Biostrings_2.52.0   XVector_0.24.0      IRanges_2.18.3      S4Vectors_0.22.1    BiocGenerics_0.30.0 knitr_1.28         
+[1] DECIPHER_2.16.1     RSQLite_2.2.0       Biostrings_2.56.0   XVector_0.28.0      IRanges_2.22.2      S4Vectors_0.26.1    BiocGenerics_0.34.0 knitr_1.28         
 
 loaded via a namespace (and not attached):
- [1] Rcpp_1.0.4          digest_0.6.25       magrittr_1.5        evaluate_0.14       highr_0.8           zlibbioc_1.30.0     rlang_0.4.5         stringi_1.4.6       rmarkdown_2.1       tools_3.6.1         stringr_1.4.0       xfun_0.12           yaml_2.2.1          compiler_3.6.1     
-[15] BiocManager_1.30.10 htmltools_0.4.0    </code></pre>
+ [1] Rcpp_1.0.4.6        magrittr_1.5        zlibbioc_1.34.0     bit_1.1-15.2        rlang_0.4.6         highr_0.8           stringr_1.4.0       blob_1.2.1          tools_4.0.0         xfun_0.14           DBI_1.1.0           htmltools_0.4.0     yaml_2.2.1          bit64_0.9-7        
+[15] digest_0.6.25       crayon_1.3.4        BiocManager_1.30.10 vctrs_0.3.0         memoise_1.1.0       evaluate_0.14       rmarkdown_2.1       stringi_1.4.6       compiler_4.0.0     </code></pre>
 </div>
 
 
