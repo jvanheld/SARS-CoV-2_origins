@@ -485,7 +485,7 @@ The collection `r collection` contains `r length(genomes)` virus genome sequence
 
 
 i <- 1
-
+i <- which(names(features) == "CDS-ORF10")
 ## Rune one-ton matches and translation-based mumti^ple alignment + PIP profiles
 for (i in 1:length(features)) {
   featureName <- names(features)[i]
@@ -599,7 +599,10 @@ for (i in 1:length(features)) {
       filepath = outfiles[paste0(featurePrefix, "_tralignedAA")] )
   }
   
-
+  kable(featureAlignmentsNto1$stats[seqOrder,], 
+        caption = paste0(
+          "One-to-N alignment of feature ", 
+          featureName))
   
   #### PIP profiles ####
   ## Choose window size  
@@ -644,43 +647,42 @@ for (i in 1:length(features)) {
   matchColors <- strainColors[seqNames]
   names(matchColors) <- matchNames
   
-  #### DNA PIP profile of translation-based multiple alignment ####
-  PlotPIPprofiles(
-    alignment = featureAlignmentsNto1$tralignedDNA, 
-    refSeqName = refMatchName,
-    plotRefGaps = FALSE,
-    reversePlot = TRUE,
-    windowSize = windowSize,
-    main = paste0("DNA PIP profiles – collection: ", collection,
-                  "\nGenomic feature ", featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"),
-    colors = matchColors,
-    legendMargin = 0.3,
-    legendCorner = "topright",
-    lwd = 1,
-    legendCex = 0.5,
-    ylim = c(30, 100))
-
-  ## AA PIP profile of translation-based multiple alignment
-  PlotPIPprofiles(
-    #    alignments = featureAlignmentsNto1$alignments[seqOrder],
-    alignment = featureAlignmentsNto1$tralignedAA, 
-    refSeqName = refMatchName,
-    plotRefGaps = FALSE,
-    reversePlot = TRUE,
-    windowSize = windowSize,
-    main = paste0("AA PIP profiles: collection ", collection,
-                  "\nGenomic feature ", featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"),
-    colors = matchColors,
-    legendMargin = 0.3,
-    legendCorner = "topright",
-    lwd = 1,
-    legendCex = 0.5,
-    ylim = c(30, 100))
+  if (featureTable[featureName, "isCDS"]) {
+    
+    #### DNA PIP profile of translation-based multiple alignment ####
+    PlotPIPprofiles(
+      alignment = featureAlignmentsNto1$tralignedDNA, 
+      refSeqName = refMatchName,
+      plotRefGaps = FALSE,
+      reversePlot = TRUE,
+      windowSize = windowSize,
+      main = paste0("DNA PIP profiles – collection: ", collection,
+                    "\nGenomic feature ", featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"),
+      colors = matchColors,
+      legendMargin = 0.3,
+      legendCorner = "topright",
+      lwd = 1,
+      legendCex = 0.5,
+      ylim = c(30, 100))
+    
+    ## AA PIP profile of translation-based multiple alignment
+    PlotPIPprofiles(
+      #    alignments = featureAlignmentsNto1$alignments[seqOrder],
+      alignment = featureAlignmentsNto1$tralignedAA, 
+      refSeqName = refMatchName,
+      plotRefGaps = FALSE,
+      reversePlot = TRUE,
+      windowSize = windowSize/3,
+      main = paste0("AA PIP profiles: collection ", collection,
+                    "\nGenomic feature ", featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"),
+      colors = matchColors,
+      legendMargin = 0.3,
+      legendCorner = "topright",
+      lwd = 1,
+      legendCex = 0.5,
+      ylim = c(30, 100))
+  }    
   
-  kable(featureAlignmentsNto1$stats[seqOrder,], 
-        caption = paste0(
-          "One-to-N alignment of feature ", 
-          featureName))
   
 }
 # }
