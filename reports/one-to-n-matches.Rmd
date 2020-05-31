@@ -161,9 +161,14 @@ excludeIncomplete <- TRUE
 dir <- list(main = '..')
 dir$R <- file.path(dir$main, "scripts/R")
 
-#### Create output directory for sequences ####
+## Input directory for sequences
 dir$seqdata <- file.path(dir$main, "data")
 dir.create(dir$seqdata, showWarnings = FALSE, recursive = TRUE)
+
+
+## Create output directory for aligned sequences
+dir$results <- file.path(dir$main, "results")
+dir.create(dir$results, showWarnings = FALSE, recursive = TRUE)
 
 ## Instantiate a list for output files
 outfiles <- vector()
@@ -185,6 +190,7 @@ infiles <- list()
 ## Load custom functions
 source(file.path(dir$R, "align_n_to_one.R"))
 source(file.path(dir$R, "plot_pip_profiles.R"))
+source(file.path(dir$R, "plot_pip_profiles_from_list.R"))
 
 ## A unequivocal pattern to identify the reference genome in the sequence names of the input file
 refPattern <- "HuCoV2_WH01_2019"
@@ -344,6 +350,17 @@ message("\tReference genome name: ", refStrainName)
 ```
 
 
+```{r reload_image}
+allFeatureAlignments <- list()
+
+## Reload memory image if specified in parameters
+if (reloadImage) {
+  load(outfiles["Memory image"])
+  reloadImage <- TRUE
+}
+
+```
+
 ## Parameters
 
 ```{r print_parameters}
@@ -466,14 +483,6 @@ The collection `r collection` contains `r length(genomes)` virus genome sequence
 ```{r one2N_feature_matches, results="asis", fig.width=10, fig.height=6, out.width="100%", fig.cap="Feature-specific Percent Identical Positions (PIP) profiles. "}
 #### One-to-N alignmemnt of user-speficied genomic features ####
 
-## Reload memory image if specified in parameters
-if (reloadImage) {
-  load(outfiles["Memory image"])
-  reloadImage <- TRUE
-
-} else {
-  allFeatureAlignments <- list()
-}
 
 i <- 1
 
@@ -511,7 +520,7 @@ for (i in 1:length(features)) {
     featureName,
     "_", collection)
   
-  dir[[featureName]] <- file.path(dir$seqdata, featureName)
+  dir[[featureName]] <- file.path(dir$results, featurePrefix)
   message("\tOutput directory: ", dir[[featureName]] )
   dir.create(dir[[featureName]], showWarnings = FALSE, recursive = TRUE)
   
@@ -527,7 +536,7 @@ for (i in 1:length(features)) {
   refSeq <- subseq(genomes[refStrainName], 
                    start = featureLimits[1], 
                    end = featureLimits[2])
-  
+
   ## Match the reference feature with all the genomes
   if (reloadImage) {
     featureAlignmentsNto1 <- allFeatureAlignments[[featureName]]
@@ -537,15 +546,20 @@ for (i in 1:length(features)) {
       querySequences = genomes, 
       type = "global-local",
       outfile = outfiles[paste0(featurePrefix, "_matches")])
+    allFeatureAlignments[[featureName]] <- featureAlignmentsNto1
     
   }
+  
+  
+  
+   
   
   
   #### Translation-based alignments ####
   if (featureTable[featureName, "isCDS"]) {
     message("\tTranslation-based multiple alignment of feature ", featureName, "; DNA output")
     
-    ## Align translated sequenecs and return correponding nucleic sequences
+    #### Align translated sequenecs and return correponding nucleic sequences ####
     featureAlignmentsNto1$tralignedDNA <- AlignTranslation(
       DNAStringSet(featureAlignmentsNto1$sequences), 
       type = "DNAStringSet",
@@ -564,7 +578,7 @@ for (i in 1:length(features)) {
     featureAlignmentsNto1$tralignedDNAConsensus <- consensusMatrix(
       x = featureAlignmentsNto1$tralignedDNA)
     
-    ## Align translated sequenecs and return correponding AA sequences
+    #### Align translated sequenecs and return correponding AA sequences ####
     message("\tTranslation-based multiple alignment of feature ", featureName, "; AA output")
     featureAlignmentsNto1$tralignedAA <- AlignTranslation(
       DNAStringSet(featureAlignmentsNto1$sequences), 
@@ -606,34 +620,61 @@ for (i in 1:length(features)) {
 
   
   ## DNA PIP profile of one-to-N alignment
-  plotPIPprofiles(
+  PlotPIPprofilesFromList(
 #    alignments = featureAlignmentsNto1$alignments[seqOrder],
     alignments = featureAlignmentsNto1$alignments,
     reversePlot = TRUE,
-    windowSize = windowSize, 
-    main = paste0("PIP profiles: collection ", collection, 
-                  "\nGenomic feature ", featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"), 
-    #    colors = NULL,
-    colors = strainColors,
-    legendMargin = 0.25, 
-    legendCorner = "topright", lwd = 1,
-    legendCex = 0.5, ylim = c(30, 100))
-
-  
-    ## AA PIP profile of translation-based multiple alignment
-  plotPIPprofiles(
-#    alignments = featureAlignmentsNto1$alignments[seqOrder],
-    alignments = featureAlignmentsNto1$tralignedAA,
-    reversePlot = TRUE,
     windowSize = windowSize,
-    main = paste0("AA PIP profiles: collection ", collection,
+    main = paste0("PIP profiles: collection ", collection,
                   "\nGenomic feature ", featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"),
     #    colors = NULL,
     colors = strainColors,
     legendMargin = 0.25,
-    legendCorner = "topright", 
+    legendCorner = "topright", lwd = 1,
+    legendCex = 0.5, ylim = c(30, 100))
+
+  ## Identify the correspodences between matches and sequences
+  seqNames <- names(featureAlignmentsNto1$alignments)
+  refSeqName <- refStrainName
+  matchNames <- names(featureAlignmentsNto1$sequences) 
+  refMatchName <- grep(pattern = paste0("^", refStrainName), matchNames, 
+                       perl = TRUE, value = TRUE)
+
+  ## Define colors
+  matchColors <- strainColors[seqNames]
+  names(matchColors) <- matchNames
+  
+  #### DNA PIP profile of translation-based multiple alignment ####
+  PlotPIPprofiles(
+    alignment = featureAlignmentsNto1$tralignedDNA, 
+    refSeqName = refMatchName,
+    plotRefGaps = FALSE,
+    reversePlot = TRUE,
+    windowSize = windowSize,
+    main = paste0("DNA PIP profiles – collection: ", collection,
+                  "\nGenomic feature ", featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"),
+    colors = matchColors,
+    legendMargin = 0.3,
+    legendCorner = "topright",
     lwd = 1,
-    legendCex = 0.5, 
+    legendCex = 0.5,
+    ylim = c(30, 100))
+
+  ## AA PIP profile of translation-based multiple alignment
+  PlotPIPprofiles(
+    #    alignments = featureAlignmentsNto1$alignments[seqOrder],
+    alignment = featureAlignmentsNto1$tralignedAA, 
+    refSeqName = refMatchName,
+    plotRefGaps = FALSE,
+    reversePlot = TRUE,
+    windowSize = windowSize,
+    main = paste0("AA PIP profiles: collection ", collection,
+                  "\nGenomic feature ", featureName, " (", featureStart, ":", featureEnd ,", ", featureLength, " bp)"),
+    colors = matchColors,
+    legendMargin = 0.3,
+    legendCorner = "topright",
+    lwd = 1,
+    legendCex = 0.5,
     ylim = c(30, 100))
   
   kable(featureAlignmentsNto1$stats[seqOrder,], 
@@ -722,7 +763,7 @@ for (i in 1:length(features)) {
 <!--     featureName, -->
 <!--     "_", collection) -->
 
-<!--   dir[[featureName]] <- file.path(dir$seqdata, featureName) -->
+<!--   dir[[featureName]] <- file.path(dir$results, featureName) -->
 <!--   dir.create(dir[[featureName]], showWarnings = FALSE, recursive = TRUE) -->
 <!--   outfiles[featureName]  <- file.path( -->
 <!--     dir[[featureName]], paste0(featurePrefix, ".fasta")) -->
