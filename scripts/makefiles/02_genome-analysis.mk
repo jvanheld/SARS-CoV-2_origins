@@ -56,19 +56,11 @@ targets:
 ## List parameters
 
 ## Genomic features
-FEATURES= 		\
-	Ins1-pm120	\
-	Ins2-pm120	\
-	Ins3-pm120	\
-	Ins4-pm120	\
-	Ins4-m240	\
+CDS_FEATURES= \
 	S1 		\
 	S2 		\
 	RBD 		\
 	S-gene 		\
-	Recomb-reg-1 	\
-	Recomb-reg-2 	\
-	Recomb-reg-3 	\
 	CDS-S		\
 	CDS-E		\
 	CDS-M 		\
@@ -79,6 +71,17 @@ FEATURES= 		\
 	CDS-ORF6	\
 	CDS-ORF7a	\
 	CDS-ORF8
+
+OTHER_FEATURES= 	\
+	Ins1-pm120	\
+	Ins2-pm120	\
+	Ins3-pm120	\
+	Ins4-pm120	\
+	Ins4-m240	\
+	Recomb-reg-1 	\
+	Recomb-reg-2 	\
+	Recomb-reg-3
+FEATURES=${CDS_FEATURES} ${OTHER_FEATURES}
 FEATURE=S1
 
 ## Collections of genomes
@@ -94,7 +97,8 @@ INSEQ_FILE=${INSEQ_DIR}/${INSEQ_PREFIX}.fasta
 INSEQ_NB=`grep '^>' ${INSEQ_FILE} | wc -l | awk '{print $$1}'`
 
 ## Parameters for the phylogenetic analysis
-PHYLO_TASKS=multialign_clustalw gblocks_clean run_phyml
+ALL_TASKS=multialign_clustalw ${PHYLO_TASKS}
+PHYLO_TASKS=gblocks_clean run_phyml
 PHYLO_DIR=results/${FEATURE}_${COLLECTION}/
 
 list_param:
@@ -102,6 +106,8 @@ list_param:
 	@echo "Generic parameters"
 	@echo "	COLLECTIONS		${COLLECTIONS}"
 	@echo "	COLLECTION		${COLLECTION}"
+	@echo "	CDS_FEATURES		${CDS_FEATURES}"
+	@echo "	OTHER_FEATURES		${OTHER_FEATURES}"
 	@echo "	FEATURES		${FEATURES}"
 	@echo "	FEATURE			${FEATURE}"
 	@echo "	FEATURE_TASKS		${FEATURE_TASKS}"
@@ -143,6 +149,7 @@ list_param:
 	@echo "Molecular phylogeny"
 	@echo "	PHYLO_DIR		${PHYLO_DIR}"
 	@echo "	PHYLO_TASKS		${PHYLO_TASKS}"
+	@echo "	ALL_TASKS		${ALL_TASKS}"
 	@echo
 	@echo "PhyML parameters"
 	@echo "	PHYML_INPATH  		${PHYML_INPATH}"
@@ -223,7 +230,7 @@ _gblocks_clean:
 gblocks_clean:
 	@echo
 	@echo "Converting alignment to PIR/PIR format"
-	@echo "	CLUSTALW_PATH	${CLUSTALW_PATH}"
+	@echo "	MALIGN_PATH	${MALIGN_PATH}"
 	seqret -sequence ${MALIGN_FILE} -sformat ${MALIGN_FORMAT} -osformat pir -outseq ${MALIGN_PATH}.pir
 	@echo "	${MALIGN_PATH}.pir"
 	@echo
@@ -306,14 +313,14 @@ run_phyml:
 ################################################################
 ## Phylogey inference for all the genomes downloaded from Genbank.
 all_genomes:
-	@${MAKE} ${PHYLO_TASKS} \
+	@${MAKE} ${ALL_TASKS} \
 		INSEQ_DIR=${GENOME_DIR}/ \
 		INSEQ_PREFIX=coronavirus_all_genomes \
 
 ################################################################
 ## Phylogeny inference for selected genomes from Genbank
 selected_genomes:
-	@${MAKE} ${PHYLO_TASKS}\
+	@${MAKE} ${ALL_TASKS}\
 		INSEQ_DIR=${GENOME_DIR} \
 		INSEQ_PREFIX=coronavirus_${COLLECTION}_genomes
 
@@ -342,21 +349,21 @@ merge_gisaid:
 ################################################################
 ## Selected from Genbank + GISAID
 selected-gisaid_genomes:
-	@${MAKE} ${PHYLO_TASKS} \
+	@${MAKE} ${ALLTASKS} \
 		INSEQ_DIR=${GISAID_DIR} \
 		COLLECTION=selected-plus-GISAID FEATURE=genomes
 
 ################################################################
 ## Close selection around CoV-2 from Genbank + GISAID
 around-cov2-gisaid_genomes:
-	@${MAKE} ${PHYLO_TASKS} \
+	@${MAKE} ${ALL_TASKS} \
 		INSEQ_DIR=${GISAID_DIR}/ \
 		COLLECTION=around-CoV-2-plus-GISAID FEATURE=genomes
 
 ################################################################
 ## S-gene phylogeny for selected genomes from Genbank
 _Sgenes:
-	@${MAKE} ${PHYLO_TASKS} FEATURE=S-gene
+	@${MAKE} ${ALL_TASKS} FEATURE=S-gene
 # \
 # 		INSEQ_PREFIX=S-gene_${COLLECTION} \
 # 		PHYLO_DIR=results/S-gene/clustalw_alignments \
@@ -368,7 +375,7 @@ Sgenes_around-cov2:
 Sgenes_selected:
 	@${MAKE} _Sgenes COLLECTION=selected 
 
-# ${PHYLO_TASKS}\
+# ${ALL_TASKS}\
 # 	INSEQ_DIR=${SGENE_DIR} \
 # 	INSEQ_PREFIX=S-gene_selected \
 # 	PHYLO_DIR=results/S-gene/clustalw_alignments \
@@ -381,7 +388,7 @@ Sgenes_selected_gisaid:
 		INSEQ_DIR=${GISAID_DIR}	\
 		COLLECTION=selected-plus-GISAID
 
-# @${MAKE} ${PHYLO_TASKS}\
+# @${MAKE} ${ALL_TASKS}\
 # 	INSEQ_DIR=${GISAID_DIR} \
 # 	INSEQ_PREFIX=S-gene_selected-plus-GISAID \
 # 	PHYLO_DIR=results/S-gene/clustalw_alignments \
@@ -394,7 +401,7 @@ Sgenes_around-cov-2_gisaid:
 		INSEQ_DIR=${GISAID_DIR}	\
 		COLLECTION=around-CoV-2-plus-GISAID
 
-#	@${MAKE} ${PHYLO_TASKS}\
+#	@${MAKE} ${ALL_TASKS}\
 #		INSEQ_DIR=${GISAID_DIR} \
 #		INSEQ_PREFIX=S-gene_around-cov-2-plus-GISAID \
 #		PHYLO_DIR=results/S-gene/clustalw_alignments \
@@ -408,15 +415,10 @@ one_feature:
 	@echo "Running phylogenetic analysis for feature ${FEATURE} in collection ${COLLECTION}"
 #	@echo "	FEATURE		 ${FEATURE}"
 #	@echo "	COLLECTION	 ${COLLECTION}"
-	@${MAKE} ${PHYLO_TASKS}
+	@${MAKE} ${ALL_TASKS}
 
-## Infer a feature phylogeny from its translation-based multiple alignment of DNA
-phylo_from_traligned_dna:
-	@echo
-	@echo "Inferring feature phylogeny from translation-based multiple alignment of DNA"	
-	${MAKE} MALIGN_SOFT=R MALIGN_FORMAT=fasta MALIGN_EXT=.fasta MALIGN_SUFFIX=_tralignedDNA ${PHYLO_TASKS}
 
-FEATURE_TASKS=phylo_from_traligned_dna
+FEATURE_TASKS=one_feature
 all_features_one_collection:
 	@echo
 	@echo "Running phylogenetic analysis for all genomic features"
@@ -435,4 +437,13 @@ all_features_all_collections:
 		${MAKE} COLLECTION=$${collection} all_features_one_collection; \
 	done;
 
+
+## Infer a feature phylogeny from its translation-based multiple alignment of DNA
+phylo_from_traligned_dna:
+	@echo
+	@echo "Inferring feature phylogeny from translation-based multiple alignment of DNA"	
+	${MAKE} MALIGN_SOFT=R MALIGN_FORMAT=fasta MALIGN_EXT=.fasta MALIGN_SUFFIX=_tralignedDNA ${PHYLO_TASKS}
+
+cds_features_one_collection:
+	${MAKE} FEATURE_TASKS=phylo_from_traligned_dna FEATURES='${CDS_FEATURES}' all_features_one_collection
 
