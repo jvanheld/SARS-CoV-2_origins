@@ -171,6 +171,7 @@ if (!file.exists(infiles$genomes)) {
 ## Load custom functions
 source(file.path(dir$R, "align_n_to_one.R"))
 source(file.path(dir$R, "plot_pip_profiles.R"))
+source(file.path(dir$R, "plot_pip_profiles_from_list.R"))
 
 ## Reference genome
 refPattern <- "HuCoV2_WH01_2019"
@@ -411,8 +412,8 @@ kable(genomesNto1$stats[order(genomesNto1$stats$score, decreasing = TRUE), ],
 ```{r genome_pip, fig.width=10, fig.height=4.5, out.width="100%", fig.cap="Percent Identical Positions profile over the whole genome of SARS-CoV-2. "}
 
 ## PIP profile of full genome N-to-1 alignments
-plotPIPprofiles(alignments = genomesNto1$alignments, 
-                windowSize = 800, 
+PlotPIPprofilesFromList(alignments = genomesNto1$alignments, 
+                windowSize = 500, 
                 vgrid1 = 5000, 
                 vgrid2 = 1000, colors = strainColors,
                 main = paste0("Full genome PIP profile", "\nRef: ", refGenomeName),
@@ -449,7 +450,7 @@ kable(SARSvsCivetGenome$stats[order(SARSvsCivetGenome$stats$score, decreasing = 
 ```{r PIP_SARS_vs_civet_genome, fig.width=10, fig.height=5, out.width="100%", fig.cap="Percent Identical Positions profile over the whole genome of SARS (2002-2003). "}
 
 ## PIP profile of full genome N-to-1 alignments
-plotPIPprofiles(alignments = SARSvsCivetGenome$alignments, 
+PlotPIPprofilesFromList(alignments = SARSvsCivetGenome$alignments, 
                 windowSize = 500, colors = strainColors, 
                 legend = paste0(names(SARSvsCivetGenome$alignments), " (", round(digits = 2, SARSvsCivetGenome$stats$pid), "%)"),
                 main = paste0("Percent Identical Positions - Full genome", "\nRef: ", "Human_SARS-CoV_Frankfurt_1"),
@@ -495,8 +496,11 @@ kable(featureAlignmentsNto1$stats[order(featureAlignmentsNto1$stat$score, decrea
 ```{r Sgene_pip, fig.width=10, fig.height=4.5, out.width="100%", fig.cap="Percent Identical Positions profile over the whole genome of SARS-CoV-2. "}
 
 ## PIP profile of spike N-to-1 alignments
-plotPIPprofiles(alignments = featureAlignmentsNto1$alignments, 
-                windowSize = 200,  colors = strainColors,
+PlotPIPprofilesFromList(alignments = featureAlignmentsNto1$alignments, 
+                windowSize = 250,  
+                colors = strainColors,
+                vgrid1 = 1000, 
+                vgrid2 = 200,
 #                legend = paste0(names(featureAlignmentsNto1$alignments), " (", round(digits = 2, featureAlignmentsNto1$stats$pid), "%)"),
                 main = paste0(featureName, " - PIP profile", "\nRef: ", refGenomeName),
                 legendMargin = 0, legendCorner = "bottomright", legendCex = 0.8, ylim = c(30, 100))
