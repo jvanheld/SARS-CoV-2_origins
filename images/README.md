@@ -1,0 +1,1 @@
+The figure 3a (images/figure_3a.png) was drawn on biorender (<https://app.biorender.com/>) from the template images/figure_3a_original_template.png available on biorender under the "name SARS-CoV-2 Spike Protein Conformations"
