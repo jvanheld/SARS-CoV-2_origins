@@ -1,5 +1,4 @@
-# Analysis of insertions in genomic and protein sequences of coronaviruses
-
+# Bioinformatics analysis of SARS-CoV-2 origins
 ## Motivation
 
 ...
