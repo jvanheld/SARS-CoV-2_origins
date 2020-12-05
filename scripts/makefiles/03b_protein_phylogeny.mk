@@ -34,7 +34,7 @@ list_param:
 	@echo "	SEQ_FILE	${SEQ_FILE}"
 	@echo
 	@echo "Phylogeny"
-	@echo "	PHYMLMODEL	${PHYML_MODEL}"
+	@echo "	PHYML_MODEL	${PHYML_MODEL}"
 	@echo "	PHYML_TREE	${PHYML_TREE}"
 
 ## Clean the multiple alignments with gblocks
