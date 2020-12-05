@@ -14,7 +14,7 @@
 ## Access
 
 
-- Web pages: <https://jvanheld.github.io/SARS-CoV-2_origins//>
+- Web pages: <https://jvanheld.github.io/SARS-CoV-2_origins/>
 - Git repository: <https://github.com/jvanheld/SARS-CoV-2_origins>
 
 ## Files
