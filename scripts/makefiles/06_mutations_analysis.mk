@@ -11,7 +11,7 @@ targets:
 NAME1 = 'HuCoV2_WIV04°2019'
 NAME2 = 'BtRaTG13'
 PLOT_FOLDER = results/mutations_analysis
-OUTPUT_PLOT = ${PLOT_FOLDER}/${NAME1}_and_${NAME2}.png
+OUTPUT_PLOT = ${PLOT_FOLDER}/${NAME1}_and_${NAME2}.pdf
 
 compare_S_genes:
 	@echo "comparison of sequences: "
