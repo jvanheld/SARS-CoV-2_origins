@@ -22,7 +22,8 @@ dependencies:
   - bioconda::iqtree    # phylogeny by mmaximum-likelihood approach
   - bioconda::figtree   # a graphical viewer of phylogenetic trees and as a program for producing publication-ready figures.
   - bioconda::jalview   # a free program for multiple sequence alignment editing, visualisation and analysis
-
+  - bioconda::seqtk     # Seqtk is a fast and lightweight tool for processing sequences in the FASTA or FASTQ format
+  
   ## R dependencies
   - r-base
 
