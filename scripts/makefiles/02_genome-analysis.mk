@@ -11,18 +11,6 @@ targets:
 	@echo "Targets:"
 	@echo "	list_param			list parameters"
 	@echo
-	@echo "Download genomes from Genbank"
-	@echo "	download_betacov_db		download BLAST-formated Betacoronavirus genomes"
-	@echo "	download_virus_db		download BLAST-formated virus reference genomes"
-	@echo
-	@echo "Blast searches"
-	@echo "	blastdb				format a viral genome for BLAST searches"
-	@echo "	genome_blast			search similarities between two viral genomes as query"
-	@echo "	cov2_vs_hiv			search HIV genome with SARS-CoV-2 genome as query"
-	@echo "	hiv_vs_cov2			search SARS-CoV-2 genome with HIV genome as query"
-	@echo "	betacov_vs_hiv			search HIV virus for matches against all Betacoronavirus genomes"
-	@echo "	hiv_vs_betacov			search Betacoronavirus genomes with HIV genome as query"
-	@echo
 	@echo "Multipe alignment"
 	@echo "	multalign_muscle		multiple alignment between reference genomes with muscle"
 	@echo "	multialign_clustalw		multiple alignment between reference genomes with clustalw"
