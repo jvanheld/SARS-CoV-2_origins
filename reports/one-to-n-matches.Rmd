@@ -120,7 +120,7 @@ par.ori <- par(no.readonly = TRUE)
 
 #### General parameters for the analysis ####
 reloadImage <- FALSE
-quickTest <- TRUE # if True, only analyse the 2 first features
+quickTest <- FALSE # if True, only analyse the 2 first features
 
 
 #### Sequence collection ####
@@ -135,10 +135,10 @@ collections <- c(
 
 
 
-# collection <- "around-CoV-2" # 14 strains
-# collection <- "all" # 16 strains
-# collection <- "selected" # ~60 strains
-collection <- "around-CoV-2-plus-GISAID" # 16 strains
+collection <- "around-CoV-2" # ~20 strains
+# collection <- "all" # ~60 strains
+# collection <- "selected" # ~50 strains
+# collection <- "around-CoV-2-plus-GISAID" # 16 strains
 # collection <- "selected-plus-GISAID" # ~40 strains
 # collection <- "all-plus-GISAID" # ~60 strains
 

@@ -121,6 +121,15 @@ par.ori <- par(no.readonly = TRUE)
 ##  all the sequences of the paper.
 useGISAID <- TRUE
 
+## Sequence collection
+## Supported: 
+## collection <- "around-CoV-2" # ~20 genomes
+## collection <- "selected" # ~60 genomes
+## collection <- "all" # ~60 genomes
+collections <- c("around-CoV-2", "selected", "all")
+collection <- "around-CoV-2" # ~20 genomes
+
+
 #### Define directories and files ####
 dir <- list(main = '..')
 dir$R <- file.path(dir$main, "scripts/R")
@@ -136,13 +145,6 @@ outfiles <- vector()
 ## Input files
 infiles <- list()
 
-## Sequence collection
-## Supported: 
-## collection <- "around-CoV-2" # ~20 genomes
-## collection <- "selected" # ~60 genomes
-## collection <- "all" # ~60 genomes
-collections <- c("around-CoV-2", "selected", "all")
-collection <- "around-CoV-2" # ~20 genomes
 
 
 ## Genome dir and files
@@ -198,7 +200,13 @@ queryPatterns <- c(
   "BtZXC21",
   "PnMP789",
   "PnGX-P1E_2017", 
-  "HuSARS-Frankfurt-1_2003"
+  "HuSARS-Frankfurt-1_2003",
+  "BtRc-o319 LC556375.1_ref_genome",
+  "BtRacCS203 MW251308_ref_genome",
+  "BtRacCS264 MW251311_ref_genome",
+  "BtRacCS253 MW251310.1_ref_genome",
+  "BtRacCS224 MW251309.1_ref_genome",
+  "BtRacCS271 MW251312_genome"
 )
 
 #### Add GISAID IDs to the query pattern ####
@@ -206,7 +214,9 @@ queryPatterns <- c(
 if (useGISAID) {
   queryPatterns <- append(queryPatterns, 
                           c("BtYu-RmYN02_2019",
-                            "PnGu1_2019"
+                            "PnGu1_2019",
+                            "BtCambodia/RShSTT200/2010",
+                            "BtCambodia/RShSTT182/2010"
                           ))
 }
 
@@ -409,7 +419,7 @@ kable(genomesNto1$stats[order(genomesNto1$stats$score, decreasing = TRUE), ],
 ## Full genome PIP plot
 
 
-```{r genome_pip, fig.width=10, fig.height=4.5, out.width="100%", fig.cap="Percent Identical Positions profile over the whole genome of SARS-CoV-2. "}
+```{r genome_pip, fig.width=10, fig.height=6, out.width="100%", fig.cap="Percent Identical Positions profile over the whole genome of SARS-CoV-2. "}
 
 ## PIP profile of full genome N-to-1 alignments
 PlotPIPprofilesFromList(alignments = genomesNto1$alignments, 
@@ -447,7 +457,7 @@ kable(SARSvsCivetGenome$stats[order(SARSvsCivetGenome$stats$score, decreasing = 
 
 ```
 
-```{r PIP_SARS_vs_civet_genome, fig.width=10, fig.height=5, out.width="100%", fig.cap="Percent Identical Positions profile over the whole genome of SARS (2002-2003). "}
+```{r PIP_SARS_vs_civet_genome, fig.width=10, fig.height=6, out.width="100%", fig.cap="Percent Identical Positions profile over the whole genome of SARS (2002-2003). "}
 
 ## PIP profile of full genome N-to-1 alignments
 PlotPIPprofilesFromList(alignments = SARSvsCivetGenome$alignments, 
