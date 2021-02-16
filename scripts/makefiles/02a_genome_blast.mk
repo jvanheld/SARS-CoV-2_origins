@@ -151,9 +151,20 @@ rand_perez_vs_hv:
 ################################################################
 ## Count k-mer occurrences in Betacoronavirus genomes
 KMER_DIR=results/k-mer_counts
-KMERS=${KMER_DIR}/Betacoronavirus_6nt-1str-noov.tsv
+K_VALUES=6 1 2 3 4 5 7 8 9 10 11 12
+K=6
+KMERS=${KMER_DIR}/Betacoronavirus_${K}nt-1str-noov.tsv
 count_kmers:
+	@for k in ${K_VALUES}; do \
+		${MAKE} count_kmers_one_k K=$${k} ; \
+	done
+
+count_kmers_one_k:
+	@echo
+	@date
+	@echo "Counting k-mer occurrences in Betacoronavirus genomes	K=${K}"
 	@mkdir -p ${KMER_DIR}
-	time rsat oligo-analysis -v 1  -quick  -i ${DB_TAXON_SEQ} -l 6 -return occ,freq -1str -noov -sort occ -o ${KMERS}
+	time rsat oligo-analysis -v 1  -quick  -i ${DB_TAXON_SEQ} -l ${K} -return occ,freq -1str -noov -sort occ -o ${KMERS}
+	@date
 	@echo "	KMER_DIR	${KMER_DIR}"
 	@echo "	KMERS		${KMERS}"
