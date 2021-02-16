@@ -35,7 +35,7 @@ list_param:
 	@echo
 	@echo "Download parameters"
 	@echo "	DB_TAXON_NAME		${DB_TAXON_NAME}"
-	@echo "	DB_TAXON_ID		${DB_TAXON_ID}"
+#	@echo "	DB_TAXON_ID		${DB_TAXON_ID}"
 	@echo "	DB_TAXON_DB		${DB_TAXON_DB}"
 	@echo "	DB_TAXON_SEQ		${DB_TAXON_SEQ}"
 	@echo "	DOWNLOAD_DIR		${DOWNLOAD_DIR}"
@@ -51,7 +51,7 @@ list_param:
 ## Download blast-formatted database of Betacoronavirus genomes from NCBI
 GENOME_DIR=data/genomes/
 DB_TAXON_NAME=Betacoronavirus
-DB_TAXON_DIR=${GENOME_DIR€/${DB_TAXON_NAME}
+DB_TAXON_DIR=${GENOME_DIR}/${DB_TAXON_NAME}
 DB_TAXON_DB=${DB_TAXON_DIR}/${DB_TAXON_NAME}
 DB_TAXON_SEQ=${DB_TAXON_DIR}/${DB_TAXON_NAME}.fasta
 DOWNLOAD_NAME=Betacoronavirus
