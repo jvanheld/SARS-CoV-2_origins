@@ -26,6 +26,9 @@ targets:
 	@echo "Reproduction of Perez results"
 	@echo "	perez_vs_hiv			run blastn with Perez' sequence agains HIV genome"
 	@echo "	shuffle_perez			random shuffling of Perez' sequence"
+	@echo
+	@echo "k-mer counts"
+	@echo "	count_kmers			count k-mer occurrences in coronavirus genomes of the reference taxon (Betacoronaviruses by default)"
 
 ################################################################
 ## List parameters
@@ -144,3 +147,13 @@ shuffle_perez:
 rand_perez_vs_hv:
 	@${MAKE} QUERY_SEQ=${SEQ_FROM_PEREZ_SHUFFLED}  BLAST_RESULT=results/repro_perez/ DB_ORG=HIV genome_blast OUTFMT=6 BLAST_EXT=.tsv
 	@${MAKE} QUERY_SEQ=${SEQ_FROM_PEREZ_SHUFFLED}  DB_ORG=HIV genome_blast OUTFMT=0 BLAST_EXT=.txt
+
+################################################################
+## Count k-mer occurrences in Betacoronavirus genomes
+KMER_DIR=results/k-mer_counts
+KMERS=${KMER_DIR}/Betacoronavirus_6nt-1str-noov.tsv
+count_kmers:
+	@mkdir -p ${KMER_DIR}
+	time rsat oligo-analysis -v 1  -quick  -i ${DB_TAXON_SEQ} -l 6 -return occ,freq -1str -noov -sort occ -o ${KMERS}
+	@echo "	KMER_DIR	${KMER_DIR}"
+	@echo "	KMERS		${KMERS}"
