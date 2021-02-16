@@ -135,10 +135,10 @@ collections <- c(
 
 
 
-collection <- "around-CoV-2" # ~20 strains
+# collection <- "around-CoV-2" # ~20 strains
 # collection <- "all" # ~60 strains
 # collection <- "selected" # ~50 strains
-# collection <- "around-CoV-2-plus-GISAID" # 16 strains
+collection <- "around-CoV-2-plus-GISAID" # 16 strains
 # collection <- "selected-plus-GISAID" # ~40 strains
 # collection <- "all-plus-GISAID" # ~60 strains
 
