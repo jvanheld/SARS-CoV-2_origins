@@ -40,7 +40,8 @@ list_param:
 ## Clean the multiple alignments with gblocks
 FEATURE=insertion1_30-120
 SEQ_DIR=data/GISAID_genomes/${FEATURE}
-COLLECTION=around-CoV-2-plus-GISAID
+#COLLECTION=around-CoV-2-plus-GISAID
+COLLECTION=selected-plus-GISAID
 SEQ_PREFIX=spike_proteins_${COLLECTION}_aligned_muscle_sorted_${FEATURE}
 SEQ_EXT=aln
 SEQ_PATH=${SEQ_DIR}/${SEQ_PREFIX}
